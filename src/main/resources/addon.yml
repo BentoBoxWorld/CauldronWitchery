@@ -1,0 +1,26 @@
+name: MagicSummon
+main: world.bentobox.magicsummon.MagicSummonAddon
+version: ${version}${build.number}
+repository: 'BentoBoxWorld/MagicSummon'
+metrics: true
+
+authors:
+  - ShakeforProtein
+  - PhysicsProdigy
+  - BONNe
+
+softdepend: AcidIsland, BSkyBlock, CaveBlock, SkyGrid, Level
+
+permissions:
+  bskyblock.magicsummon:
+    description: Let the player use the '/island magicsummon' command
+    default: true
+  acidisland.magicsummon:
+    description: Let the player use the '/ai magicsummon' command
+    default: true
+  caveblock.magicsummon:
+    description: Let the player use the '/cave magicsummon' command
+    default: true
+  skygrid.magicsummon:
+    description: Let the player use the '/skygrid magicsummon' command
+    default: true
