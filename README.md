@@ -4,6 +4,10 @@
 
 Add-on for BentoBox to provide ability to summon mobs with a magic for any BentoBox GameMode. 
 
+## What is this addon
+
+This addon allows to summon any mob (from config) using cauldron with water and right clicking with magic stick (from config) on it.
+
 ## Where to find
 
 Currently Magic Summon Addon is in **Alpha stage**, so it may or may not contain bugs... a lot of bugs. Also it means, that some features are not working or implemented. 
