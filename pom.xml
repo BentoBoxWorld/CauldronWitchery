@@ -5,28 +5,28 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>world.bentobox</groupId>
-    <artifactId>magicsummon</artifactId>
+    <artifactId>cauldronwitchery</artifactId>
     <version>${revision}</version>
 
-    <name>MagicSummon</name>
-    <description>Magic Summon is an add-on for BentoBox, an expandable Minecraft Bukkit plugin for island-type games like SkyBlock, AcidIsland or CaveBlock.</description>
-    <url>https://github.com/BentoBoxWorld/MagicSummon</url>
+    <name>CauldronWitchery</name>
+    <description>CauldronWitchery is an add-on for BentoBox, an expandable Minecraft Bukkit plugin for island-type games like SkyBlock, AcidIsland or CaveBlock.</description>
+    <url>https://github.com/BentoBoxWorld/CauldronWitchery</url>
     <inceptionYear>2019</inceptionYear>
 
     <scm>
-        <connection>scm:git:https://github.com/BentoBoxWorld/MagicSummon.git</connection>
-        <developerConnection>scm:git:git@github.com:BentoBoxWorld/MagicSummon.git</developerConnection>
-        <url>https://github.com/BentoBoxWorld/MagicSummon</url>
+        <connection>scm:git:https://github.com/BentoBoxWorld/CauldronWitchery.git</connection>
+        <developerConnection>scm:git:git@github.com:BentoBoxWorld/CauldronWitchery.git</developerConnection>
+        <url>https://github.com/BentoBoxWorld/CauldronWitchery</url>
     </scm>
 
     <ciManagement>
         <system>jenkins</system>
-        <url>http://ci.codemc.org/job/BentoBoxWorld/job/MagicSummon</url>
+        <url>http://ci.codemc.org/job/BentoBoxWorld/job/CauldronWitchery</url>
     </ciManagement>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/BentoBoxWorld/MagicSummon/issues</url>
+        <url>https://github.com/BentoBoxWorld/CauldronWitchery/issues</url>
     </issueManagement>
 
     <properties>
