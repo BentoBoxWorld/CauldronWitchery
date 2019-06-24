@@ -1,7 +1,7 @@
-# Config file for Magic Summon add-on Version ${version}
+# Config file for CauldronWitchery add-on Version ${version}
 
 # Disabled Game Mode Addons
-# MagicCobblestoneGenerator will not work in these game modes
+# CauldronWitchery will not work in these game modes
 disabled-gamemodes: []
 #- SkyGrid
 

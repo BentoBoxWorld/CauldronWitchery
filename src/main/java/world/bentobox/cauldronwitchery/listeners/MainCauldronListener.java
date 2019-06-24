@@ -1,4 +1,4 @@
-package world.bentobox.magicsummon.listeners;
+package world.bentobox.cauldronwitchery.listeners;
 
 
 import org.bukkit.Bukkit;
@@ -10,26 +10,25 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.material.Cauldron;
 
 import java.util.*;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.magicsummon.MagicSummonAddon;
+import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
 
 
 /**
  * This is main listener that checks for clicks on cauldrons.
  */
-public class MainMagicListener implements Listener
+public class MainCauldronListener implements Listener
 {
 	/**
 	 * Default constructor
 	 * @param addon MagicSummonAddon object.
 	 */
-	public MainMagicListener(MagicSummonAddon addon)
+	public MainCauldronListener(CauldronWitcheryAddon addon)
 	{
 		this.addon = addon;
 	}
@@ -64,7 +63,7 @@ public class MainMagicListener implements Listener
 
 			Block block = event.getClickedBlock();
 
-			if (MagicSummonAddon.MAGIC_SUMMON_ENABLE_FLAG.isSetForWorld(block.getWorld()))
+			if (CauldronWitcheryAddon.MAGIC_SUMMON_ENABLE_FLAG.isSetForWorld(block.getWorld()))
 			{
 				// Cancel event
 				event.setCancelled(true);
@@ -79,13 +78,13 @@ public class MainMagicListener implements Listener
 				if (island.isPresent())
 				{
 					// Island is found. Check if player has permission to do anything here.
-					if (island.get().isAllowed(user, MagicSummonAddon.MAGIC_SUMMON_ISLAND_PROTECTION))
+					if (island.get().isAllowed(user, CauldronWitcheryAddon.MAGIC_SUMMON_ISLAND_PROTECTION))
 					{
 						// Now work on summoning.
 
 						if (!block.getBlockData().getAsString().equals("minecraft:cauldron[level=3]"))
 						{
-							user.sendMessage("magicsummon.messages.cauldron-not-full");
+							user.sendMessage("cauldronwitchery.messages.cauldron-not-full");
 
 							// Strike lightning with a damage.
 							user.getWorld().strikeLightning(user.getLocation());
@@ -100,7 +99,7 @@ public class MainMagicListener implements Listener
 						}
 						else if (this.addon.getMagicSummon().isSummonSuccessful(user, block.getLocation()))
 						{
-							user.sendMessage("magicsummon.messages.it-is-alive");
+							user.sendMessage("cauldronwitchery.messages.it-is-alive");
 
 							// Strike lightning without damage
 							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
@@ -124,7 +123,7 @@ public class MainMagicListener implements Listener
 						}
 						else
 						{
-							user.sendMessage("magicsummon.messages.something-went-wrong");
+							user.sendMessage("cauldronwitchery.messages.something-went-wrong");
 
 							// Strike lightning with damage
 							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
@@ -142,12 +141,12 @@ public class MainMagicListener implements Listener
 					}
 					else
 					{
-						user.sendMessage("magicsummon.messages.missing-rank");
+						user.sendMessage("cauldronwitchery.messages.missing-rank");
 					}
 				}
 				else
 				{
-					user.sendMessage("magicsummon.messages.missing-island");
+					user.sendMessage("cauldronwitchery.messages.missing-island");
 				}
 			}
 		}
@@ -162,7 +161,7 @@ public class MainMagicListener implements Listener
 	/**
 	 * This variable stores magic summon addon object.
 	 */
-	private MagicSummonAddon addon;
+	private CauldronWitcheryAddon addon;
 
 
 	// ---------------------------------------------------------------------

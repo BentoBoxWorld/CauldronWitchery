@@ -1,4 +1,4 @@
-package world.bentobox.magicsummon.configs;
+package world.bentobox.cauldronwitchery.configs;
 
 
 import org.bukkit.Material;
@@ -7,12 +7,12 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import java.util.*;
 
-import world.bentobox.magicsummon.MagicSummonAddon;
+import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
 
 
 public class Settings
 {
-	public Settings(MagicSummonAddon addon)
+	public Settings(CauldronWitcheryAddon addon)
 	{
 		addon.saveDefaultConfig();
 

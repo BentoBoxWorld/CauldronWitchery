@@ -1,5 +1,5 @@
 name: MagicSummon
-main: world.bentobox.magicsummon.MagicSummonAddon
+main: world.bentobox.cauldronwitchery.MagicSummonAddon
 version: ${version}${build.number}
 repository: 'BentoBoxWorld/MagicSummon'
 metrics: true
@@ -13,14 +13,14 @@ softdepend: AcidIsland, BSkyBlock, CaveBlock, SkyGrid, Level
 
 permissions:
   bskyblock.magicsummon:
-    description: Let the player use the '/island magicsummon' command
+    description: Let the player use the '/island cauldronwitchery' command
     default: true
   acidisland.magicsummon:
-    description: Let the player use the '/ai magicsummon' command
+    description: Let the player use the '/ai cauldronwitchery' command
     default: true
   caveblock.magicsummon:
-    description: Let the player use the '/cave magicsummon' command
+    description: Let the player use the '/cave cauldronwitchery' command
     default: true
   skygrid.magicsummon:
-    description: Let the player use the '/skygrid magicsummon' command
+    description: Let the player use the '/skygrid cauldronwitchery' command
     default: true

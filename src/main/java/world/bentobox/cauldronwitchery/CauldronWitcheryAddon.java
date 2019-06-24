@@ -1,4 +1,4 @@
-package world.bentobox.magicsummon;
+package world.bentobox.cauldronwitchery;
 
 
 import org.bukkit.Bukkit;
@@ -7,12 +7,12 @@ import org.bukkit.Material;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.managers.RanksManager;
-import world.bentobox.magicsummon.configs.Settings;
-import world.bentobox.magicsummon.listeners.MainMagicListener;
-import world.bentobox.magicsummon.tasks.MagicSummon;
+import world.bentobox.cauldronwitchery.configs.Settings;
+import world.bentobox.cauldronwitchery.listeners.MainCauldronListener;
+import world.bentobox.cauldronwitchery.tasks.CauldronSummon;
 
 
-public class MagicSummonAddon extends Addon
+public class CauldronWitcheryAddon extends Addon
 {
 	/**
 	 * Executes code when loading the addon. This is called before {@link #onEnable()}. This <b>must</b> be
@@ -48,7 +48,7 @@ public class MagicSummonAddon extends Addon
 		// Check if addon is not disabled before.
 		if (this.getState().equals(State.DISABLED))
 		{
-			Bukkit.getLogger().severe("Magic Summon Addon is not available or disabled!");
+			Bukkit.getLogger().severe("CauldronWitchery Addon is not available or disabled!");
 			return;
 		}
 
@@ -68,10 +68,10 @@ public class MagicSummonAddon extends Addon
 
 		if (this.hooked)
 		{
-			this.summon = new MagicSummon(this);
+			this.summon = new CauldronSummon(this);
 
 			// Register the listener.
-			this.registerListener(new MainMagicListener(this));
+			this.registerListener(new MainCauldronListener(this));
 
 			// Register Flags
 			this.registerFlag(MAGIC_SUMMON_ENABLE_FLAG);
@@ -82,7 +82,7 @@ public class MagicSummonAddon extends Addon
 		}
 		else
 		{
-			this.logError("Magic Summon could not hook into any GameMode so will not do anything!");
+			this.logError("CauldronWitchery could not hook into any GameMode so will not do anything!");
 			this.setState(State.DISABLED);
 		}
 	}
@@ -109,7 +109,7 @@ public class MagicSummonAddon extends Addon
 		if (this.hooked)
 		{
 			this.settings = new Settings(this);
-			this.getLogger().info("Magic Summon addon reloaded.");
+			this.getLogger().info("CauldronWitchery addon reloaded.");
 		}
 	}
 
@@ -133,7 +133,7 @@ public class MagicSummonAddon extends Addon
 	 * This method returns Magic Generator.
 	 * @return Magic Generator object.
 	 */
-	public MagicSummon getMagicSummon()
+	public CauldronSummon getMagicSummon()
 	{
 		return this.summon;
 	}
@@ -156,7 +156,7 @@ public class MagicSummonAddon extends Addon
 	/**
 	 * Variable holds MagicSummon object.
 	 */
-	private MagicSummon summon;
+	private CauldronSummon summon;
 
 
 // ---------------------------------------------------------------------
