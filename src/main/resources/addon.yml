@@ -1,7 +1,7 @@
-name: MagicSummon
-main: world.bentobox.cauldronwitchery.MagicSummonAddon
+name: CauldronWitchery
+main: world.bentobox.cauldronwitchery.CauldronWitcheryAddon
 version: ${version}${build.number}
-repository: 'BentoBoxWorld/MagicSummon'
+repository: 'BentoBoxWorld/CauldronWitchery'
 metrics: true
 
 authors:
