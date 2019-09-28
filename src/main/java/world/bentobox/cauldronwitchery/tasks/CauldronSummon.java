@@ -9,8 +9,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.user.User;
@@ -135,24 +138,31 @@ public class CauldronSummon
 
 		for (Map.Entry<Material, Integer> entry : recipe.getRequiredMaterials().entrySet())
 		{
-			int removeAmount = entry.getValue();
+			int amountToBeRemoved = entry.getValue();
 
-			while (removeAmount <= 0)
+			List<ItemStack> itemsInInventory = Arrays.stream(user.getInventory().getContents()).
+				filter(Objects::nonNull).
+				filter(i -> i.getType().equals(entry.getKey())).
+				collect(Collectors.toList());
+
+			for (ItemStack itemStack : itemsInInventory)
 			{
-				ItemStack itemStack = user.getInventory().getItem(user.getInventory().first(entry.getKey()));
+				if (amountToBeRemoved > 0)
+				{
+					ItemStack dummy = itemStack.clone();
+					dummy.setAmount(1);
 
-				if (itemStack == null)
-				{
-					return false;
-				}
-				else if (itemStack.getAmount() >= removeAmount)
-				{
-					itemStack.setAmount(itemStack.getAmount() - removeAmount);
-				}
-				else
-				{
-					removeAmount -= itemStack.getAmount();
-					itemStack.setAmount(0);
+					// Remove either the full amount or the remaining amount
+					if (itemStack.getAmount() >= amountToBeRemoved)
+					{
+						itemStack.setAmount(itemStack.getAmount() - amountToBeRemoved);
+						amountToBeRemoved = 0;
+					}
+					else
+					{
+						amountToBeRemoved -= itemStack.getAmount();
+						itemStack.setAmount(0);
+					}
 				}
 			}
 		}
