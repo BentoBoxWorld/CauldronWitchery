@@ -84,6 +84,56 @@ public class Settings
 		{
 			addon.logError("No magic sticks installed!");
 		}
+
+		// Set up lightning effects
+		this.successful = new LightningEffect();
+		this.successful.damage = addon.getConfig().getBoolean("lightning.successful.damage", false);
+		this.successful.hitPlayer = addon.getConfig().getBoolean("lightning.successful.hit-player", false);
+		this.successful.destroyCauldron = addon.getConfig().getBoolean("lightning.successful.destroy-cauldron", false);
+
+		if (addon.getConfig().contains("lightning.successful.timings"))
+		{
+			this.successful.timings.addAll(addon.getConfig().getLongList("lightning.successful.timings"));
+		}
+		else
+		{
+			this.successful.timings.add(20L);
+			this.successful.timings.add(30L);
+			this.successful.timings.add(40L);
+			this.successful.timings.add(50L);
+		}
+
+		this.error = new LightningEffect();
+		this.error.damage = addon.getConfig().getBoolean("lightning.error.damage", true);
+		this.error.hitPlayer = addon.getConfig().getBoolean("lightning.error.hit-player", false);
+		this.error.destroyCauldron = addon.getConfig().getBoolean("lightning.error.destroy-cauldron", false);
+
+		if (addon.getConfig().contains("lightning.error.timings"))
+		{
+			this.error.timings.addAll(addon.getConfig().getLongList("lightning.error.timings"));
+		}
+		else
+		{
+			this.error.timings.add(20L);
+			this.error.timings.add(40L);
+			this.error.timings.add(60L);
+		}
+
+		this.missingWater = new LightningEffect();
+		this.missingWater.damage = addon.getConfig().getBoolean("lightning.no-water.damage", true);
+		this.missingWater.hitPlayer = addon.getConfig().getBoolean("lightning.no-water.hit-player", true);
+		this.missingWater.destroyCauldron = addon.getConfig().getBoolean("lightning.no-water.destroy-cauldron", false);
+
+		if (addon.getConfig().contains("lightning.no-water.timings"))
+		{
+			this.missingWater.timings.addAll(addon.getConfig().getLongList("lightning.no-water.timings"));
+		}
+		else
+		{
+			this.missingWater.timings.add(0L);
+			this.missingWater.timings.add(20L);
+			this.missingWater.timings.add(40L);
+		}
 	}
 
 	// ---------------------------------------------------------------------
@@ -111,6 +161,24 @@ public class Settings
 	}
 
 
+	public LightningEffect getSuccessful()
+	{
+		return successful;
+	}
+
+
+	public LightningEffect getError()
+	{
+		return error;
+	}
+
+
+	public LightningEffect getMissingWater()
+	{
+		return missingWater;
+	}
+
+
 	// ---------------------------------------------------------------------
 	// Section: Variables
 	// ---------------------------------------------------------------------
@@ -121,6 +189,22 @@ public class Settings
 	private Set<String> disabledGameModes;
 
 	private Map<Material, MagicStick> magicStickMap;
+
+	/**
+	 * Effect that will be triggered when everything works correctly.
+	 */
+	private LightningEffect successful;
+
+	/**
+	 * Effect that will be triggered when something is missing in players inventory.
+	 */
+	private LightningEffect error;
+
+	/**
+	 * Effect that will be triggered when player clicks on cauldron without a water.
+	 */
+	private LightningEffect missingWater;
+
 
 	// ---------------------------------------------------------------------
 	// Section: Object
@@ -319,5 +403,51 @@ public class Settings
 		 * Name of the book.
 		 */
 		private String name;
+	}
+
+
+	public class LightningEffect
+	{
+		public boolean isDestroyCauldron()
+		{
+			return destroyCauldron;
+		}
+
+
+		public boolean isHitPlayer()
+		{
+			return hitPlayer;
+		}
+
+
+		public boolean isDamage()
+		{
+			return damage;
+		}
+
+
+		public List<Long> getTimings()
+		{
+			return timings;
+		}
+
+
+		public boolean hasTimings()
+		{
+			return timings != null && !timings.isEmpty();
+		}
+
+
+		// ---------------------------------------------------------------------
+		// Section: Variables
+		// ---------------------------------------------------------------------
+
+		private boolean hitPlayer;
+
+		private boolean damage;
+
+		private List<Long> timings = new ArrayList<>(3);
+
+		private boolean destroyCauldron;
 	}
 }

@@ -2,6 +2,7 @@ package world.bentobox.cauldronwitchery.listeners;
 
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -11,12 +12,15 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
+import world.bentobox.cauldronwitchery.configs.Settings;
 
 
 /**
@@ -82,61 +86,52 @@ public class MainCauldronListener implements Listener
 					{
 						// Now work on summoning.
 
+						Settings.LightningEffect effect;
+
 						if (!block.getBlockData().getAsString().equals("minecraft:cauldron[level=3]"))
 						{
 							user.sendMessage("cauldronwitchery.messages.cauldron-not-full");
-
-							// Strike lightning with a damage.
-							user.getWorld().strikeLightning(user.getLocation());
-
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightning(block.getLocation()),
-								20L);
-
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightning(block.getLocation()),
-								40L);
+							effect = this.addon.getSettings().getMissingWater();
 						}
 						else if (this.addon.getMagicSummon().isSummonSuccessful(user, block.getLocation()))
 						{
 							user.sendMessage("cauldronwitchery.messages.it-is-alive");
-
-							// Strike lightning without damage
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightningEffect(block.getLocation()),
-								20L);
-
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightningEffect(block.getLocation()),
-								30L);
-
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightningEffect(block.getLocation()),
-								40L);
-
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightningEffect(block.getLocation()),
-								50L);
-
-							// empty cauldron
-							block.setType(Material.CAULDRON);
+							effect = this.addon.getSettings().getSuccessful();
 						}
 						else
 						{
 							user.sendMessage("cauldronwitchery.messages.something-went-wrong");
+							effect = this.addon.getSettings().getError();
+						}
 
-							// Strike lightning with damage
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightning(block.getLocation()),
-								20L);
+						if (effect.hasTimings())
+						{
+							Location location = effect.isHitPlayer() ? user.getLocation() : block.getLocation();
 
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightning(block.getLocation()),
-								40L);
+							for (Long time : effect.getTimings())
+							{
+								if (effect.isDamage())
+								{
+									Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
+										() -> user.getWorld().strikeLightning(location),
+										time);
+								}
+								else
+								{
+									Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
+										() -> user.getWorld().strikeLightningEffect(location),
+										time);
+								}
+							}
 
-							Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-								() -> user.getWorld().strikeLightning(block.getLocation()),
-								60L);
+							if (effect.isDestroyCauldron())
+							{
+								block.setType(Material.AIR);
+							}
+							else
+							{
+								block.setType(Material.CAULDRON);
+							}
 						}
 					}
 					else
