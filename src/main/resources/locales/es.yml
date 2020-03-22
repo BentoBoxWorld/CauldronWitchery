@@ -3,6 +3,14 @@ cauldronwitchery:
   messages:
     missing-rank: No tienes que llamar para hacer esto.
     missing-island: No se puede encontrar la isla donde la mafia podría ser convocada
+    something-went-wrong: "&4 ¡¡¡El experimento salió terriblemente mal!!!"
+    it-is-alive: "&desta ... esta... ¡está vivo!"
+    cauldron-not-full: "&4¡Hmm parece que el caldero no estaba lleno!"
+    not-a-stick: "&d¿Y dónde dejé mi Magic Stick?"
+    wrong-workspace: "&dHmm no puedo hacer esto en la dimensión actual."
+    missing-offhand-item: "&d¿Y dónde dejé el artículo principal de la receta?"
+    something-is-missing: "&dHmm parece que me perdí algunos artículos ... Necesito
+      revisar la receta nuevamente."
   books:
     ANIMALS:
       title: Los efectos de cinco mil millones de voltios en varios cadáveres
@@ -22,6 +30,18 @@ cauldronwitchery:
         repetir cómo obtuviste este libro, pero en su lugar de un palo, necesitarás
         un hueso.'
       recipe-extra-list: 'Ingredientes extra:'
+      author: "&dDr. V. Frankenstein"
+      page-one: "&4 Prólogo: Estimado lector, este libro está destinado a transmitir
+        mi conocimiento. Sintiendo la necesidad de descubrir las artes de la reanimación,
+        no sugiero realizar estos experimentos."
+      page-five: Here are the ingredients for each mob you'll want to create
+      recipe-header: |-
+        [mob]
+         Ingredientes principales:
+         [offhand]
+         Un caldero lleno
+         [levels] partes ¡Conocimiento!
+      recipe-extra-element: "[count] x [material]"
     MONSTERS:
       title: Los efectos de cinco mil millones de voltios en varios cadáveres - LA
         GUÍA DEL MONSTRUO
@@ -35,6 +55,14 @@ cauldronwitchery:
         repetir cómo obtuviste este libro, pero en lugar de un hueso, necesitarás
         una barra de fuego.'
       recipe-extra-list: 'Ingredientes extra:'
+      author: Dr. V. Frankenstein
+      recipe-header: |-
+        [mob]
+         Ingredientes principales:
+         [offhand]
+         Un caldero lleno
+         [levels] partes ¡Conocimiento!
+      recipe-extra-element: "[count] x [material]"
     NETHER:
       title: Los efectos de cinco mil millones de voltios en varios cadáveres - LA
         GUÍA NETHER MOBS
@@ -47,6 +75,14 @@ cauldronwitchery:
         LA GUÍA DE FIN MOBS Para obtener mi próximo libro, deberá repetir cómo obtuvo
         su libro, pero en lugar de una barra de fuego, necesitarás una barra final.'
       recipe-extra-list: 'Ingredientes extra:'
+      author: Dr. V. Frankenstein
+      recipe-header: |-
+        [mob]
+         Ingredientes principales:
+         [offhand]
+         Un caldero lleno
+         [levels] partes ¡Conocimiento!
+      recipe-extra-element: "[count] x [material]"
     THE_END:
       title: 'Los efectos de cinco mil millones de voltios en varios cadáveres: LA
         GUÍA DE MOBS FINALES'
@@ -55,6 +91,14 @@ cauldronwitchery:
         en adelante ... Estas convocatorias pueden causar la muerte y se recomienda
         la contención de estas turbas'
       recipe-extra-list: 'Ingredientes extra:'
+      author: Dr. V. Frankenstein
+      recipe-header: |-
+        [mod]
+         Ingredientes principales:
+         [offhand]
+         Un caldero lleno
+         [levels] partes ¡Conocimiento!
+      recipe-extra-element: "[count] x [material]"
   materials:
     STICK: Palo
     END_ROD: Varilla final
@@ -76,6 +120,8 @@ cauldronwitchery:
     ROTTEN_FLESH: Carne podrida
     PHANTOM_MEMBRANE: Membrana fantasma
     SHULKER_SHELL: Concha de shulker
+    BLAZE_ROD: Varilla de Blaze
+    SLIME_BALL: Bola de slime
   mobs:
     SHEEP: Oveja
     COW: Vaca
@@ -91,10 +137,21 @@ cauldronwitchery:
     POLAR_BEAR: Oso polar
     ZOMBIE_VILLAGER: Aldeano Zombie
     PHANTOM: Fantasma
+    SLIME: Slime
+    WITHER_SKELETON: Wither Skeleton
+    ENDERMITE: Endermite
+    SHULKER: Shulker
 protection:
   flags:
     MAGIC_SUMMON_ISLAND_PROTECTION:
       name: Protección de invocación de la mafia
+      description: |-
+        &5 &o Alternar quién puede
+        &5&oaparecer entidades
     MAGIC_SUMMON_ENABLE_FLAG:
       name: Invocación de mafia mágica
       hint: Magic Summon no está habilitado en el mundo actual
+      description: |-
+        &5&o Esto permite habilitar / deshabilitar
+        &5&ocapacidad para usar la invocación mágica
+        &5&oparagenera criaturas en la isla.
