@@ -59,7 +59,7 @@ public class MainCauldronListener implements Listener
 			event.getHand() != null &&
 			event.getHand().equals(EquipmentSlot.HAND) &&
 			event.getClickedBlock() != null &&
-			event.getClickedBlock().getType().equals(Material.CAULDRON) &&
+			event.getClickedBlock().getType().equals(Material.WATER_CAULDRON) &&
 			!IGNORED_MATERIALS.contains(event.getItem().getType()))
 		{
 			// We have checked that player clicked on cauldron with an item. Now check if
@@ -88,7 +88,7 @@ public class MainCauldronListener implements Listener
 
 						Settings.LightningEffect effect;
 
-						if (!block.getBlockData().getAsString().equals("minecraft:cauldron[level=3]"))
+						if (!block.getBlockData().getAsString().equals("minecraft:water_cauldron[level=3]"))
 						{
 							user.sendMessage("cauldronwitchery.messages.cauldron-not-full");
 							effect = this.addon.getSettings().getMissingWater();
