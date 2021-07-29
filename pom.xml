@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>world.bentobox</groupId>
@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>16</java.version>
-        <powermock.version>1.7.4</powermock.version>
+        <powermock.version>2.0.9</powermock.version>
         <!-- More visible way how to change dependency versions -->
         <spigot.version>1.17.1-R0.1-SNAPSHOT</spigot.version>
         <bentobox.version>1.17.0</bentobox.version>
@@ -71,7 +71,7 @@
             <properties>
                 <!-- Override only if necessary -->
                 <revision>${build.version}</revision>
-                <!-- Empties build number variable.-->
+                <!-- Empties build number variable. -->
                 <build.number></build.number>
             </properties>
         </profile>
@@ -88,6 +88,13 @@
         </repository>
     </distributionManagement>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>apache.snapshots</id>
+            <url>https://repository.apache.org/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <repositories>
         <repository>
             <id>spigot-repo</id>
@@ -97,11 +104,11 @@
             <id>codemc-repo</id>
             <url>https://repo.codemc.org/repository/maven-public/</url>
         </repository>
-        <!--Vault Repo is down.-->
-        <!--<repository>-->
-        <!--<id>vault-repo</id>-->
-        <!--<url>http://nexus.hc.to/content/repositories/pub_releases</url>-->
-        <!--</repository>-->
+        <!--Vault Repo is down. -->
+        <!--<repository> -->
+        <!--<id>vault-repo</id> -->
+        <!--<url>http://nexus.hc.to/content/repositories/pub_releases</url> -->
+        <!--</repository> -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -123,7 +130,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
+            <version>2.0.2-beta</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -134,7 +141,7 @@
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
@@ -212,6 +219,7 @@
                     <show>public</show>
                     <failOnError>false</failOnError>
                     <additionalJOption>-Xdoclint:none</additionalJOption>
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>
@@ -238,7 +246,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.3.0-SNAPSHOT</version>
                 <configuration>
                     <minimizeJar>true</minimizeJar>
                 </configuration>
