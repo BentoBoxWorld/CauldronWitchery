@@ -1,28 +1,29 @@
-package world.bentobox.magicsummon.tasks;
+package world.bentobox.cauldronwitchery.tasks;
 
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.user.User;
-import world.bentobox.magicsummon.MagicSummonAddon;
-import world.bentobox.magicsummon.configs.Settings;
+import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
+import world.bentobox.cauldronwitchery.configs.Settings;
 
 
-public class MagicSummon
+public class CauldronSummon
 {
-	public MagicSummon(MagicSummonAddon addon)
+	public CauldronSummon(CauldronWitcheryAddon addon)
 	{
 		this.addon = addon;
 	}
@@ -43,7 +44,7 @@ public class MagicSummon
 		if (!magicStickMap.containsKey(mainHandItem))
 		{
 			// Main Hand Item Is not a valid magic stick
-			user.sendMessage("magicsummon.messages.not-a-stick");
+			user.sendMessage("cauldronwitchery.messages.not-a-stick");
 			return false;
 		}
 
@@ -52,7 +53,7 @@ public class MagicSummon
 		if (!location.getWorld().getEnvironment().equals(magicStick.getEnvironment()))
 		{
 			// Wrong Workspace
-			user.sendMessage("magicsummon.messages.wrong-workspace");
+			user.sendMessage("cauldronwitchery.messages.wrong-workspace");
 			return false;
 		}
 
@@ -61,7 +62,7 @@ public class MagicSummon
 		if (!magicStick.containsRecipe(offHandItem))
 		{
 			// Not a recipe item
-			user.sendMessage("magicsummon.messages.missing-offhand-item");
+			user.sendMessage("cauldronwitchery.messages.missing-offhand-item");
 			return false;
 		}
 
@@ -70,7 +71,7 @@ public class MagicSummon
 		if (!this.hasAllRequirements(user, recipe))
 		{
 			// Required materials not met
-			user.sendMessage("magicsummon.messages.something-is-missing");
+			user.sendMessage("cauldronwitchery.messages.something-is-missing");
 			return false;
 		}
 
@@ -137,24 +138,31 @@ public class MagicSummon
 
 		for (Map.Entry<Material, Integer> entry : recipe.getRequiredMaterials().entrySet())
 		{
-			int removeAmount = entry.getValue();
+			int amountToBeRemoved = entry.getValue();
 
-			while (removeAmount <= 0)
+			List<ItemStack> itemsInInventory = Arrays.stream(user.getInventory().getContents()).
+				filter(Objects::nonNull).
+				filter(i -> i.getType().equals(entry.getKey())).
+				collect(Collectors.toList());
+
+			for (ItemStack itemStack : itemsInInventory)
 			{
-				ItemStack itemStack = user.getInventory().getItem(user.getInventory().first(entry.getKey()));
+				if (amountToBeRemoved > 0)
+				{
+					ItemStack dummy = itemStack.clone();
+					dummy.setAmount(1);
 
-				if (itemStack == null)
-				{
-					return false;
-				}
-				else if (itemStack.getAmount() >= removeAmount)
-				{
-					itemStack.setAmount(itemStack.getAmount() - removeAmount);
-				}
-				else
-				{
-					removeAmount -= itemStack.getAmount();
-					itemStack.setAmount(0);
+					// Remove either the full amount or the remaining amount
+					if (itemStack.getAmount() >= amountToBeRemoved)
+					{
+						itemStack.setAmount(itemStack.getAmount() - amountToBeRemoved);
+						amountToBeRemoved = 0;
+					}
+					else
+					{
+						amountToBeRemoved -= itemStack.getAmount();
+						itemStack.setAmount(0);
+					}
 				}
 			}
 		}
@@ -184,57 +192,57 @@ public class MagicSummon
 		ItemStack magicBook = new ItemStack(Material.WRITTEN_BOOK);
 		BookMeta bookMeta = (BookMeta) magicBook.getItemMeta();
 
-		bookMeta.setDisplayName(user.getTranslation("magicsummon.books." + stringCode + ".title"));
-		bookMeta.setTitle(user.getTranslation("magicsummon.books." + stringCode + ".title"));
-		bookMeta.setAuthor(user.getTranslation("magicsummon.books." + stringCode + ".author"));
+		bookMeta.setDisplayName(user.getTranslation("cauldronwitchery.books." + stringCode + ".title"));
+		bookMeta.setTitle(user.getTranslation("cauldronwitchery.books." + stringCode + ".title"));
+		bookMeta.setAuthor(user.getTranslation("cauldronwitchery.books." + stringCode + ".author"));
 
 		List<String> pages = new ArrayList<>();
 
 		// Check and add up to nine intro pages.
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-one").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-one").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-one"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-one"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-two").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-two").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-two"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-two"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-three").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-three").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-three"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-three"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-four").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-four").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-four"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-four"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-five").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-five").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-five"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-five"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-six").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-six").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-six"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-six"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-seven").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-seven").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-seven"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-seven"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-eight").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-eight").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-eight"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-eight"));
 		}
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-nine").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-nine").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-nine"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-nine"));
 		}
 
 		// Add All recipes
@@ -249,17 +257,17 @@ public class MagicSummon
 
 				StringBuilder builder = new StringBuilder();
 
-				builder.append(user.getTranslation("magicsummon.books." + stringCode + ".recipe-header",
-					"[mob]", user.getTranslation("magicsummon.mobs." + entityType.name()),
-					"[offhand]", user.getTranslation("magicsummon.materials." + recipe.getOffhandItem().name()),
+				builder.append(user.getTranslation("cauldronwitchery.books." + stringCode + ".recipe-header",
+					"[mob]", user.getTranslation("cauldronwitchery.mobs." + entityType.name()),
+					"[offhand]", user.getTranslation("cauldronwitchery.materials." + recipe.getOffhandItem().name()),
 					"[levels]", Integer.toString(recipe.getRequiredLevel())));
 
-				builder.append(user.getTranslation("magicsummon.books." + stringCode + ".recipe-extra-list"));
+				builder.append(user.getTranslation("cauldronwitchery.books." + stringCode + ".recipe-extra-list"));
 
 				for (Map.Entry<Material, Integer> entry : recipe.getRequiredMaterials().entrySet())
 				{
-					builder.append(user.getTranslation("magicsummon.books." + stringCode + ".recipe-extra-element",
-						"[material]", user.getTranslation("magicsummon.materials." + entry.getKey().name()),
+					builder.append(user.getTranslation("cauldronwitchery.books." + stringCode + ".recipe-extra-element",
+						"[material]", user.getTranslation("cauldronwitchery.materials." + entry.getKey().name()),
 						"[count]", Integer.toString(entry.getValue())));
 				}
 
@@ -269,9 +277,9 @@ public class MagicSummon
 
 		// Add Last Page
 
-		if (!user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-last").equals(""))
+		if (!user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-last").equals(""))
 		{
-			pages.add(user.getTranslationOrNothing("magicsummon.books." + stringCode + ".page-last"));
+			pages.add(user.getTranslationOrNothing("cauldronwitchery.books." + stringCode + ".page-last"));
 		}
 
 		bookMeta.setPages(pages);
@@ -289,5 +297,5 @@ public class MagicSummon
 	// ---------------------------------------------------------------------
 
 
-	private MagicSummonAddon addon;
+	private CauldronWitcheryAddon addon;
 }

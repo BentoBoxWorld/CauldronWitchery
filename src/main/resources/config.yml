@@ -1,7 +1,37 @@
-# Config file for Magic Summon add-on Version ${version}
-
+# Config file for CauldronWitchery add-on Version ${version}
+# Allows to manage different lightning timings and enable / disable damage.
+# Hit Player allows to set if lightning should hit cauldron or player.
+# Destroy cauldron means, that cauldron will be removed from world.
+# Setting [] in timings will disable lightning.
+lightning:
+  successful:
+    damage: false
+    hit-player: false
+    destroy-cauldron: false
+    timings:
+      - 20
+      - 30
+      - 40
+      - 50
+  error:
+    damage: true
+    hit-player: false
+    destroy-cauldron: false
+    timings:
+      - 20
+      - 40
+      - 60
+  no-water:
+    damage: true
+    hit-player: true
+    destroy-cauldron: false
+    timings:
+      - 0
+      - 20
+      - 40
+#
 # Disabled Game Mode Addons
-# MagicCobblestoneGenerator will not work in these game modes
+# CauldronWitchery will not work in these game modes
 disabled-gamemodes: []
 #- SkyGrid
 

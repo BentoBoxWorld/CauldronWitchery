@@ -1,4 +1,4 @@
-magicsummon:
+cauldronwitchery:
   messages:
     missing-rank: "You do not have rang to do this."
     missing-island: "Cannot find island where mob could be summoned."

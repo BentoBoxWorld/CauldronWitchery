@@ -8,6 +8,11 @@ Add-on for BentoBox to provide ability to summon mobs with a magic for any Bento
 
 This addon allows to summon any mob (from config) using cauldron with water and right clicking with magic stick (from config) on it.
 
+## Translations
+
+As most of BentoBox projects, CauldronWitchery Addon is translatable in any language. Everyone can contribute, and translate some parts of the addon in their language via [GitLocalize](https://gitlocalize.com/repo/2976).
+If your language is not in the list, please contact to developers via Discord and it will be added there.
+
 ## Where to find
 
 Currently CauldronWitchery Addon is in **Alpha stage**, so it may or may not contain bugs... a lot of bugs. Also it means, that some features are not working or implemented. 
