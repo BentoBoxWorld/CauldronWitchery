@@ -1,0 +1,36 @@
+# Allows to list all magic sticks that can be imported.
+# This is just a template for easier importing. You need to import the template into gamemode,
+# you will be able to use it.
+# It can be done via command or admin panel.
+magic-sticks:
+  # the ID of the stick for the database.
+  animal_stick:
+    # Magic Stick material.
+    stick: STICK:1
+    # Book name that will contain stick recipes.
+    book: animal_book
+    recipes:
+      - mob: SHEEP
+        ingredient: WHITE_WOOL
+        extra:
+          - ROTTEN_FLESH:40
+          - BONE:20
+        experience: 10
+        cauldron: WATER_CAULDRON
+        level: 1
+        permissions: []
+      - item: DIAMOND_BLOCK
+        ingredient: COAL:40
+        extra:
+          - BLUE_DYE:5
+        experience: 40
+        cauldron: LAVA_CAULDRON
+        permissions: []
+      - book: animal_book
+        ingredient: BOOK
+        extra:
+          - LEATHER:2
+        experience: 1
+        cauldron: WATER_CAULDRON
+        level: 1
+        permissions: []

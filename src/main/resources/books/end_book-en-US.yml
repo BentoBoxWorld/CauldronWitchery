@@ -1,0 +1,22 @@
+end_book:
+  title: "The effects of Five billion Volts on various cadavers - THE END MOBS GUIDE"
+  author: "&d Dr. V. Frankenstein"
+
+  pages:
+    1: |-
+      Foreword: If you have read my previous books,
+      you should know the standard procedures and
+      safety precautions. I would like to say from
+      this point onwards... These summons can cause
+      death and containment of these mobs is
+      recommended
+  recipe:
+    header: |-
+      [mob]
+      Main ingredients: [offhand]
+      A filled up cauldron
+      [levels] parts Knowledge!
+    extra-title: |-
+      Extra ingredients:
+    extra-element: |-
+      [count] x [material]

@@ -4,12 +4,19 @@ package world.bentobox.cauldronwitchery;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
+import java.io.File;
+import java.util.jar.JarFile;
+
 import world.bentobox.bentobox.api.addons.Addon;
+import world.bentobox.bentobox.api.configuration.Config;
 import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.managers.RanksManager;
+import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.configs.Settings;
-import world.bentobox.cauldronwitchery.listeners.MainCauldronListener;
-import world.bentobox.cauldronwitchery.tasks.CauldronSummon;
+import world.bentobox.cauldronwitchery.listeners.CauldronClickListener;
+import world.bentobox.cauldronwitchery.listeners.ItemsInsideCauldronListener;
+import world.bentobox.cauldronwitchery.managers.CauldronWitcheryImportManager;
+import world.bentobox.cauldronwitchery.managers.CauldronWitcheryManager;
 
 
 public class CauldronWitcheryAddon extends Addon
@@ -22,10 +29,15 @@ public class CauldronWitcheryAddon extends Addon
 	public void onLoad()
 	{
 		super.onLoad();
-//		// Save default config.yml
+		// Save default config.yml
 		this.saveDefaultConfig();
-		// Load Addon Settings
-		this.settings = new Settings(this);
+		// Load the plugin's config
+		this.loadSettings();
+
+		// Save template
+		this.saveResource("template.yml",false);
+		// Save all books
+		this.loadBooks();
 	}
 
 
@@ -48,18 +60,23 @@ public class CauldronWitcheryAddon extends Addon
 		// Check if addon is not disabled before.
 		if (this.getState().equals(State.DISABLED))
 		{
-			Bukkit.getLogger().severe("CauldronWitchery Addon is not available or disabled!");
+			Bukkit.getLogger().severe("CauldronWitchery is not available or disabled!");
 			return;
 		}
 
+		// Init manager.
+		this.manager = new CauldronWitcheryManager(this);
+		this.manager.load();
+
+		this.importManager = new CauldronWitcheryImportManager(this);
 
 		this.getPlugin().getAddonsManager().getGameModeAddons().forEach(gameModeAddon -> {
 			if (!this.settings.getDisabledGameModes().contains(gameModeAddon.getDescription().getName()))
 			{
 				if (gameModeAddon.isEnabled())
 				{
-					MAGIC_SUMMON_ENABLE_FLAG.addGameModeAddon(gameModeAddon);
-					MAGIC_SUMMON_ISLAND_PROTECTION.addGameModeAddon(gameModeAddon);
+					CAULDRON_WITCHERY_ENABLE_FLAG.addGameModeAddon(gameModeAddon);
+					CAULDRON_WITCHERY_ISLAND_PROTECTION.addGameModeAddon(gameModeAddon);
 				}
 
 				this.hooked = true;
@@ -68,14 +85,13 @@ public class CauldronWitcheryAddon extends Addon
 
 		if (this.hooked)
 		{
-			this.summon = new CauldronSummon(this);
-
 			// Register the listener.
-			this.registerListener(new MainCauldronListener(this));
+			this.registerListener(new CauldronClickListener(this));
+			this.registerListener(new ItemsInsideCauldronListener(this));
 
 			// Register Flags
-			this.registerFlag(MAGIC_SUMMON_ENABLE_FLAG);
-			this.registerFlag(MAGIC_SUMMON_ISLAND_PROTECTION);
+			this.registerFlag(CAULDRON_WITCHERY_ENABLE_FLAG);
+			this.registerFlag(CAULDRON_WITCHERY_ISLAND_PROTECTION);
 
 			// Register Request Handlers
 //			this.registerRequestHandler(REQUEST_HANDLER);
@@ -108,8 +124,62 @@ public class CauldronWitcheryAddon extends Addon
 
 		if (this.hooked)
 		{
-			this.settings = new Settings(this);
-			this.getLogger().info("CauldronWitchery addon reloaded.");
+			this.loadSettings();
+			this.getAddonManager().reload();
+			this.log("CauldronWitchery reloaded.");
+		}
+	}
+
+
+	/**
+	 * This method saves addon settings into file.
+	 */
+	public void saveSettings()
+	{
+		if (this.settings != null)
+		{
+			new Config<>(this, Settings.class).saveConfigObject(this.settings);
+		}
+	}
+
+
+	/**
+	 * This method loads addon configuration settings in memory.
+	 */
+	private void loadSettings()
+	{
+		this.settings = new Config<>(this, Settings.class).loadConfigObject();
+
+		if (this.settings == null)
+		{
+			// Disable
+			this.logError("CauldronWitchery settings could not load! Addon disabled.");
+			this.setState(State.DISABLED);
+		}
+	}
+
+
+	/**
+	 * This method saves books from jar to addon data folder.
+	 */
+	private void loadBooks()
+	{
+		try (JarFile jar = new JarFile(this.getFile()))
+		{
+			File bookDir = new File(this.getDataFolder(), "books");
+
+			if (!bookDir.exists())
+			{
+				bookDir.mkdirs();
+			}
+
+			// Obtain any locale files, save them and update
+			Util.listJarFiles(jar, "books", ".yml").forEach(lf ->
+				this.saveResource(lf, bookDir, false, true));
+		}
+		catch (Exception e)
+		{
+			this.logError(e.getMessage());
 		}
 	}
 
@@ -130,18 +200,19 @@ public class CauldronWitcheryAddon extends Addon
 
 
 	/**
-	 * This method returns Magic Generator.
-	 * @return Magic Generator object.
+	 * This method returns stone manager.
+	 *
+	 * @return Stone Generator Manager
 	 */
-	public CauldronSummon getMagicSummon()
+	public CauldronWitcheryManager getAddonManager()
 	{
-		return this.summon;
+		return this.manager;
 	}
 
 
-	// ---------------------------------------------------------------------
-	// Section: Variables
-	// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// Section: Variables
+// ---------------------------------------------------------------------
 
 	/**
 	 * Variable holds settings object.
@@ -154,9 +225,14 @@ public class CauldronWitcheryAddon extends Addon
 	private boolean hooked;
 
 	/**
-	 * Variable holds MagicSummon object.
+	 * Variable that stores CauldronWitcheryManager.
 	 */
-	private CauldronSummon summon;
+	private CauldronWitcheryManager manager;
+
+	/**
+	 * Variable that stores CauldronWitcheryManager.
+	 */
+	private CauldronWitcheryImportManager importManager;
 
 
 // ---------------------------------------------------------------------
@@ -167,14 +243,14 @@ public class CauldronWitcheryAddon extends Addon
 	/**
 	 * This flag allows to enable or disable Magic Summon addon in particular world.
 	 */
-	public static Flag MAGIC_SUMMON_ENABLE_FLAG =
-		new Flag.Builder("MAGIC_SUMMON_ENABLE_FLAG", Material.PIG_SPAWN_EGG).
+	public static Flag CAULDRON_WITCHERY_ENABLE_FLAG =
+		new Flag.Builder("CAULDRON_WITCHERY_ENABLE_FLAG", Material.PIG_SPAWN_EGG).
 			type(Flag.Type.WORLD_SETTING).defaultSetting(true).build();
 
 	/**
 	 * This flag allows to define which users can summon mobs using magic.
 	 */
-	public static Flag MAGIC_SUMMON_ISLAND_PROTECTION =
-		new Flag.Builder("MAGIC_SUMMON_ISLAND_PROTECTION", Material.CHICKEN_SPAWN_EGG).
+	public static Flag CAULDRON_WITCHERY_ISLAND_PROTECTION =
+		new Flag.Builder("CAULDRON_WITCHERY_ISLAND_PROTECTION", Material.CHICKEN_SPAWN_EGG).
 			defaultRank(RanksManager.VISITOR_RANK).build();
 }

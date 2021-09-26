@@ -1,149 +1,267 @@
 package world.bentobox.cauldronwitchery.configs;
 
 
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.EntityType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
+import world.bentobox.bentobox.api.configuration.ConfigComment;
+import world.bentobox.bentobox.api.configuration.ConfigEntry;
+import world.bentobox.bentobox.api.configuration.ConfigObject;
+import world.bentobox.bentobox.api.configuration.StoreAt;
 
 
-public class Settings
+
+@StoreAt(filename="config.yml", path="addons/CauldronWitchery")
+public class Settings implements ConfigObject
 {
-	public Settings(CauldronWitcheryAddon addon)
+	/**
+	 * Is drop in cauldron boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isMixInCauldron()
 	{
-		addon.saveDefaultConfig();
-
-		// Get disabled GameModes
-		this.disabledGameModes = new HashSet<>(addon.getConfig().getStringList("disabled-gamemodes"));
-
-		if (addon.getConfig().isSet("magic-sticks"))
-		{
-			ConfigurationSection section = addon.getConfig().getConfigurationSection("magic-sticks");
-
-			this.magicStickMap = new HashMap<>(4);
-
-			for (String key : section.getKeys(false))
-			{
-				ConfigurationSection stickSection = section.getConfigurationSection(key);
-
-				Material stick = Material.getMaterial(key);
-
-				if (stick != null)
-				{
-					MagicStick magicStick = new MagicStick(stick);
-					magicStick.setEnvironment(World.Environment.valueOf(stickSection.getString("environment")));
-
-					ConfigurationSection recipesSection = stickSection.getConfigurationSection("recipes");
-
-					for (String recipeKey : recipesSection.getKeys(false))
-					{
-						ConfigurationSection singleRecipeSection = recipesSection.getConfigurationSection(recipeKey);
-						MagicRecipe magicRecipe;
-
-						if (recipeKey.equals("BOOK"))
-						{
-							magicRecipe = new MagicBook(
-								Material.getMaterial(singleRecipeSection.getString("offhand")),
-								singleRecipeSection.getString("name"));
-						}
-						else
-						{
-							magicRecipe = new MagicMob(
-								Material.getMaterial(singleRecipeSection.getString("offhand")),
-								EntityType.valueOf(recipeKey));
-						}
-
-						magicRecipe.setRequiredLevel(singleRecipeSection.getInt("levels"));
-
-						ConfigurationSection materialsSection = singleRecipeSection.getConfigurationSection("materials");
-
-						if (materialsSection != null)
-						{
-							for (String materialKey : materialsSection.getKeys(false))
-							{
-								magicRecipe.addRequiredItem(Material.valueOf(materialKey),
-									materialsSection.getInt(materialKey));
-							}
-						}
-
-						magicStick.addRecipe(magicRecipe);
-					}
-
-					this.magicStickMap.put(magicStick.getMainMaterial(), magicStick);
-				}
-				else
-				{
-					addon.logError("Cannot parse " + key + " as magic stick!");
-				}
-			}
-		}
-		else
-		{
-			addon.logError("No magic sticks installed!");
-		}
-
-		// Set up lightning effects
-		this.successful = new LightningEffect();
-		this.successful.damage = addon.getConfig().getBoolean("lightning.successful.damage", false);
-		this.successful.hitPlayer = addon.getConfig().getBoolean("lightning.successful.hit-player", false);
-		this.successful.destroyCauldron = addon.getConfig().getBoolean("lightning.successful.destroy-cauldron", false);
-
-		if (addon.getConfig().contains("lightning.successful.timings"))
-		{
-			this.successful.timings.addAll(addon.getConfig().getLongList("lightning.successful.timings"));
-		}
-		else
-		{
-			this.successful.timings.add(20L);
-			this.successful.timings.add(30L);
-			this.successful.timings.add(40L);
-			this.successful.timings.add(50L);
-		}
-
-		this.error = new LightningEffect();
-		this.error.damage = addon.getConfig().getBoolean("lightning.error.damage", true);
-		this.error.hitPlayer = addon.getConfig().getBoolean("lightning.error.hit-player", false);
-		this.error.destroyCauldron = addon.getConfig().getBoolean("lightning.error.destroy-cauldron", false);
-
-		if (addon.getConfig().contains("lightning.error.timings"))
-		{
-			this.error.timings.addAll(addon.getConfig().getLongList("lightning.error.timings"));
-		}
-		else
-		{
-			this.error.timings.add(20L);
-			this.error.timings.add(40L);
-			this.error.timings.add(60L);
-		}
-
-		this.missingWater = new LightningEffect();
-		this.missingWater.damage = addon.getConfig().getBoolean("lightning.no-water.damage", true);
-		this.missingWater.hitPlayer = addon.getConfig().getBoolean("lightning.no-water.hit-player", true);
-		this.missingWater.destroyCauldron = addon.getConfig().getBoolean("lightning.no-water.destroy-cauldron", false);
-
-		if (addon.getConfig().contains("lightning.no-water.timings"))
-		{
-			this.missingWater.timings.addAll(addon.getConfig().getLongList("lightning.no-water.timings"));
-		}
-		else
-		{
-			this.missingWater.timings.add(0L);
-			this.missingWater.timings.add(20L);
-			this.missingWater.timings.add(40L);
-		}
+		return mixInCauldron;
 	}
-
-	// ---------------------------------------------------------------------
-	// Section: Getters and Setters
-	// ---------------------------------------------------------------------
 
 
 	/**
-	 * This method returns the disabledGameModes value.
-	 * @return the value of disabledGameModes.
+	 * Sets drop in cauldron.
+	 *
+	 * @param mixInCauldron the drop in cauldron
+	 */
+	public void setMixInCauldron(boolean mixInCauldron)
+	{
+		this.mixInCauldron = mixInCauldron;
+	}
+
+
+	/**
+	 * Is exact extra count boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isExactExtraCount()
+	{
+		return exactExtraCount;
+	}
+
+
+	/**
+	 * Sets exact extra count.
+	 *
+	 * @param exactExtraCount the exact extra count
+	 */
+	public void setExactExtraCount(boolean exactExtraCount)
+	{
+		this.exactExtraCount = exactExtraCount;
+	}
+
+
+	/**
+	 * Is remove left overs boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isRemoveLeftOvers()
+	{
+		return removeLeftOvers;
+	}
+
+
+	/**
+	 * Sets remove left overs.
+	 *
+	 * @param removeLeftOvers the remove left overs
+	 */
+	public void setRemoveLeftOvers(boolean removeLeftOvers)
+	{
+		this.removeLeftOvers = removeLeftOvers;
+	}
+
+
+	/**
+	 * Is successful damage boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isSuccessfulDamage()
+	{
+		return successfulDamage;
+	}
+
+
+	/**
+	 * Sets successful damage.
+	 *
+	 * @param successfulDamage the successful damage
+	 */
+	public void setSuccessfulDamage(boolean successfulDamage)
+	{
+		this.successfulDamage = successfulDamage;
+	}
+
+
+	/**
+	 * Is successful hit player boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isSuccessfulHitPlayer()
+	{
+		return successfulHitPlayer;
+	}
+
+
+	/**
+	 * Sets successful hit player.
+	 *
+	 * @param successfulHitPlayer the successful hit player
+	 */
+	public void setSuccessfulHitPlayer(boolean successfulHitPlayer)
+	{
+		this.successfulHitPlayer = successfulHitPlayer;
+	}
+
+
+	/**
+	 * Is successful destroy cauldron boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isSuccessfulDestroyCauldron()
+	{
+		return successfulDestroyCauldron;
+	}
+
+
+	/**
+	 * Sets successful destroy cauldron.
+	 *
+	 * @param successfulDestroyCauldron the successful destroy cauldron
+	 */
+	public void setSuccessfulDestroyCauldron(boolean successfulDestroyCauldron)
+	{
+		this.successfulDestroyCauldron = successfulDestroyCauldron;
+	}
+
+
+	/**
+	 * Gets successful timings.
+	 *
+	 * @return the successful timings
+	 */
+	public List<Long> getSuccessfulTimings()
+	{
+		return successfulTimings;
+	}
+
+
+	/**
+	 * Sets successful timings.
+	 *
+	 * @param successfulTimings the successful timings
+	 */
+	public void setSuccessfulTimings(List<Long> successfulTimings)
+	{
+		this.successfulTimings = successfulTimings;
+	}
+
+
+	/**
+	 * Is error damage boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isErrorDamage()
+	{
+		return errorDamage;
+	}
+
+
+	/**
+	 * Sets error damage.
+	 *
+	 * @param errorDamage the error damage
+	 */
+	public void setErrorDamage(boolean errorDamage)
+	{
+		this.errorDamage = errorDamage;
+	}
+
+
+	/**
+	 * Is error hit player boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isErrorHitPlayer()
+	{
+		return errorHitPlayer;
+	}
+
+
+	/**
+	 * Sets error hit player.
+	 *
+	 * @param errorHitPlayer the error hit player
+	 */
+	public void setErrorHitPlayer(boolean errorHitPlayer)
+	{
+		this.errorHitPlayer = errorHitPlayer;
+	}
+
+
+	/**
+	 * Is error destroy cauldron boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isErrorDestroyCauldron()
+	{
+		return errorDestroyCauldron;
+	}
+
+
+	/**
+	 * Sets error destroy cauldron.
+	 *
+	 * @param errorDestroyCauldron the error destroy cauldron
+	 */
+	public void setErrorDestroyCauldron(boolean errorDestroyCauldron)
+	{
+		this.errorDestroyCauldron = errorDestroyCauldron;
+	}
+
+
+	/**
+	 * Gets error timings.
+	 *
+	 * @return the error timings
+	 */
+	public List<Long> getErrorTimings()
+	{
+		return errorTimings;
+	}
+
+
+	/**
+	 * Sets error timings.
+	 *
+	 * @param errorTimings the error timings
+	 */
+	public void setErrorTimings(List<Long> errorTimings)
+	{
+		this.errorTimings = errorTimings;
+	}
+
+
+	/**
+	 * Gets disabled game modes.
+	 *
+	 * @return the disabled game modes
 	 */
 	public Set<String> getDisabledGameModes()
 	{
@@ -152,302 +270,172 @@ public class Settings
 
 
 	/**
-	 * This method returns loaded Magic Sticks from Config file.
-	 * @return Map that contains all magic sticks.
+	 * Sets disabled game modes.
+	 *
+	 * @param disabledGameModes the disabled game modes
 	 */
-	public Map<Material, MagicStick> getMagicStickMap()
+	public void setDisabledGameModes(Set<String> disabledGameModes)
 	{
-		return this.magicStickMap;
+		this.disabledGameModes = disabledGameModes;
 	}
 
-
-	public LightningEffect getSuccessful()
-	{
-		return successful;
-	}
-
-
-	public LightningEffect getError()
-	{
-		return error;
-	}
-
-
-	public LightningEffect getMissingWater()
-	{
-		return missingWater;
-	}
-
-
-	// ---------------------------------------------------------------------
-	// Section: Variables
-	// ---------------------------------------------------------------------
 
 	/**
-	 * This holds disabled game modes.
+	 * Gets success damage amount.
+	 *
+	 * @return the success damage amount
 	 */
-	private Set<String> disabledGameModes;
+	public int getSuccessDamageAmount()
+	{
+		return successDamageAmount;
+	}
 
-	private Map<Material, MagicStick> magicStickMap;
 
 	/**
-	 * Effect that will be triggered when everything works correctly.
+	 * Sets success damage amount.
+	 *
+	 * @param successDamageAmount the success damage amount
 	 */
-	private LightningEffect successful;
+	public void setSuccessDamageAmount(int successDamageAmount)
+	{
+		this.successDamageAmount = successDamageAmount;
+	}
+
 
 	/**
-	 * Effect that will be triggered when something is missing in players inventory.
+	 * Gets error damage amount.
+	 *
+	 * @return the error damage amount
 	 */
-	private LightningEffect error;
+	public int getErrorDamageAmount()
+	{
+		return errorDamageAmount;
+	}
+
 
 	/**
-	 * Effect that will be triggered when player clicks on cauldron without a water.
+	 * Sets error damage amount.
+	 *
+	 * @param errorDamageAmount the error damage amount
 	 */
-	private LightningEffect missingWater;
-
-
-	// ---------------------------------------------------------------------
-	// Section: Object
-	// ---------------------------------------------------------------------
-
-
-	public class MagicStick
+	public void setErrorDamageAmount(int errorDamageAmount)
 	{
-		private MagicStick(Material mainMaterial)
-		{
-			this.mainMaterial = mainMaterial;
-			this.recipes = new HashMap<>();
-		}
-
-
-		private void setEnvironment(World.Environment environment)
-		{
-			this.environment = environment;
-		}
-
-
-		private void addRecipe(MagicRecipe recipe)
-		{
-			this.recipes.put(recipe.getOffhandItem(), recipe);
-		}
-
-
-		// ---------------------------------------------------------------------
-		// Section: Getters
-		// ---------------------------------------------------------------------
-
-
-		public Material getMainMaterial()
-		{
-			return mainMaterial;
-		}
-
-
-		public World.Environment getEnvironment()
-		{
-			return environment;
-		}
-
-
-		public Map<Material, MagicRecipe> getRecipes()
-		{
-			return recipes;
-		}
-
-
-		public boolean containsRecipe(Material offHandItem)
-		{
-			return this.recipes.containsKey(offHandItem);
-		}
-
-
-		public MagicRecipe getRecipe(Material offHandItem)
-		{
-			return this.recipes.get(offHandItem);
-		}
-
-
-		// ---------------------------------------------------------------------
-		// Section: Variables
-		// ---------------------------------------------------------------------
-
-		/**
-		 * Magic stick item.
-		 */
-		private Material mainMaterial;
-
-		/**
-		 * Environment where current stick works
-		 */
-		private World.Environment environment;
-
-		/**
-		 * List of recipes that can be spawned.
-		 */
-		private Map<Material, MagicRecipe> recipes;
+		this.errorDamageAmount = errorDamageAmount;
 	}
 
 
-	public class MagicRecipe
+	/**
+	 * Is remove on fail boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isRemoveOnFail()
 	{
-		private MagicRecipe(Material offhandItem)
-		{
-			this.offhandItem = offhandItem;
-			this.requiredMaterials = new HashMap<>(2);
-		}
-
-
-		private void setRequiredLevel(int requiredLevel)
-		{
-			this.requiredLevel = requiredLevel;
-		}
-
-
-		private void setOffhandItem(Material offhandItem)
-		{
-			this.offhandItem = offhandItem;
-		}
-
-
-		private void addRequiredItem(Material material, int count)
-		{
-			this.requiredMaterials.put(material, count);
-		}
-
-
-		public int getRequiredLevel()
-		{
-			return this.requiredLevel;
-		}
-
-
-		public Material getOffhandItem()
-		{
-			return this.offhandItem;
-		}
-
-
-		public Map<Material, Integer> getRequiredMaterials()
-		{
-			return this.requiredMaterials;
-		}
-
-
-		// ---------------------------------------------------------------------
-		// Section: Variables
-		// ---------------------------------------------------------------------
-
-		/**
-		 * Required player experience level.
-		 */
-		private int requiredLevel;
-
-		/**
-		 * Offhand item
-		 */
-		private Material offhandItem;
-
-		/**
-		 * List of required materials.
-		 */
-		private Map<Material, Integer> requiredMaterials;
+		return removeOnFail;
 	}
 
 
-	public class MagicMob extends MagicRecipe
+	/**
+	 * Sets remove on fail.
+	 *
+	 * @param removeOnFail the remove on fail
+	 */
+	public void setRemoveOnFail(boolean removeOnFail)
 	{
-		private MagicMob(Material offhandItem, EntityType entity)
-		{
-			super(offhandItem);
-			this.entity = entity;
-		}
-
-
-		public EntityType getEntity()
-		{
-			return this.entity;
-		}
-
-
-		// ---------------------------------------------------------------------
-		// Section: Variables
-		// ---------------------------------------------------------------------
-
-		/**
-		 * Entity type that will be spawned by current recipe
-		 */
-		private EntityType entity;
+		this.removeOnFail = removeOnFail;
 	}
 
 
-	public class MagicBook extends MagicRecipe
-	{
-		private MagicBook(Material offhandItem, String name)
-		{
-			super(offhandItem);
-			this.name = name;
-		}
+// ---------------------------------------------------------------------
+// Section: Variables
+// ---------------------------------------------------------------------
 
+	@ConfigComment("Allows to set amount of damage on successful magic.")
+	@ConfigComment("Items that cannot be damaged, like STICK, will be removed.")
+	@ConfigComment("0 means that damage will not be applied. ")
+	@ConfigEntry(path = "stick.success-damage")
+	private int successDamageAmount = 0;
 
-		public String getName()
-		{
-			return this.name;
-		}
+	@ConfigComment("Allows to set amount of damage on failed magic.")
+	@ConfigComment("Items that cannot be damaged, like STICK, will be removed.")
+	@ConfigComment("0 means that damage will not be applied. ")
+	@ConfigEntry(path = "stick.error-damage")
+	private int errorDamageAmount = 0;
 
+	@ConfigComment("Allows to toggle if extra ingredients should be dropped in cauldron.")
+	@ConfigComment("Setting it to `true` will allow to perform magic only if items are dropped in cauldron.")
+	@ConfigEntry(path = "cauldron.mix-in-cauldron")
+	private boolean mixInCauldron = true;
 
-		// ---------------------------------------------------------------------
-		// Section: Variables
-		// ---------------------------------------------------------------------
+	@ConfigComment("Allows to toggle if extra ingredients should be in correct count.")
+	@ConfigComment("Setting it to `true` will fail any recipe where extras in cauldron are more then required.")
+	@ConfigComment("This option works only if `mix-in-cauldron` is enabled.")
+	@ConfigEntry(path = "cauldron.require-exact")
+	private boolean exactExtraCount = true;
 
-		/**
-		 * Name of the book.
-		 */
-		private String name;
-	}
+	@ConfigComment("Allows to toggle if left-overs for extra ingredients should be removed.")
+	@ConfigComment("Setting it to `true` will remove all left-over ingredients that were dropped in cauldron.")
+	@ConfigComment("This option works only if `mix-in-cauldron` is enabled and `require-exact` is disabled.")
+	@ConfigEntry(path = "cauldron.remove-left-overs")
+	private boolean removeLeftOvers = false;
 
+	@ConfigComment("Allows to toggle if items inside cauldron should be removed on failed magic.")
+	@ConfigComment("Setting it to `true` will remove all items inside cauldron if magic fails.")
+	@ConfigComment("This option works only if `mix-in-cauldron` is enabled.")
+	@ConfigEntry(path = "cauldron.remove-on-fail")
+	private boolean removeOnFail = false;
 
-	public class LightningEffect
-	{
-		public boolean isDestroyCauldron()
-		{
-			return destroyCauldron;
-		}
+	@ConfigComment("Allows to toggle lightning between visual and damage mode when recipe worked.")
+	@ConfigComment("Setting it to `true` will summon actual lightning that will damage and set things on fire")
+	@ConfigComment("Setting it to `false` will just make visual lightning and sound.")
+	@ConfigEntry(path = "lightning.successful.damage")
+	private boolean successfulDamage = false;
+	
+	@ConfigComment("Allows to toggle lightning should target cauldron or player who performed successful magic.")
+	@ConfigComment("Setting it to `true` will force lightning to target player.")
+	@ConfigComment("Setting it to `false` will force lightning to target cauldron.")
+	@ConfigEntry(path = "lightning.successful.hit-player")
+	private boolean successfulHitPlayer = false;
 
+	@ConfigComment("Allows to toggle lightning should destroy the cauldron after successful magic.")
+	@ConfigComment("Setting it to `true` will force lightning to destroy cauldron.")
+	@ConfigComment("Setting it to `false` will not allow lightning to destroy cauldron.")
+	@ConfigEntry(path = "lightning.successful.destroy-cauldron")
+	private boolean successfulDestroyCauldron = false;
 
-		public boolean isHitPlayer()
-		{
-			return hitPlayer;
-		}
+	@ConfigComment("Allows to set the ticks daley between lightning strikes.")
+	@ConfigComment("If left empty, lightning will not strike.")
+	@ConfigEntry(path = "lightning.successful.timings")
+	private List<Long> successfulTimings = new ArrayList<>(4);
+	
+	@ConfigComment("Allows to toggle lightning between visual and damage mode when recipe did worked.")
+	@ConfigComment("Setting it to `true` will summon actual lightning that will damage and set things on fire")
+	@ConfigComment("Setting it to `false` will just make visual lightning and sound.")
+	@ConfigEntry(path = "lightning.error.damage")
+	private boolean errorDamage = false;
 
+	@ConfigComment("Allows to toggle lightning should target cauldron or player when magic failed.")
+	@ConfigComment("Setting it to `true` will force lightning to target player.")
+	@ConfigComment("Setting it to `false` will force lightning to target cauldron.")
+	@ConfigEntry(path = "lightning.error.hit-player")
+	private boolean errorHitPlayer = false;
 
-		public boolean isDamage()
-		{
-			return damage;
-		}
+	@ConfigComment("Allows to toggle lightning should destroy the cauldron after failed magic.")
+	@ConfigComment("Setting it to `true` will force lightning to destroy cauldron.")
+	@ConfigComment("Setting it to `false` will not allow lightning to destroy cauldron.")
+	@ConfigEntry(path = "lightning.error.destroy-cauldron")
+	private boolean errorDestroyCauldron = false;
 
+	@ConfigComment("Allows to set the ticks daley between lightning strikes.")
+	@ConfigComment("If left empty, lightning will not strike.")
+	@ConfigEntry(path = "lightning.error.timings")
+	private List<Long> errorTimings = new ArrayList<>(4);
 
-		public List<Long> getTimings()
-		{
-			return timings;
-		}
-
-
-		public boolean hasTimings()
-		{
-			return timings != null && !timings.isEmpty();
-		}
-
-
-		// ---------------------------------------------------------------------
-		// Section: Variables
-		// ---------------------------------------------------------------------
-
-		private boolean hitPlayer;
-
-		private boolean damage;
-
-		private List<Long> timings = new ArrayList<>(3);
-
-		private boolean destroyCauldron;
-	}
+	@ConfigComment("")
+	@ConfigComment("This list stores GameModes in which CauldronWitchery addon should not work.")
+	@ConfigComment("To disable addon it is necessary to write its name in new line that starts with -. Example:")
+	@ConfigComment("disabled-gamemodes:")
+	@ConfigComment(" - BSkyBlock")
+	@ConfigEntry(path = "disabled-gamemodes")
+	private Set<String> disabledGameModes = new HashSet<>();	
 }
