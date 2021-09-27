@@ -7,10 +7,7 @@
 package world.bentobox.cauldronwitchery.utils;
 
 
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Statistic;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +32,36 @@ import world.bentobox.bentobox.util.Util;
  */
 public class Utils
 {
+    /**
+     * This method checks if 2 given item stacks are similar without durability check.
+     * @param input First item.
+     * @param stack Second item.
+     * @return {@code true} if items are equal, {@code false} otherwise.
+     */
+    public static boolean isSimilarNoDurability(@Nullable ItemStack input, @Nullable ItemStack stack)
+    {
+        if (stack == null || input == null)
+        {
+            return false;
+        }
+        else if (stack == input)
+        {
+            return true;
+        }
+        else
+        {
+            return input.getType() == stack.getType() &&
+                input.hasItemMeta() == stack.hasItemMeta() &&
+                (!input.hasItemMeta() || Bukkit.getItemFactory().equals(input.getItemMeta(), stack.getItemMeta()));
+        }
+    }
+
+
+    /**
+     * This method groups equal elements into single stack. It uses ItemStack#isSimilar method.
+     * @param requiredItems Items that should be grouped.
+     * @return List of grouped item stacks.
+     */
     public static List<ItemStack> groupEqualItems(Collection<ItemStack> requiredItems)
     {
         List<ItemStack> returnItems = new ArrayList<>(requiredItems.size());
@@ -71,7 +98,6 @@ public class Utils
 
         return returnItems;
     }
-
 
 
     /**

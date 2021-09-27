@@ -9,6 +9,7 @@ package world.bentobox.cauldronwitchery.managers;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.UnsafeValues;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -235,7 +236,7 @@ public class CauldronWitcheryManager
     {
         // Search an item from magic stick item cache.
         return this.magicStickDataCache.values().stream().
-            anyMatch(key -> key.getMagicStick().isSimilar(item));
+            anyMatch(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item));
     }
 
 
@@ -250,7 +251,7 @@ public class CauldronWitcheryManager
     public MagicStickObject getMagicStick(ItemStack item, User user)
     {
         return this.magicStickDataCache.values().stream().
-            filter(key -> key.getMagicStick().isSimilar(item)).
+            filter(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item)).
             findFirst().
             orElse(null);
     }
