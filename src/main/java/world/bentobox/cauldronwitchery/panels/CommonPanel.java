@@ -16,6 +16,10 @@ import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
+import world.bentobox.cauldronwitchery.database.object.recipe.BookRecipe;
+import world.bentobox.cauldronwitchery.database.object.recipe.EntityRecipe;
+import world.bentobox.cauldronwitchery.database.object.recipe.ItemRecipe;
+import world.bentobox.cauldronwitchery.database.object.recipe.Recipe;
 import world.bentobox.cauldronwitchery.managers.CauldronWitcheryManager;
 import world.bentobox.cauldronwitchery.utils.Constants;
 
@@ -91,6 +95,26 @@ public abstract class CommonPanel
      */
     protected abstract void build();
 
+
+    protected String generateRecipeDescription(BookRecipe recipe, User user)
+    {
+        return "";
+    }
+
+    protected String generateRecipeDescription(ItemRecipe recipe, User user)
+    {
+        return "";
+    }
+
+    protected String generateRecipeDescription(EntityRecipe recipe, User user)
+    {
+        return "";
+    }
+
+    protected String generateRecipeDescription(Recipe recipe, User user)
+    {
+        return "";
+    }
 
     /**
      * This method reopens given panel.
