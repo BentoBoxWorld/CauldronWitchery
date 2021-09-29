@@ -53,7 +53,7 @@ public class MagicStickObject implements DataObject
      */
     public ItemStack getMagicStick()
     {
-        return magicStick;
+        return magicStick.clone();
     }
 
 

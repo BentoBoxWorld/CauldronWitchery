@@ -43,7 +43,7 @@ public class ItemRecipe extends Recipe
      */
     public ItemStack getItemStack()
     {
-        return itemStack;
+        return itemStack.clone();
     }
 
 

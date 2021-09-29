@@ -49,7 +49,7 @@ public abstract class Recipe
      */
     public ItemStack getMainIngredient()
     {
-        return mainIngredient;
+        return mainIngredient.clone();
     }
 
 
@@ -71,7 +71,7 @@ public abstract class Recipe
      */
     public List<ItemStack> getExtraIngredients()
     {
-        return extraIngredients;
+        return extraIngredients.stream().map(ItemStack::clone).collect(Collectors.toList());
     }
 
 
