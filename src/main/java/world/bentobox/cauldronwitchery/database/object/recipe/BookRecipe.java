@@ -95,5 +95,5 @@ public class BookRecipe extends Recipe
      * Stores the name of the book.
      */
     @Expose
-    private String bookName;
+    private String bookName = "";
 }
