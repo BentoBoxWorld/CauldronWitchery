@@ -150,9 +150,9 @@ public class EditRecipePanel extends CommonPanel
         }
 
         return new PanelItemBuilder().
-            name(Util.translateColorCodes(recipe.getBookName())).
+            name(recipe.getRecipeName(this.user)).
             description(description).
-            icon(new ItemStack(Material.KNOWLEDGE_BOOK)).
+            icon(recipe.getIcon()).
             clickHandler((panel, user, clickType, slot) -> {
                 // Open challenges edit screen.
 
@@ -197,13 +197,13 @@ public class EditRecipePanel extends CommonPanel
     private PanelItem createElementButton(ItemRecipe recipe)
     {
         return new PanelItemBuilder().
-            name(Utils.prettifyObject(recipe.getItemStack(), this.user)).
+            name(recipe.getRecipeName(this.user)).
             description(this.generateRecipeDescription(recipe, null)).
             description("").
             description(this.selectedButton != Button.REWARD_ITEM ?
                 this.user.getTranslation(Constants.TIPS + "click-to-change") :
                 this.user.getTranslation(Constants.TIPS + "click-on-item")).
-            icon(recipe.getItemStack().clone()).
+            icon(recipe.getIcon()).
             clickHandler((panel, user, clickType, slot) -> {
                 // Open challenges edit screen.
                 this.selectedButton = Button.REWARD_ITEM;
@@ -224,11 +224,11 @@ public class EditRecipePanel extends CommonPanel
     private PanelItem createElementButton(EntityRecipe recipe)
     {
         return new PanelItemBuilder().
-            name(Utils.prettifyObject(recipe.getEntityType(), this.user)).
+            name(recipe.getRecipeName(this.user)).
             description(this.generateRecipeDescription(recipe, null)).
             description("").
             description(this.user.getTranslation(Constants.TIPS + "click-to-edit")).
-            icon(PanelUtils.getEntityHead(recipe.getEntityType())).
+            icon(recipe.getIcon()).
             clickHandler((panel, user, clickType, slot) -> {
                 // Open challenges edit screen.
                 SingleEntitySelector.open(this.user,
