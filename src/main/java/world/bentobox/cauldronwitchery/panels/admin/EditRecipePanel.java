@@ -426,7 +426,7 @@ public class EditRecipePanel extends CommonPanel
                     validBlocks.add(this.recipe.getCauldronType());
 
                     SingleBlockSelector.open(this.user,
-                        SingleBlockSelector.Mode.ITEMS,
+                        SingleBlockSelector.Mode.BLOCKS,
                         validBlocks,
                         (status, block) -> {
                             if (status)
