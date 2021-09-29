@@ -8,8 +8,10 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 
 
 import com.google.gson.annotations.Expose;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.cauldronwitchery.utils.Utils;
 
@@ -85,7 +87,7 @@ public class ItemRecipe extends Recipe
     @Override
     public ItemStack getIcon()
     {
-        return this.itemStack.clone();
+        return this.itemStack == null ? new ItemStack(Material.BARRIER) : this.itemStack.clone();
     }
 
 

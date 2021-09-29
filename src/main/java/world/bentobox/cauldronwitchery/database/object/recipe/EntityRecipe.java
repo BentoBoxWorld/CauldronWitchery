@@ -8,6 +8,7 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 
 
 import com.google.gson.annotations.Expose;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
@@ -76,7 +77,7 @@ public class EntityRecipe extends Recipe
     @Override
     public ItemStack getIcon()
     {
-        return PanelUtils.getEntityHead(this.entityType);
+        return this.entityType == null ? new ItemStack(Material.BARRIER) : PanelUtils.getEntityHead(this.entityType);
     }
 
 
