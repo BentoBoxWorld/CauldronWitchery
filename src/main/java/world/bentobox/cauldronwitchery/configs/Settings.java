@@ -83,138 +83,6 @@ public class Settings implements ConfigObject
 
 
 	/**
-	 * Is successful damage boolean.
-	 *
-	 * @return the boolean
-	 */
-	public boolean isSuccessfulDamage()
-	{
-		return successfulDamage;
-	}
-
-
-	/**
-	 * Sets successful damage.
-	 *
-	 * @param successfulDamage the successful damage
-	 */
-	public void setSuccessfulDamage(boolean successfulDamage)
-	{
-		this.successfulDamage = successfulDamage;
-	}
-
-
-	/**
-	 * Is successful hit player boolean.
-	 *
-	 * @return the boolean
-	 */
-	public boolean isSuccessfulHitPlayer()
-	{
-		return successfulHitPlayer;
-	}
-
-
-	/**
-	 * Sets successful hit player.
-	 *
-	 * @param successfulHitPlayer the successful hit player
-	 */
-	public void setSuccessfulHitPlayer(boolean successfulHitPlayer)
-	{
-		this.successfulHitPlayer = successfulHitPlayer;
-	}
-
-
-	/**
-	 * Is successful destroy cauldron boolean.
-	 *
-	 * @return the boolean
-	 */
-	public boolean isSuccessfulDestroyCauldron()
-	{
-		return successfulDestroyCauldron;
-	}
-
-
-	/**
-	 * Sets successful destroy cauldron.
-	 *
-	 * @param successfulDestroyCauldron the successful destroy cauldron
-	 */
-	public void setSuccessfulDestroyCauldron(boolean successfulDestroyCauldron)
-	{
-		this.successfulDestroyCauldron = successfulDestroyCauldron;
-	}
-
-
-	/**
-	 * Gets successful timings.
-	 *
-	 * @return the successful timings
-	 */
-	public List<Long> getSuccessfulTimings()
-	{
-		return successfulTimings;
-	}
-
-
-	/**
-	 * Sets successful timings.
-	 *
-	 * @param successfulTimings the successful timings
-	 */
-	public void setSuccessfulTimings(List<Long> successfulTimings)
-	{
-		this.successfulTimings = successfulTimings;
-	}
-
-
-	/**
-	 * Is error damage boolean.
-	 *
-	 * @return the boolean
-	 */
-	public boolean isErrorDamage()
-	{
-		return errorDamage;
-	}
-
-
-	/**
-	 * Sets error damage.
-	 *
-	 * @param errorDamage the error damage
-	 */
-	public void setErrorDamage(boolean errorDamage)
-	{
-		this.errorDamage = errorDamage;
-	}
-
-
-	/**
-	 * Is error hit player boolean.
-	 *
-	 * @return the boolean
-	 */
-	public boolean isErrorHitPlayer()
-	{
-		return errorHitPlayer;
-	}
-
-
-	/**
-	 * Sets error hit player.
-	 *
-	 * @param errorHitPlayer the error hit player
-	 */
-	public void setErrorHitPlayer(boolean errorHitPlayer)
-	{
-		this.errorHitPlayer = errorHitPlayer;
-	}
-
-
-	/**
 	 * Is error destroy cauldron boolean.
 	 *
 	 * @return the boolean
@@ -233,28 +101,6 @@ public class Settings implements ConfigObject
 	public void setErrorDestroyCauldron(boolean errorDestroyCauldron)
 	{
 		this.errorDestroyCauldron = errorDestroyCauldron;
-	}
-
-
-	/**
-	 * Gets error timings.
-	 *
-	 * @return the error timings
-	 */
-	public List<Long> getErrorTimings()
-	{
-		return errorTimings;
-	}
-
-
-	/**
-	 * Sets error timings.
-	 *
-	 * @param errorTimings the error timings
-	 */
-	public void setErrorTimings(List<Long> errorTimings)
-	{
-		this.errorTimings = errorTimings;
 	}
 
 
@@ -368,6 +214,28 @@ public class Settings implements ConfigObject
     }
 
 
+	/**
+	 * Is correct error message boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isCorrectErrorMessage()
+	{
+		return correctErrorMessage;
+	}
+
+
+	/**
+	 * Sets correct error message.
+	 *
+	 * @param correctErrorMessage the correct error message
+	 */
+	public void setCorrectErrorMessage(boolean correctErrorMessage)
+	{
+		this.correctErrorMessage = correctErrorMessage;
+	}
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -407,51 +275,16 @@ public class Settings implements ConfigObject
 	@ConfigEntry(path = "cauldron.remove-on-fail")
 	private boolean removeOnFail = false;
 
-	@ConfigComment("Allows to toggle lightning between visual and damage mode when recipe worked.")
-	@ConfigComment("Setting it to `true` will summon actual lightning that will damage and set things on fire")
-	@ConfigComment("Setting it to `false` will just make visual lightning and sound.")
-	@ConfigEntry(path = "lightning.successful.damage")
-	private boolean successfulDamage = false;
-	
-	@ConfigComment("Allows to toggle lightning should target cauldron or player who performed successful magic.")
-	@ConfigComment("Setting it to `true` will force lightning to target player.")
-	@ConfigComment("Setting it to `false` will force lightning to target cauldron.")
-	@ConfigEntry(path = "lightning.successful.hit-player")
-	private boolean successfulHitPlayer = false;
-
-	@ConfigComment("Allows to toggle lightning should destroy the cauldron after successful magic.")
-	@ConfigComment("Setting it to `true` will force lightning to destroy cauldron.")
-	@ConfigComment("Setting it to `false` will not allow lightning to destroy cauldron.")
-	@ConfigEntry(path = "lightning.successful.destroy-cauldron")
-	private boolean successfulDestroyCauldron = false;
-
-	@ConfigComment("Allows to set the ticks daley between lightning strikes.")
-	@ConfigComment("If left empty, lightning will not strike.")
-	@ConfigEntry(path = "lightning.successful.timings")
-	private List<Long> successfulTimings = new ArrayList<>(4);
-	
-	@ConfigComment("Allows to toggle lightning between visual and damage mode when recipe did worked.")
-	@ConfigComment("Setting it to `true` will summon actual lightning that will damage and set things on fire")
-	@ConfigComment("Setting it to `false` will just make visual lightning and sound.")
-	@ConfigEntry(path = "lightning.error.damage")
-	private boolean errorDamage = false;
-
-	@ConfigComment("Allows to toggle lightning should target cauldron or player when magic failed.")
-	@ConfigComment("Setting it to `true` will force lightning to target player.")
-	@ConfigComment("Setting it to `false` will force lightning to target cauldron.")
-	@ConfigEntry(path = "lightning.error.hit-player")
-	private boolean errorHitPlayer = false;
-
-	@ConfigComment("Allows to toggle lightning should destroy the cauldron after failed magic.")
-	@ConfigComment("Setting it to `true` will force lightning to destroy cauldron.")
-	@ConfigComment("Setting it to `false` will not allow lightning to destroy cauldron.")
-	@ConfigEntry(path = "lightning.error.destroy-cauldron")
+	@ConfigComment("Allows to toggle failing should destroy the cauldron.")
+	@ConfigComment("Setting it to `true` will destroy cauldron.")
+	@ConfigComment("Setting it to `false` will not destroy cauldron.")
+	@ConfigEntry(path = "cauldron.error.destroy-cauldron")
 	private boolean errorDestroyCauldron = false;
 
-	@ConfigComment("Allows to set the ticks daley between lightning strikes.")
-	@ConfigComment("If left empty, lightning will not strike.")
-	@ConfigEntry(path = "lightning.error.timings")
-	private List<Long> errorTimings = new ArrayList<>(4);
+	@ConfigComment("Allows to toggle if failing recipe should display correct reason or")
+	@ConfigComment("generic message about failing.")
+	@ConfigEntry(path = "cauldron.error.correct-message")
+	private boolean correctErrorMessage = true;
 
 	@ConfigComment("Allows to change label for admin command.")
 	@ConfigEntry(path = "command.admin-command")
