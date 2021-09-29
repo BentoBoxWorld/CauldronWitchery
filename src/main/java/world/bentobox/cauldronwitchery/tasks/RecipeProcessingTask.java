@@ -11,8 +11,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.block.data.Lightable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
@@ -233,6 +235,102 @@ public class RecipeProcessingTask implements Runnable
             }
         }
 
+        // Check cauldron temperature based on block below.
+        if (recipe.getTemperature() == Recipe.Temperature.COOL)
+        {
+            Material type = this.block.getRelative(BlockFace.DOWN).getType();
+
+            if (type != Material.ICE &&
+                type != Material.PACKED_ICE &&
+                type != Material.BLUE_ICE &&
+                type != Material.FROSTED_ICE)
+            {
+                // Recipe cannot be fulfilled.
+                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
+                return false;
+            }
+        }
+        else if (recipe.getTemperature() == Recipe.Temperature.HEAT)
+        {
+            Block relative = this.block.getRelative(BlockFace.DOWN);
+            Material type = relative.getType();
+
+            boolean heat = false;
+
+            if (type == Material.CAMPFIRE ||
+                type == Material.SOUL_CAMPFIRE ||
+                type == Material.FURNACE ||
+                type == Material.BLAST_FURNACE ||
+                type == Material.SMOKER ||
+                type.name().contains("CANDLE"))
+            {
+                if (relative.getBlockData() instanceof Lightable data)
+                {
+                    heat = data.isLit();
+                }
+            }
+            else if (type == Material.FIRE ||
+                type == Material.LAVA ||
+                type == Material.LAVA_CAULDRON)
+            {
+                heat = true;
+            }
+
+            if (!heat)
+            {
+                // Recipe cannot be fulfilled.
+                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
+                return false;
+            }
+        }
+        else
+        {
+            Block relative = this.block.getRelative(BlockFace.DOWN);
+            Material type = relative.getType();
+
+            boolean heat = false;
+            boolean cool = false;
+
+            if (type == Material.CAMPFIRE ||
+                type == Material.SOUL_CAMPFIRE ||
+                type == Material.FURNACE ||
+                type == Material.BLAST_FURNACE ||
+                type == Material.SMOKER ||
+                type.name().contains("CANDLE"))
+            {
+                if (relative.getBlockData() instanceof Lightable data)
+                {
+                    heat = data.isLit();
+                }
+            }
+            else if (type == Material.FIRE ||
+                type == Material.LAVA ||
+                type == Material.LAVA_CAULDRON)
+            {
+                heat = true;
+            }
+            else if (type == Material.ICE ||
+                type == Material.PACKED_ICE ||
+                type == Material.BLUE_ICE ||
+                type == Material.FROSTED_ICE)
+            {
+                cool = true;
+            }
+
+            if (heat)
+            {
+                // Recipe cannot be fulfilled.
+                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
+                return false;
+            }
+            else if (cool)
+            {
+                // Recipe cannot be fulfilled.
+                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
+                return false;
+            }
+        }
+
         if (recipe.getMainIngredient().getAmount() > mainIngredient.getAmount())
         {
             // Missing main ingredient
@@ -280,7 +378,7 @@ public class RecipeProcessingTask implements Runnable
      * @param permissions List of permissions
      * @return {@code true} if some permissions is missing, {@code false} otherwise.
      */
-    private boolean missingPermissions(List<String> permissions)
+    private boolean missingPermissions(Collection<String> permissions)
     {
         return !permissions.stream().allMatch(this.user::hasPermission);
     }
