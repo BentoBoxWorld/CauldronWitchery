@@ -248,14 +248,14 @@ public class MagicStickObject implements DataObject
      * Mostly for GUI's.
      */
     @Expose
-    private String friendlyName;
+    private String friendlyName = "";
 
     /**
      * The description of magic stick.
      * Mostly for GUI's.
      */
     @Expose
-    private String description;
+    private String description = "";
 
     /**
      * Permissions for using the stick.
@@ -274,7 +274,7 @@ public class MagicStickObject implements DataObject
      * Name of the book that will contain recipes for this magic stick.
      */
     @Expose
-    private String bookName;
+    private String bookName = "";
 
     /**
      * Allows to set complexity of the stick usage.

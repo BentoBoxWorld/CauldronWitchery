@@ -12,6 +12,7 @@ import com.google.gson.annotations.JsonAdapter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -329,7 +330,7 @@ public abstract class Recipe
      * List of extra items for the recipe
      */
     @Expose
-    private List<ItemStack> extraIngredients;
+    private List<ItemStack> extraIngredients = new ArrayList<>();
 
     /**
      * Experience level for recipe.
@@ -345,14 +346,14 @@ public abstract class Recipe
      * @see Material#POWDER_SNOW_CAULDRON
      */
     @Expose
-    private Material cauldronType;
+    private Material cauldronType = Material.WATER_CAULDRON;
 
     /**
      * Cauldron fill level.
      * Works for water and snow. Lava and empty one is always 1
      */
     @Expose
-    private int cauldronLevel;
+    private int cauldronLevel = 3;
 
     /**
      * Allows to define 4 different cauldron types.
