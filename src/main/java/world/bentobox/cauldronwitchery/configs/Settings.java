@@ -346,6 +346,28 @@ public class Settings implements ConfigObject
 	}
 
 
+	/**
+	 * Gets admin main command.
+	 *
+	 * @return the admin main command
+	 */
+	public String getAdminMainCommand()
+    {
+        return adminMainCommand;
+    }
+
+
+	/**
+	 * Sets admin main command.
+	 *
+	 * @param adminMainCommand the admin main command
+	 */
+	public void setAdminMainCommand(String adminMainCommand)
+    {
+        this.adminMainCommand = adminMainCommand;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -431,11 +453,15 @@ public class Settings implements ConfigObject
 	@ConfigEntry(path = "lightning.error.timings")
 	private List<Long> errorTimings = new ArrayList<>(4);
 
+	@ConfigComment("Allows to change label for admin command.")
+	@ConfigEntry(path = "command.admin-command")
+	private String adminMainCommand = "witchery";
+
 	@ConfigComment("")
 	@ConfigComment("This list stores GameModes in which CauldronWitchery addon should not work.")
 	@ConfigComment("To disable addon it is necessary to write its name in new line that starts with -. Example:")
 	@ConfigComment("disabled-gamemodes:")
 	@ConfigComment(" - BSkyBlock")
 	@ConfigEntry(path = "disabled-gamemodes")
-	private Set<String> disabledGameModes = new HashSet<>();	
+	private Set<String> disabledGameModes = new HashSet<>();
 }

@@ -12,6 +12,7 @@ import world.bentobox.bentobox.api.configuration.Config;
 import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.bentobox.util.Util;
+import world.bentobox.cauldronwitchery.commands.WitcheryAdminCommand;
 import world.bentobox.cauldronwitchery.configs.Settings;
 import world.bentobox.cauldronwitchery.listeners.CauldronClickListener;
 import world.bentobox.cauldronwitchery.listeners.ItemsInsideCauldronListener;
@@ -77,6 +78,9 @@ public class CauldronWitcheryAddon extends Addon
 				{
 					CAULDRON_WITCHERY_ENABLE_FLAG.addGameModeAddon(gameModeAddon);
 					CAULDRON_WITCHERY_ISLAND_PROTECTION.addGameModeAddon(gameModeAddon);
+
+					gameModeAddon.getAdminCommand().ifPresent(command ->
+						new WitcheryAdminCommand(this, command));
 				}
 
 				this.hooked = true;
