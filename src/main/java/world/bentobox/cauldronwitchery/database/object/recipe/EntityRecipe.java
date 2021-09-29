@@ -9,7 +9,9 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 
 import com.google.gson.annotations.Expose;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 
+import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.cauldronwitchery.utils.Utils;
 
@@ -65,6 +67,16 @@ public class EntityRecipe extends Recipe
     public String getRecipeName(User user)
     {
         return Utils.prettifyObject(this.entityType, user);
+    }
+
+    /**
+     * Returns entity as icon.
+     * @return Icon.
+     */
+    @Override
+    public ItemStack getIcon()
+    {
+        return PanelUtils.getEntityHead(this.entityType);
     }
 
 

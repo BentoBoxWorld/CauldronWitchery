@@ -79,6 +79,17 @@ public class ItemRecipe extends Recipe
 
 
     /**
+     * Returns item stack as icon.
+     * @return Icon.
+     */
+    @Override
+    public ItemStack getIcon()
+    {
+        return this.itemStack.clone();
+    }
+
+
+    /**
      * Stores the ItemStack.
      */
     @Expose

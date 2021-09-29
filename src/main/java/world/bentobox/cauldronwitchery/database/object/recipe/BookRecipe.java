@@ -9,6 +9,9 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 
 import com.google.gson.annotations.Expose;
 
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.cauldronwitchery.utils.Utils;
 
@@ -64,6 +67,17 @@ public class BookRecipe extends Recipe
     public String getRecipeName(User user)
     {
         return this.bookName;
+    }
+
+
+    /**
+     * Returns book as icon.
+     * @return Icon.
+     */
+    @Override
+    public ItemStack getIcon()
+    {
+        return new ItemStack(Material.KNOWLEDGE_BOOK);
     }
 
 

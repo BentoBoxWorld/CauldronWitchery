@@ -261,6 +261,12 @@ public abstract class Recipe
 
 
     /**
+     * Returns ItemStack of icon for recipe.
+     * @return Recipe icon ItemStack.
+     */
+    public abstract ItemStack getIcon();
+
+    /**
      * This method populates clone with items from current object.
      * @param clone Clone object that must be populated.
      */
