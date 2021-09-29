@@ -105,13 +105,30 @@ public class ParticleSpawnTask implements Runnable
             }
             else
             {
+                double x = this.runCounter % 3 == 0 ? 0 : this.random.nextFloat() * 0.4;
+                double z = this.runCounter % 3 == 1 ? 0 : this.random.nextFloat() * 0.4;
+
+                x = this.random.nextBoolean() ? x : -x;
+                z = this.random.nextBoolean() ? z : -z;
+
                 world.spawnParticle(Particle.SPELL_MOB,
-                    center,
+                    center.add(x, 0, z),
                     0,
-                    0.20D,
-                    0.0D,
-                    0.20D,
-                    128);
+                    0,
+                    127,
+                    0,
+                    127);
+
+                x = this.random.nextBoolean() ? x : -x;
+                z = this.random.nextBoolean() ? z : -z;
+
+                world.spawnParticle(Particle.SPELL_MOB,
+                    center.add(x, 0, z),
+                    0,
+                    0,
+                    127,
+                    0,
+                    127);
             }
         }
     }
@@ -194,4 +211,9 @@ public class ParticleSpawnTask implements Runnable
      * Set of cauldrons with items inside.
      */
     private final Set<Block> blockSet = new HashSet<>();
+
+    /**
+     * Random instance.
+     */
+    private final Random random = new Random(0);
 }
