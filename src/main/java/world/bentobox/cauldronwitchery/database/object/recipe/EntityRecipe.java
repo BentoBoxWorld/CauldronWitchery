@@ -9,9 +9,6 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 
 import com.google.gson.annotations.Expose;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.ItemStack;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 
 /**
@@ -61,20 +58,7 @@ public class EntityRecipe extends Recipe
     {
         EntityRecipe recipe = new EntityRecipe();
         recipe.setEntityType(this.entityType);
-
-        recipe.setCauldronType(this.getCauldronType());
-        recipe.setCauldronLevel(this.getCauldronLevel());
-
-        recipe.setExperience(this.getExperience());
-
-        recipe.setPermissions(new ArrayList<>());
-        recipe.getPermissions().addAll(this.getPermissions());
-
-        recipe.setMainIngredient(this.getMainIngredient().clone());
-        recipe.setExtraIngredients(this.getExtraIngredients().stream().
-            map(ItemStack::clone).
-            collect(Collectors.toList()));
-
+        this.populateClone(recipe);
         return recipe;
     }
 

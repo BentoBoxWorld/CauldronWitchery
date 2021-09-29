@@ -10,11 +10,12 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.JsonAdapter;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import world.bentobox.cauldronwitchery.database.object.adapters.RecipeAdapter;
 
@@ -154,7 +155,7 @@ public abstract class Recipe
      *
      * @return the permissions
      */
-    public List<String> getPermissions()
+    public Set<String> getPermissions()
     {
         return permissions;
     }
@@ -165,9 +166,75 @@ public abstract class Recipe
      *
      * @param permissions the permissions
      */
-    public void setPermissions(List<String> permissions)
+    public void setPermissions(Set<String> permissions)
     {
         this.permissions = permissions;
+    }
+
+
+    /**
+     * Gets temperature.
+     *
+     * @return the temperature
+     */
+    public Temperature getTemperature()
+    {
+        return temperature;
+    }
+
+
+    /**
+     * Sets temperature.
+     *
+     * @param temperature the temperature
+     */
+    public void setTemperature(Temperature temperature)
+    {
+        this.temperature = temperature;
+    }
+
+
+    /**
+     * Gets reward points.
+     *
+     * @return the reward points
+     */
+    public int getRewardPoints()
+    {
+        return rewardPoints;
+    }
+
+
+    /**
+     * Sets reward points.
+     *
+     * @param rewardPoints the reward points
+     */
+    public void setRewardPoints(int rewardPoints)
+    {
+        this.rewardPoints = rewardPoints;
+    }
+
+
+    /**
+     * Gets complexity.
+     *
+     * @return the complexity
+     */
+    public float getComplexity()
+    {
+        return complexity;
+    }
+
+
+    /**
+     * Sets complexity.
+     *
+     * @param complexity the complexity
+     */
+    public void setComplexity(float complexity)
+    {
+        this.complexity = complexity;
     }
 
 
@@ -176,8 +243,60 @@ public abstract class Recipe
 // ---------------------------------------------------------------------
 
 
+    /**
+     * This method clones given object.
+     * @return Clone of recipe.
+     */
     @Override
     public abstract Recipe clone();
+
+
+    /**
+     * This method populates clone with items from current object.
+     * @param clone Clone object that must be populated.
+     */
+    protected void populateClone(Recipe clone)
+    {
+        clone.setCauldronType(this.getCauldronType());
+        clone.setCauldronLevel(this.getCauldronLevel());
+        clone.setTemperature(this.getTemperature());
+
+        clone.setExperience(this.getExperience());
+        clone.setPermissions(new HashSet<>(this.getPermissions()));
+
+        clone.setMainIngredient(this.getMainIngredient().clone());
+        clone.setExtraIngredients(this.getExtraIngredients().stream().
+            map(ItemStack::clone).
+            collect(Collectors.toList()));
+
+        clone.setRewardPoints(this.getRewardPoints());
+        clone.setComplexity(this.getComplexity());
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: Enum
+// ---------------------------------------------------------------------
+
+
+    /**
+     * The type of temperature that required for recipe.
+     */
+    public enum Temperature
+    {
+        /**
+         * Requires ice block below cauldron.
+         */
+        COOL,
+        /**
+         * Does not require anything.
+         */
+        NORMAL,
+        /**
+         * Requires lava, fire, campfire or burning furnace below cauldron.
+         */
+        HEAT
+    }
 
 
 // ---------------------------------------------------------------------
@@ -221,8 +340,31 @@ public abstract class Recipe
     private int cauldronLevel;
 
     /**
+     * Allows to define 4 different cauldron types.
+     * @see Temperature#HEAT
+     * @see Temperature#NORMAL
+     * @see Temperature#COOL
+     */
+    @Expose
+    private Temperature temperature = Temperature.NORMAL;
+
+    /**
      * Stores the list of permissions that are required for this recipe.
      */
     @Expose
-    private List<String> permissions = new ArrayList<>();
+    private Set<String> permissions = new HashSet<>();
+
+    /**
+     * Stores the reward points for using this recipe.
+     * TODO: Requires for MASTERY_SKILL feature
+     */
+    @Expose
+    private int rewardPoints;
+
+    /**
+     * Complexity level for recipe.
+     * TODO: Requires for MASTERY_SKILL feature
+     */
+    @Expose
+    private float complexity;
 }
