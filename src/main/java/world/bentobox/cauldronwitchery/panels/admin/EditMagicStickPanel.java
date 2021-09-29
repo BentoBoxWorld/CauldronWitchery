@@ -551,7 +551,10 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
                 icon = new ItemStack(Material.WATER_BUCKET);
                 clickHandler = (panel, user, clickType, slot) -> {
                     RecipeTypeSelector.open(this.user,
-                        type -> EditRecipePanel.open(this, this.magicStick, type));
+                        type -> {
+                            this.magicStick.getRecipeList().add(type);
+                            EditRecipePanel.open(this, this.magicStick, type);
+                        });
 
                     return true;
                 };
