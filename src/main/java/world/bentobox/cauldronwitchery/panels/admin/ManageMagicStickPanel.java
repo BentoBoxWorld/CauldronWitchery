@@ -78,7 +78,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
 
         this.populateElements(panelBuilder, this.filterElements);
 
-        panelBuilder.item(45, this.returnButton);
+        panelBuilder.item(44, this.returnButton);
 
         // Build panel.
         panelBuilder.build();
