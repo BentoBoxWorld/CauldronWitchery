@@ -210,6 +210,17 @@ public class CauldronWitcheryAddon extends Addon
 	}
 
 
+	/**
+	 * Gets import manager.
+	 *
+	 * @return the import manager
+	 */
+	public CauldronWitcheryImportManager getImportManager()
+	{
+		return this.importManager;
+	}
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
