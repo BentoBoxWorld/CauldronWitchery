@@ -12,6 +12,9 @@ import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
 import world.bentobox.bentobox.api.user.User;
@@ -22,6 +25,7 @@ import world.bentobox.cauldronwitchery.database.object.recipe.ItemRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.Recipe;
 import world.bentobox.cauldronwitchery.managers.CauldronWitcheryManager;
 import world.bentobox.cauldronwitchery.utils.Constants;
+import world.bentobox.cauldronwitchery.utils.Utils;
 
 
 /**
@@ -96,25 +100,353 @@ public abstract class CommonPanel
     protected abstract void build();
 
 
-    protected String generateRecipeDescription(BookRecipe recipe, User user)
+    /**
+     * This method generates book recipe description.
+     * @param recipe Book Recipe.
+     * @param target User who will view recipe.
+     * @return String that contains info about recipe.
+     */
+    protected String generateRecipeDescription(BookRecipe recipe, User target)
     {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        String bookName = !recipe.getBookName().isBlank() ?
+            recipe.getBookName() :
+            this.user.getTranslation(reference + "book.no-book");
+
+        String cauldron;
+
+        if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
+            recipe.getCauldronType() == Material.POWDER_SNOW_CAULDRON)
+        {
+            cauldron = this.user.getTranslation(reference + "leveled-cauldron",
+                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user),
+                "[level]", String.valueOf(recipe.getCauldronLevel()));
+        }
+        else
+        {
+            cauldron = this.user.getTranslation(reference + "cauldron",
+                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
+        }
+
+        String knowledge = recipe.getExperience() == 0 ? "" :
+            this.user.getTranslation(reference + "knowledge",
+                "[number]", String.valueOf(recipe.getExperience()));
+
+        String mainIngredient = this.user.getTranslation(reference + "main-ingredient",
+            "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
+
+
+        StringBuilder extraItems = new StringBuilder();
+
+        if (recipe.getExtraIngredients().isEmpty())
+        {
+            extraItems.append(this.user.getTranslation(reference + "no-extra"));
+        }
+        else
+        {
+            extraItems.append(this.user.getTranslation(reference + "extra-title"));
+
+            recipe.getExtraIngredients().forEach(item -> {
+                extraItems.append("\n");
+                extraItems.append(this.user.getTranslation(reference + "extra-element",
+                    "[item]", Utils.prettifyObject(item, this.user)));
+            });
+        }
+
+        String temperature = this.user.getTranslation(reference + "temperature-" + recipe.getTemperature().name().toLowerCase());
+
+        String permissions;
+
+        if (!recipe.getPermissions().isEmpty())
+        {
+            // Yes list duplication for complete menu.
+            List<String> missingPermissions = recipe.getPermissions().stream().
+                filter(permission -> target == null || !target.hasPermission(permission)).
+                sorted().
+                collect(Collectors.toList());
+
+            StringBuilder permissionBuilder = new StringBuilder();
+
+            if (missingPermissions.size() == 1)
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
+                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
+            }
+            else if (!missingPermissions.isEmpty())
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
+                missingPermissions.forEach(permission ->
+                {
+                    permissionBuilder.append("\n");
+                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
+                        Constants.PARAMETER_PERMISSION, permission));
+                });
+            }
+
+            permissions = permissionBuilder.toString();
+        }
+        else
+        {
+            permissions = "";
+        }
+
+
+        String returnString = this.user.getTranslationOrNothing(reference + "book.lore",
+            "[book]", bookName,
+            "[cauldron]", cauldron,
+            "[knowledge]", knowledge,
+            "[ingredient]", mainIngredient,
+            "[extra]", extraItems.toString(),
+            "[temperature]", temperature,
+            "[permissions]", permissions);
+
+        // Remove empty lines and returns as a list.
+
+        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+    }
+
+
+    /**
+     * This method generates item recipe description.
+     * @param recipe Book Recipe.
+     * @param target User who will view recipe.
+     * @return String that contains info about recipe.
+     */
+    protected String generateRecipeDescription(ItemRecipe recipe, User target)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        String itemName = recipe.getItemStack() != null ?
+            Utils.prettifyObject(recipe.getItemStack(), this.user) :
+            this.user.getTranslation(reference + "item.no-item");
+
+        String cauldron;
+
+        if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
+            recipe.getCauldronType() == Material.POWDER_SNOW_CAULDRON)
+        {
+            cauldron = this.user.getTranslation(reference + "leveled-cauldron",
+                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user),
+                "[level]", String.valueOf(recipe.getCauldronLevel()));
+        }
+        else
+        {
+            cauldron = this.user.getTranslation(reference + "cauldron",
+                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
+        }
+
+        String knowledge = recipe.getExperience() == 0 ? "" :
+            this.user.getTranslation(reference + "knowledge",
+                "[number]", String.valueOf(recipe.getExperience()));
+
+        String mainIngredient = this.user.getTranslation(reference + "main-ingredient",
+            "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
+
+
+        StringBuilder extraItems = new StringBuilder();
+
+        if (recipe.getExtraIngredients().isEmpty())
+        {
+            extraItems.append(this.user.getTranslation(reference + "no-extra"));
+        }
+        else
+        {
+            extraItems.append(this.user.getTranslation(reference + "extra-title"));
+
+            recipe.getExtraIngredients().forEach(item -> {
+                extraItems.append("\n");
+                extraItems.append(this.user.getTranslation(reference + "extra-element",
+                    "[item]", Utils.prettifyObject(item, this.user)));
+            });
+        }
+
+        String temperature = this.user.getTranslation(reference + "temperature-" +
+            recipe.getTemperature().name().toLowerCase());
+
+        String permissions;
+
+        if (!recipe.getPermissions().isEmpty())
+        {
+            // Yes list duplication for complete menu.
+            List<String> missingPermissions = recipe.getPermissions().stream().
+                filter(permission -> target == null || !target.hasPermission(permission)).
+                sorted().
+                collect(Collectors.toList());
+
+            StringBuilder permissionBuilder = new StringBuilder();
+
+            if (missingPermissions.size() == 1)
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
+                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
+            }
+            else if (!missingPermissions.isEmpty())
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
+                missingPermissions.forEach(permission ->
+                {
+                    permissionBuilder.append("\n");
+                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
+                        Constants.PARAMETER_PERMISSION, permission));
+                });
+            }
+
+            permissions = permissionBuilder.toString();
+        }
+        else
+        {
+            permissions = "";
+        }
+
+
+        String returnString = this.user.getTranslationOrNothing(reference + "item.lore",
+            "[item]", itemName,
+            "[cauldron]", cauldron,
+            "[knowledge]", knowledge,
+            "[ingredient]", mainIngredient,
+            "[extra]", extraItems.toString(),
+            "[temperature]", temperature,
+            "[permissions]", permissions);
+
+        // Remove empty lines and returns as a list.
+
+        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+    }
+
+
+    /**
+     * This method generates entity recipe description.
+     * @param recipe Book Recipe.
+     * @param target User who will view recipe.
+     * @return String that contains info about recipe.
+     */
+    protected String generateRecipeDescription(EntityRecipe recipe, User target)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        String entityName = recipe.getEntityType() != null ?
+            Utils.prettifyObject(recipe.getEntityType(), this.user) :
+            this.user.getTranslation(reference + "entity.no-entity");
+
+        String cauldron;
+
+        if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
+            recipe.getCauldronType() == Material.POWDER_SNOW_CAULDRON)
+        {
+            cauldron = this.user.getTranslation(reference + "leveled-cauldron",
+                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user),
+                "[level]", String.valueOf(recipe.getCauldronLevel()));
+        }
+        else
+        {
+            cauldron = this.user.getTranslation(reference + "cauldron",
+                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
+        }
+
+        String knowledge = recipe.getExperience() == 0 ? "" :
+            this.user.getTranslation(reference + "knowledge",
+                "[number]", String.valueOf(recipe.getExperience()));
+
+        String mainIngredient = this.user.getTranslation(reference + "main-ingredient",
+            "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
+
+
+        StringBuilder extraItems = new StringBuilder();
+
+        if (recipe.getExtraIngredients().isEmpty())
+        {
+            extraItems.append(this.user.getTranslation(reference + "no-extra"));
+        }
+        else
+        {
+            extraItems.append(this.user.getTranslation(reference + "extra-title"));
+
+            recipe.getExtraIngredients().forEach(item -> {
+                extraItems.append("\n");
+                extraItems.append(this.user.getTranslation(reference + "extra-element",
+                    "[item]", Utils.prettifyObject(item, this.user)));
+            });
+        }
+
+        String temperature = this.user.getTranslation(reference + "temperature-" +
+            recipe.getTemperature().name().toLowerCase());
+
+        String permissions;
+
+        if (!recipe.getPermissions().isEmpty())
+        {
+            // Yes list duplication for complete menu.
+            List<String> missingPermissions = recipe.getPermissions().stream().
+                filter(permission -> target == null || !target.hasPermission(permission)).
+                sorted().
+                collect(Collectors.toList());
+
+            StringBuilder permissionBuilder = new StringBuilder();
+
+            if (missingPermissions.size() == 1)
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
+                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
+            }
+            else if (!missingPermissions.isEmpty())
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
+                missingPermissions.forEach(permission ->
+                {
+                    permissionBuilder.append("\n");
+                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
+                        Constants.PARAMETER_PERMISSION, permission));
+                });
+            }
+
+            permissions = permissionBuilder.toString();
+        }
+        else
+        {
+            permissions = "";
+        }
+
+
+        String returnString = this.user.getTranslationOrNothing(reference + "entity.lore",
+            "[entity]", entityName,
+            "[cauldron]", cauldron,
+            "[knowledge]", knowledge,
+            "[ingredient]", mainIngredient,
+            "[extra]", extraItems.toString(),
+            "[temperature]", temperature,
+            "[permissions]", permissions);
+
+        // Remove empty lines and returns as a list.
+
+        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+    }
+
+
+    /**
+     * This method generates recipe description.
+     * @param recipe Recipe.
+     * @param target User who will view recipe.
+     * @return String that contains info about recipe.
+     */
+    protected String generateRecipeDescription(Recipe recipe, User target)
+    {
+        if (recipe instanceof BookRecipe bookRecipe)
+        {
+            return this.generateRecipeDescription(bookRecipe, target);
+        }
+        else if (recipe instanceof ItemRecipe itemRecipe)
+        {
+            return this.generateRecipeDescription(itemRecipe, target);
+        }
+        else if (recipe instanceof EntityRecipe entityRecipe)
+        {
+            return this.generateRecipeDescription(entityRecipe, target);
+        }
+
         return "";
     }
 
-    protected String generateRecipeDescription(ItemRecipe recipe, User user)
-    {
-        return "";
-    }
-
-    protected String generateRecipeDescription(EntityRecipe recipe, User user)
-    {
-        return "";
-    }
-
-    protected String generateRecipeDescription(Recipe recipe, User user)
-    {
-        return "";
-    }
 
     /**
      * This method reopens given panel.
