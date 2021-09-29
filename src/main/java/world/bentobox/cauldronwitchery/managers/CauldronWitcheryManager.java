@@ -76,7 +76,7 @@ public class CauldronWitcheryManager
      *
      * @param magicStickObject the magic stick object
      */
-    void saveMagicStick(MagicStickObject magicStickObject)
+    public void saveMagicStick(MagicStickObject magicStickObject)
     {
         this.magicStickDatabase.saveObjectAsync(magicStickObject);
     }
@@ -283,6 +283,43 @@ public class CauldronWitcheryManager
     {
         return this.magicStickDataCache.keySet().stream().anyMatch(key ->
             key.startsWith(name) || key.startsWith(name.toLowerCase()));
+    }
+
+
+    /**
+     * Method returns Magic Stick based on its id.
+     * @param objectId Magic Stick ID.
+     * @return MagicStickObject or null.
+     */
+    public MagicStickObject getMagicStickById(String objectId)
+    {
+        return this.magicStickDataCache.get(objectId);
+    }
+
+
+    /**
+     * This method deletes magic stick object.
+     * @param stickObject Object that must be deleted.
+     */
+    public void delete(MagicStickObject stickObject)
+    {
+        this.magicStickDataCache.remove(stickObject.getUniqueId());
+        this.magicStickDatabase.deleteObject(stickObject);
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: User sections
+// ---------------------------------------------------------------------
+
+
+    /**
+     * Allows removing all player data from gamemode.
+     * @param gameMode Gamemode which data must be removed
+     */
+    public void wipePlayers(String gameMode)
+    {
+        // TODO: wipe data for players.
     }
 
 
