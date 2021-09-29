@@ -74,9 +74,9 @@ public class SettingsPanel extends CommonPanel
         if (!this.settings.getErrorTimings().isEmpty())
         {
             // Show buttons only if timings are enabled.
-            panelBuilder.item(14, this.createButton(Action.FAIL_LIGHTNING_DAMAGE));
-            panelBuilder.item(15, this.createButton(Action.FAIL_HIT_PLAYER));
-            panelBuilder.item(16, this.createButton(Action.FAIL_DESTROY_CAULDRON));
+            panelBuilder.item(23, this.createButton(Action.FAIL_LIGHTNING_DAMAGE));
+            panelBuilder.item(24, this.createButton(Action.FAIL_HIT_PLAYER));
+            panelBuilder.item(25, this.createButton(Action.FAIL_DESTROY_CAULDRON));
         }
 
         panelBuilder.item(28, this.createButton(Action.MIX_IN_CAULDRON));
