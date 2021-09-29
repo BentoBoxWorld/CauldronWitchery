@@ -43,7 +43,7 @@ public class ItemRecipe extends Recipe
      */
     public ItemStack getItemStack()
     {
-        return itemStack.clone();
+        return this.itemStack != null ? this.itemStack.clone() : new ItemStack(Material.BARRIER);
     }
 
 
@@ -62,7 +62,7 @@ public class ItemRecipe extends Recipe
     public Recipe clone()
     {
         ItemRecipe recipe = new ItemRecipe();
-        recipe.setItemStack(this.itemStack.clone());
+        recipe.setMainIngredient(this.itemStack == null ? null : this.itemStack.clone());
         this.populateClone(recipe);
         return recipe;
     }

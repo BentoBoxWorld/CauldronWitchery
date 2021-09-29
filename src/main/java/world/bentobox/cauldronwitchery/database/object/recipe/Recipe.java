@@ -49,7 +49,7 @@ public abstract class Recipe
      */
     public ItemStack getMainIngredient()
     {
-        return mainIngredient.clone();
+        return this.mainIngredient != null ? mainIngredient.clone() : new ItemStack(Material.BARRIER);
     }
 
 
@@ -280,10 +280,8 @@ public abstract class Recipe
         clone.setExperience(this.getExperience());
         clone.setPermissions(new HashSet<>(this.getPermissions()));
 
-        clone.setMainIngredient(this.getMainIngredient().clone());
-        clone.setExtraIngredients(this.getExtraIngredients().stream().
-            map(ItemStack::clone).
-            collect(Collectors.toList()));
+        clone.setMainIngredient(this.mainIngredient == null ? null : this.mainIngredient.clone());
+        clone.setExtraIngredients(this.getExtraIngredients());
 
         clone.setRewardPoints(this.getRewardPoints());
         clone.setComplexity(this.getComplexity());
