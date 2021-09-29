@@ -231,7 +231,8 @@ public class CauldronWitcheryImportManager
                 recipe.setCauldronType(matchMaterial((String) hashMap.get("cauldron"), Material.WATER_CAULDRON));
                 recipe.setCauldronLevel((int) hashMap.getOrDefault("level", 0));
                 recipe.setExperience((int) hashMap.getOrDefault("experience", 0));
-                recipe.setPermissions((List<String>) hashMap.getOrDefault("permissions", Collections.emptyList()));
+                recipe.setPermissions(new HashSet<>());
+                recipe.getPermissions().addAll((List<String>) hashMap.getOrDefault("permissions", Collections.emptyList()));
 
                 recipe.setMainIngredient(matchItem((String) hashMap.get("ingredient"), new ItemStack(Material.PAPER)));
 
