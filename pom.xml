@@ -33,16 +33,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>16</java.version>
-        <powermock.version>2.0.9</powermock.version>
         <!-- More visible way how to change dependency versions -->
         <spigot.version>1.17.1-R0.1-SNAPSHOT</spigot.version>
         <bentobox.version>1.17.3</bentobox.version>
         <level.version>2.7.0</level.version>
         <vault.version>68f14ec</vault.version>
+        <panelutils.version>1.0.0</panelutils.version>
         <!-- Revision variable removes warning about dynamic version -->
         <revision>${build.version}-SNAPSHOT</revision>
         <!-- This allows to change between versions and snapshots. -->
-        <build.version>1.6.0</build.version>
+        <build.version>2.0.0</build.version>
         <build.number>-LOCAL</build.number>
     </properties>
 
@@ -113,6 +113,12 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <!-- Panel Utils Repository  -->
+        <repository>
+            <id>github</id>
+            <name>GitHub BONNe Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/BONNePlayground/PanelUtils</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -131,6 +137,17 @@
             <groupId>world.bentobox</groupId>
             <artifactId>bentobox</artifactId>
             <version>${bentobox.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>lv.id.bonne</groupId>
+            <artifactId>panelutils</artifactId>
+            <version>${panelutils.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>22.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -209,22 +226,6 @@
                         <id>attach-sources</id>
                         <goals>
                             <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0-SNAPSHOT</version>
-                <configuration>
-                    <minimizeJar>true</minimizeJar>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
                         </goals>
                     </execution>
                 </executions>
