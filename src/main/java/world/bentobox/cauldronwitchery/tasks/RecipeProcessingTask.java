@@ -243,7 +243,9 @@ public class RecipeProcessingTask implements Runnable
             if (type != Material.ICE &&
                 type != Material.PACKED_ICE &&
                 type != Material.BLUE_ICE &&
-                type != Material.FROSTED_ICE)
+                type != Material.FROSTED_ICE &&
+                type != Material.SNOW_BLOCK &&
+                type != Material.POWDER_SNOW)
             {
                 // Recipe cannot be fulfilled.
                 Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
@@ -312,7 +314,9 @@ public class RecipeProcessingTask implements Runnable
             else if (type == Material.ICE ||
                 type == Material.PACKED_ICE ||
                 type == Material.BLUE_ICE ||
-                type == Material.FROSTED_ICE)
+                type == Material.FROSTED_ICE ||
+                type == Material.SNOW_BLOCK ||
+                type == Material.POWDER_SNOW)
             {
                 cool = true;
             }
