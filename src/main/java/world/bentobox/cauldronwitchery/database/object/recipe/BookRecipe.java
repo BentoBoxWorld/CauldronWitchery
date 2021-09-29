@@ -9,6 +9,9 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 
 import com.google.gson.annotations.Expose;
 
+import world.bentobox.bentobox.api.user.User;
+import world.bentobox.cauldronwitchery.utils.Utils;
+
 
 /**
  * The type Book recipe.
@@ -49,6 +52,18 @@ public class BookRecipe extends Recipe
     public void setBookName(String bookName)
     {
         this.bookName = bookName;
+    }
+
+
+    /**
+     * Returns name of the book.
+     * @param user User who wants to get recipe name.
+     * @return Name of book.
+     */
+    @Override
+    public String getRecipeName(User user)
+    {
+        return this.bookName;
     }
 
 

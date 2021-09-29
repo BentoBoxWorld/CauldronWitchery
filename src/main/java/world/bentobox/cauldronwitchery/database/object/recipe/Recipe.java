@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import world.bentobox.bentobox.api.user.User;
 import world.bentobox.cauldronwitchery.database.object.adapters.RecipeAdapter;
 
 
@@ -249,6 +250,14 @@ public abstract class Recipe
      */
     @Override
     public abstract Recipe clone();
+
+
+    /**
+     * Returns the name of recipe.
+     * @param user User who wants to get recipe name.
+     * @return String of recipe name.
+     */
+    public abstract String getRecipeName(User user);
 
 
     /**

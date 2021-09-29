@@ -10,6 +10,9 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 import com.google.gson.annotations.Expose;
 import org.bukkit.entity.EntityType;
 
+import world.bentobox.bentobox.api.user.User;
+import world.bentobox.cauldronwitchery.utils.Utils;
+
 
 /**
  * The type EntityType recipe.
@@ -50,6 +53,18 @@ public class EntityRecipe extends Recipe
     public void setEntityType(EntityType entityType)
     {
         this.entityType = entityType;
+    }
+
+
+    /**
+     * Returns name of the entity.
+     * @param user User who wants to get recipe name.
+     * @return Name of entity.
+     */
+    @Override
+    public String getRecipeName(User user)
+    {
+        return Utils.prettifyObject(this.entityType, user);
     }
 
 

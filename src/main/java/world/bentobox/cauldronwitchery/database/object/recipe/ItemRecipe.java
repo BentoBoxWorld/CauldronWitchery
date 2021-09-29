@@ -10,6 +10,9 @@ package world.bentobox.cauldronwitchery.database.object.recipe;
 import com.google.gson.annotations.Expose;
 import org.bukkit.inventory.ItemStack;
 
+import world.bentobox.bentobox.api.user.User;
+import world.bentobox.cauldronwitchery.utils.Utils;
+
 
 /**
  * The type ItemStack recipe.
@@ -60,6 +63,18 @@ public class ItemRecipe extends Recipe
         recipe.setItemStack(this.itemStack.clone());
         this.populateClone(recipe);
         return recipe;
+    }
+
+
+    /**
+     * Returns name of the item stack.
+     * @param user User who wants to get recipe name.
+     * @return Name of item stack.
+     */
+    @Override
+    public String getRecipeName(User user)
+    {
+        return Utils.prettifyObject(this.itemStack, user);
     }
 
 
