@@ -7,9 +7,7 @@
 package world.bentobox.cauldronwitchery.tasks;
 
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -20,12 +18,9 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import org.bukkit.scheduler.BukkitTask;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.BentoBox;
@@ -75,15 +70,6 @@ public class RecipeProcessingTask implements Runnable
                 filter(entity -> entity instanceof Item).
                 map(entity -> ((Item) entity).getItemStack()).
                 collect(Collectors.toList()));
-
-        this.error = new LightningEffect(addon.getSettings().isErrorDamage(),
-            addon.getSettings().isErrorHitPlayer(),
-            addon.getSettings().isErrorDestroyCauldron(),
-            addon.getSettings().getErrorTimings());
-        this.success = new LightningEffect(addon.getSettings().isSuccessfulDamage(),
-            addon.getSettings().isSuccessfulHitPlayer(),
-            addon.getSettings().isSuccessfulDestroyCauldron(),
-            addon.getSettings().getSuccessfulTimings());
     }
 
 
@@ -101,16 +87,18 @@ public class RecipeProcessingTask implements Runnable
         // at least 1 of the ingredient type.
 
         Optional<Recipe> recipeOptional = this.magicStick.getRecipeList().stream().
+            filter(recipe -> recipe.getMainIngredient() != null).
             filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand)).
             filter(recipe -> recipe.getCauldronType().equals(this.block.getType())).
             filter(recipe -> recipe.getExtraIngredients().stream().allMatch(
                 ingredient -> this.containsAtLeast(ingredient, 1))).
             findFirst();
 
-        // LightningEffect initialization.
-        LightningEffect effect;
+        // This list will contain last error message for the failure.
+        StringBuilder lastErrorMessage = new StringBuilder();
 
-        if (recipeOptional.isPresent() && this.didMagicWorked(recipeOptional.get(), itemInOffHand))
+        if (recipeOptional.isPresent() &&
+            this.didMagicWorked(recipeOptional.get(), itemInOffHand, lastErrorMessage))
         {
             // Fulfill requirements
             this.fulFillRecipe(recipeOptional.get(), itemInOffHand);
@@ -136,13 +124,16 @@ public class RecipeProcessingTask implements Runnable
                 if (this.addon.getSettings().isRemoveLeftOvers())
                 {
                     // Remove all cauldron items.
-                    this.cauldronEntities.forEach(Entity::remove);
+                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                        () -> this.cauldronEntities.forEach(Entity::remove));
                 }
             }
 
-            // Recipe worked.
-            Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "it-is-alive"));
-            effect = this.success;
+            // Run consumer.
+            Bukkit.getScheduler().runTaskTimer(this.addon.getPlugin(),
+                new SuccessConsumer(this.block, this.user),
+                0,
+                1);
         }
         else
         {
@@ -150,7 +141,8 @@ public class RecipeProcessingTask implements Runnable
             if (this.addon.getSettings().isMixInCauldron() && this.addon.getSettings().isRemoveOnFail())
             {
                 // Remove all cauldron items on fail.
-                this.cauldronEntities.forEach(Entity::remove);
+                Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                    () -> this.cauldronEntities.forEach(Entity::remove));
             }
 
             // Damage magic stick
@@ -171,45 +163,16 @@ public class RecipeProcessingTask implements Runnable
             // Reduce main ingredient count by 1 on fail.
             itemInOffHand.setAmount(itemInOffHand.getAmount() - 1);
 
-            // If user does not have an island, return message.
-            Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "something-went-wrong"));
-            effect = this.error;
-        }
+            // Check which message should be sent.
+            String errorMessage = this.addon.getSettings().isCorrectErrorMessage() ?
+                lastErrorMessage.toString() :
+                this.user.getTranslation(Constants.CONVERSATIONS + "something-went-wrong");
 
-        // Trigger Lightning effects
-        if (effect.hasTimings())
-        {
-            // Get lightning target location
-            Location location = effect.hitPlayer() ? this.user.getLocation() : this.block.getLocation();
-
-            if (location == null)
-            {
-                // Just a null-check that cannot be triggered.
-                return;
-            }
-
-            // Strike the lightning.
-            for (Long time : effect.timings())
-            {
-                if (effect.damage())
-                {
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-                        () -> this.user.getWorld().strikeLightning(location),
-                        time);
-                }
-                else
-                {
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(BentoBox.getInstance(),
-                        () -> this.user.getWorld().strikeLightningEffect(location),
-                        time);
-                }
-            }
-
-            // Destroy the cauldron
-            if (effect.destroyCauldron())
-            {
-                this.block.setType(Material.AIR);
-            }
+            // Run task every tick.
+            Bukkit.getScheduler().runTaskTimer(this.addon.getPlugin(),
+                new ErrorConsumer(this.block, this.user, errorMessage, this.addon.getSettings().isErrorDestroyCauldron()),
+                0,
+                1);
         }
     }
 
@@ -221,7 +184,7 @@ public class RecipeProcessingTask implements Runnable
      * @param mainIngredient the main ingredient
      * @return the boolean
      */
-    private boolean didMagicWorked(Recipe recipe, ItemStack mainIngredient)
+    private boolean didMagicWorked(Recipe recipe, ItemStack mainIngredient, StringBuilder errorMessages)
     {
         BlockData blockData = this.block.getBlockData();
 
@@ -230,7 +193,7 @@ public class RecipeProcessingTask implements Runnable
             if (recipe.getCauldronLevel() > ((Levelled) blockData).getLevel())
             {
                 // Recipe cannot be fulfilled.
-                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "not-filled-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "not-filled-cauldron"));
                 return false;
             }
         }
@@ -248,7 +211,7 @@ public class RecipeProcessingTask implements Runnable
                 type != Material.POWDER_SNOW)
             {
                 // Recipe cannot be fulfilled.
-                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
                 return false;
             }
         }
@@ -281,7 +244,7 @@ public class RecipeProcessingTask implements Runnable
             if (!heat)
             {
                 // Recipe cannot be fulfilled.
-                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
                 return false;
             }
         }
@@ -324,13 +287,13 @@ public class RecipeProcessingTask implements Runnable
             if (heat)
             {
                 // Recipe cannot be fulfilled.
-                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
                 return false;
             }
             else if (cool)
             {
                 // Recipe cannot be fulfilled.
-                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
                 return false;
             }
         }
@@ -338,21 +301,21 @@ public class RecipeProcessingTask implements Runnable
         if (recipe.getMainIngredient().getAmount() > mainIngredient.getAmount())
         {
             // Missing main ingredient
-            Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "missing-main-ingredient"));
+            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-main-ingredient"));
             return false;
         }
 
         if (recipe.getExperience() > this.user.getPlayer().getTotalExperience())
         {
             // Not enough experience
-            Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "missing-knowledge"));
+            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-knowledge"));
             return false;
         }
 
         if (this.missingPermissions(recipe.getPermissions()))
         {
             // Missing permissions.
-            Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "missing-permissions"));
+            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-permissions"));
             return false;
         }
 
@@ -361,14 +324,14 @@ public class RecipeProcessingTask implements Runnable
             if (!this.exactIngredients(recipe.getExtraIngredients()))
             {
                 // Requires exact items but something was wrong.
-                Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "missing-extra-ingredients"));
+                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-much-ingredients"));
                 return false;
             }
         }
         else if (this.missingIngredients(recipe.getExtraIngredients()))
         {
             // Missing ingredients.
-            Utils.sendMessage(this.user, this.user.getTranslation(Constants.CONVERSATIONS + "missing-extra-ingredients"));
+            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-extra-ingredients"));
             return false;
         }
 
@@ -516,7 +479,8 @@ public class RecipeProcessingTask implements Runnable
                 if (level <= 0)
                 {
                     // Empty cauldron type.
-                    this.block.setType(Material.CAULDRON);
+                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                        () -> this.block.setType(Material.CAULDRON));
                 }
                 else
                 {
@@ -528,7 +492,8 @@ public class RecipeProcessingTask implements Runnable
             else
             {
                 // Empty cauldron type.
-                this.block.setType(Material.CAULDRON);
+                Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                    () -> this.block.setType(Material.CAULDRON));
             }
         }
 
@@ -562,8 +527,10 @@ public class RecipeProcessingTask implements Runnable
                                 else
                                 {
                                     amount -= itemStack.getAmount();
-                                    // Remove entity.
-                                    itemEntity.remove();
+
+                                    // Remove all cauldron items on fail.
+                                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                                        itemEntity::remove);
                                 }
                             }
                         }
@@ -663,28 +630,213 @@ public class RecipeProcessingTask implements Runnable
 
 
 // ---------------------------------------------------------------------
-// Section: Class
+// Section: Classes
 // ---------------------------------------------------------------------
 
 
     /**
-     * The type Lightning effect.
-     * @param damage damage effect
-     * @param hitPlayer target player or cauldron
-     * @param destroyCauldron destroy cauldron
-     * @param timings List of lightning delays
+     * This class contains consumer for failing the recipe.
      */
-    private record LightningEffect(boolean damage, boolean hitPlayer, boolean destroyCauldron, List<Long> timings)
+    private static class ErrorConsumer implements Consumer<BukkitTask>
     {
         /**
-         * Has timings.
+         * Instantiates a new Error consumer.
          *
-         * @return the boolean
+         * @param block the block
+         * @param user the user
+         * @param errorMessage the error message
+         * @param destroyCauldron the destroy cauldron
          */
-        public boolean hasTimings()
+        public ErrorConsumer(Block block, User user, String errorMessage, boolean destroyCauldron)
         {
-            return !timings.isEmpty();
+            this.block = block;
+            this.user = user;
+            this.errorMessage = errorMessage;
+            this.destroyCauldron = destroyCauldron;
+
+            // Put particles in the middle and above water.
+            this.center = this.block.getLocation().add(0.5D, 0.9D, 0.5D);
         }
+
+
+        /**
+         * Consumer acceptor.
+         * @param bukkitTask BukkitTask.
+         */
+        @Override
+        public void accept(BukkitTask bukkitTask)
+        {
+            if (this.counter == 0)
+            {
+                // Play brewing sound effect
+                this.block.getWorld().playEffect(this.block.getLocation(),
+                    Effect.BREWING_STAND_BREW,
+                    10);
+            }
+            else if (this.counter < 50)
+            {
+                // All next ticks spawn witch particles
+                this.block.getWorld().spawnParticle(Particle.SPELL_WITCH,
+                    this.center, 5, 0.10D, 0.2D, 0.10D, 2);
+            }
+            else if (this.counter < 70)
+            {
+                if (this.counter % 6 == 0)
+                {
+                    this.block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE,
+                        this.center, 5, 0.10D, 0.2D, 0.10D, 2);
+
+                    this.block.getWorld().playSound(this.block.getLocation(),
+                        Sound.ENTITY_GENERIC_EXPLODE,
+                        0.5f,
+                        0.5f);
+                }
+            }
+            else
+            {
+                // Display Error Message
+                Utils.sendMessage(this.user, this.errorMessage);
+
+                // Destroy Cauldron.
+                if (this.destroyCauldron)
+                {
+                    this.block.getWorld().createExplosion(this.center,
+                        3,
+                        true,
+                        true);
+                }
+
+                // Stop task after 50 ticks.
+                bukkitTask.cancel();
+            }
+
+            // Increase counter.
+            this.counter++;
+        }
+
+
+        /**
+         * Tick counter.
+         */
+        private int counter;
+
+        /**
+         * Block that is targeted.
+         */
+        private final Block block;
+
+        /**
+         * Stores the particle spawn location.
+         */
+        private final Location center;
+
+        /**
+         * The user who will receive message.
+         */
+        private final User user;
+
+        /**
+         * Indicates that cauldron will be removed.
+         */
+        private final boolean destroyCauldron;
+
+        /**
+         * Error message that will be displayed.
+         */
+        private final String errorMessage;
+    }
+
+
+    /**
+     * This class contains consumer for successful recipe.
+     */
+    private static class SuccessConsumer implements  Consumer<BukkitTask>
+    {
+        /**
+         * Instantiates a new Success consumer.
+         *
+         * @param block the block
+         * @param user the user
+         */
+        public SuccessConsumer(Block block, User user)
+        {
+            this.user = user;
+            this.block = block;
+
+            // Put particles in the middle and above water.
+            this.center = this.block.getLocation().add(0.5D, 0.9D, 0.5D);
+        }
+
+
+        /**
+         * Consumer acceptor.
+         * @param bukkitTask BukkitTask.
+         */
+        @Override
+        public void accept(BukkitTask bukkitTask)
+        {
+            if (this.counter == 0)
+            {
+                // Play brewing sound effect
+                this.block.getWorld().playEffect(this.block.getLocation(),
+                    Effect.BREWING_STAND_BREW,
+                    10);
+            }
+            else if (this.counter < 50)
+            {
+                // All next ticks spawn witch particles
+                this.block.getWorld().spawnParticle(Particle.SPELL_WITCH,
+                    this.center, 5, 0.10D, 0.2D, 0.10D, 2);
+            }
+            else if (this.counter < 70)
+            {
+                if (this.counter % 6 == 0)
+                {
+                    // Send 3 smokes up.
+                    this.block.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE,
+                        this.center, 0, 0, 0.1, 0);
+                }
+
+                this.block.getWorld().playSound(this.block.getLocation(),
+                    Sound.BLOCK_AMETHYST_CLUSTER_HIT,
+                    0.5f,
+                    0.5f);
+                // All next ticks spawn witch particles
+                this.block.getWorld().spawnParticle(Particle.SPELL,
+                    this.center, 5, 0.10D, 0.2D, 0.10D, 2);
+            }
+            else
+            {
+                // Display Error Message
+                this.user.getTranslation(Constants.CONVERSATIONS + "it-is-alive");
+
+                // Stop task after 50 ticks.
+                bukkitTask.cancel();
+            }
+
+            this.counter++;
+        }
+
+
+        /**
+         * Tick counter.
+         */
+        private int counter;
+
+        /**
+         * Stores the particle spawn location.
+         */
+        private final Location center;
+
+        /**
+         * Target block.
+         */
+        private final Block block;
+
+        /**
+         * User who receives message.
+         */
+        private final User user;
     }
 
 
@@ -721,14 +873,4 @@ public class RecipeProcessingTask implements Runnable
      * List of items inside cauldron.
      */
     private final List<ItemStack> cauldronItems;
-
-    /**
-     * The error lightning effect.
-     */
-    private final LightningEffect error;
-
-    /**
-     * The success lightning effect.
-     */
-    private final LightningEffect success;
 }
