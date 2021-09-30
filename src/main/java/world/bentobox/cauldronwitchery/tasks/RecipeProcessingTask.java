@@ -22,6 +22,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.user.User;
@@ -86,16 +87,45 @@ public class RecipeProcessingTask implements Runnable
         // Filter available recipes, based on cauldron type, item in main offhand and recipes that contains
         // at least 1 of the ingredient type.
 
-        Optional<Recipe> recipeOptional = this.magicStick.getRecipeList().stream().
-            filter(recipe -> recipe.getMainIngredient() != null).
-            filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand)).
-            filter(recipe -> recipe.getCauldronType().equals(this.block.getType())).
-            filter(recipe -> recipe.getExtraIngredients().stream().allMatch(
-                ingredient -> this.containsAtLeast(ingredient, 1))).
-            findFirst();
-
         // This list will contain last error message for the failure.
         StringBuilder lastErrorMessage = new StringBuilder();
+
+        Stream<Recipe> recipeStream = this.magicStick.getRecipeList().stream().
+            filter(recipe -> recipe.getMainIngredient() != null).
+            filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand));
+
+        if (recipeStream.toList().isEmpty())
+        {
+            // Missing main ingredient
+            lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "incorrect-main-ingredient"));
+        }
+        else
+        {
+            // Filter by cauldron type.
+            recipeStream = recipeStream.filter(recipe ->
+                recipe.getCauldronType().equals(this.block.getType()));
+        }
+
+        if (recipeStream.toList().isEmpty())
+        {
+            // Missing main ingredient
+            lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "incorrect-cauldron"));
+        }
+        else
+        {
+            // Filter by extra ingredients.
+            recipeStream = recipeStream.filter(recipe -> recipe.getExtraIngredients().stream().allMatch(
+                ingredient -> this.containsAtLeast(ingredient, 1)));
+        }
+
+        if (recipeStream.toList().isEmpty())
+        {
+            // Missing extra ingredients
+            lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "incorrect-extra-ingredients"));
+        }
+
+        // Select any recipe that matches outcome.
+        Optional<Recipe> recipeOptional = recipeStream.findAny();
 
         if (recipeOptional.isPresent() &&
             this.didMagicWorked(recipeOptional.get(), itemInOffHand, lastErrorMessage))
@@ -166,7 +196,7 @@ public class RecipeProcessingTask implements Runnable
             // Check which message should be sent.
             String errorMessage = this.addon.getSettings().isCorrectErrorMessage() ?
                 lastErrorMessage.toString() :
-                this.user.getTranslation(Constants.CONVERSATIONS + "something-went-wrong");
+                this.user.getTranslation(Constants.MESSAGES + "something-went-wrong");
 
             // Run task every tick.
             Bukkit.getScheduler().runTaskTimer(this.addon.getPlugin(),
@@ -193,7 +223,7 @@ public class RecipeProcessingTask implements Runnable
             if (recipe.getCauldronLevel() > ((Levelled) blockData).getLevel())
             {
                 // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "not-filled-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "not-filled-cauldron"));
                 return false;
             }
         }
@@ -211,7 +241,7 @@ public class RecipeProcessingTask implements Runnable
                 type != Material.POWDER_SNOW)
             {
                 // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-hot-cauldron"));
                 return false;
             }
         }
@@ -244,7 +274,7 @@ public class RecipeProcessingTask implements Runnable
             if (!heat)
             {
                 // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-cold-cauldron"));
                 return false;
             }
         }
@@ -287,13 +317,13 @@ public class RecipeProcessingTask implements Runnable
             if (heat)
             {
                 // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-hot-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-hot-cauldron"));
                 return false;
             }
             else if (cool)
             {
                 // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-cold-cauldron"));
+                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-cold-cauldron"));
                 return false;
             }
         }
@@ -301,21 +331,21 @@ public class RecipeProcessingTask implements Runnable
         if (recipe.getMainIngredient().getAmount() > mainIngredient.getAmount())
         {
             // Missing main ingredient
-            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-main-ingredient"));
+            errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "missing-main-ingredient"));
             return false;
         }
 
         if (recipe.getExperience() > this.user.getPlayer().getTotalExperience())
         {
             // Not enough experience
-            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-knowledge"));
+            errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "missing-knowledge"));
             return false;
         }
 
         if (this.missingPermissions(recipe.getPermissions()))
         {
             // Missing permissions.
-            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-permissions"));
+            errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "missing-permissions"));
             return false;
         }
 
@@ -324,14 +354,14 @@ public class RecipeProcessingTask implements Runnable
             if (!this.exactIngredients(recipe.getExtraIngredients()))
             {
                 // Requires exact items but something was wrong.
-                errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "too-much-ingredients"));
+                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-much-ingredients"));
                 return false;
             }
         }
         else if (this.missingIngredients(recipe.getExtraIngredients()))
         {
             // Missing ingredients.
-            errorMessages.append(this.user.getTranslation(Constants.CONVERSATIONS + "missing-extra-ingredients"));
+            errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "missing-extra-ingredients"));
             return false;
         }
 
@@ -402,12 +432,23 @@ public class RecipeProcessingTask implements Runnable
         }
         else
         {
-            for (ItemStack dropped : this.cauldronItems)
+            if (this.addon.getSettings().isMixInCauldron())
             {
-                if (item.isSimilar(dropped) && (amount -= dropped.getAmount()) <= 0)
+                // Check dropped items in cauldron.
+
+                for (ItemStack dropped : this.cauldronItems)
                 {
-                    return true;
+                    if (item.isSimilar(dropped) && (amount -= dropped.getAmount()) <= 0)
+                    {
+                        return true;
+                    }
                 }
+            }
+            else
+            {
+                // Check player inventory.
+                return Objects.requireNonNull(this.user.getInventory()).
+                    containsAtLeast(item, amount);
             }
 
             return false;
@@ -808,7 +849,7 @@ public class RecipeProcessingTask implements Runnable
             else
             {
                 // Display Error Message
-                this.user.getTranslation(Constants.CONVERSATIONS + "it-is-alive");
+                this.user.getTranslation(Constants.MESSAGES + "it-worked");
 
                 // Stop task after 50 ticks.
                 bukkitTask.cancel();
