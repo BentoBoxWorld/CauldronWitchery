@@ -1,16 +1,14 @@
 package world.bentobox.cauldronwitchery.configs;
 
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import world.bentobox.bentobox.api.configuration.ConfigComment;
 import world.bentobox.bentobox.api.configuration.ConfigEntry;
 import world.bentobox.bentobox.api.configuration.ConfigObject;
 import world.bentobox.bentobox.api.configuration.StoreAt;
-
+import world.bentobox.bentobox.managers.RanksManager;
 
 
 @StoreAt(filename="config.yml", path="addons/CauldronWitchery")
@@ -236,6 +234,28 @@ public class Settings implements ConfigObject
 	}
 
 
+	/**
+	 * Gets default flag permission.
+	 *
+	 * @return the default flag permission
+	 */
+	public int getDefaultFlagPermission()
+    {
+        return defaultFlagPermission;
+    }
+
+
+	/**
+	 * Sets default flag permission.
+	 *
+	 * @param defaultFlagPermission the default flag permission
+	 */
+	public void setDefaultFlagPermission(int defaultFlagPermission)
+    {
+        this.defaultFlagPermission = defaultFlagPermission;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -285,6 +305,11 @@ public class Settings implements ConfigObject
 	@ConfigComment("generic message about failing.")
 	@ConfigEntry(path = "cauldron.error.correct-message")
 	private boolean correctErrorMessage = true;
+
+	@ConfigComment("")
+	@ConfigComment("Allows to set default protection flag value for `CAULDRON_WITCHERY_ISLAND_PROTECTION` flag.")
+	@ConfigEntry(path = "flag.island-protection-flag-value")
+	private int defaultFlagPermission = RanksManager.MEMBER_RANK;
 
 	@ConfigComment("Allows to change label for admin command.")
 	@ConfigEntry(path = "command.admin-command")

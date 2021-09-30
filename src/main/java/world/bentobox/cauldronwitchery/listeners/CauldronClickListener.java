@@ -65,12 +65,6 @@ public class CauldronClickListener extends FlagListener implements Listener
             return;
         }
 
-        if (!CauldronWitcheryAddon.CAULDRON_WITCHERY_ENABLE_FLAG.isSetForWorld(event.getClickedBlock().getWorld()))
-        {
-            // Return if Magic Summon Flag is disabled for this world.
-            return;
-        }
-
         // Gets the user who clicks.
         User user = User.getInstance(event.getPlayer());
 

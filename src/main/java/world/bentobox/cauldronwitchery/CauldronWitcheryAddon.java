@@ -14,6 +14,7 @@ import java.util.jar.JarFile;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.configuration.Config;
 import world.bentobox.bentobox.api.flags.Flag;
+import world.bentobox.bentobox.api.flags.clicklisteners.CycleClick;
 import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.commands.WitcheryAdminCommand;
@@ -76,6 +77,16 @@ public class CauldronWitcheryAddon extends Addon
 
 		this.importManager = new CauldronWitcheryImportManager(this);
 
+		// Init flag.
+		CauldronWitcheryAddon.CAULDRON_WITCHERY_ISLAND_PROTECTION =
+			new Flag.Builder("CAULDRON_WITCHERY_ISLAND_PROTECTION", Material.DIAMOND_PICKAXE).
+				type(Flag.Type.PROTECTION).
+				defaultRank(this.settings.getDefaultFlagPermission()).
+				clickHandler(new CycleClick("CAULDRON_WITCHERY_ISLAND_PROTECTION",
+					RanksManager.VISITOR_RANK,
+					RanksManager.OWNER_RANK)).
+				build();
+
 		List<World> worldList = new ArrayList<>();
 
 		this.getPlugin().getAddonsManager().getGameModeAddons().forEach(gameModeAddon -> {
@@ -83,7 +94,6 @@ public class CauldronWitcheryAddon extends Addon
 			{
 				if (gameModeAddon.isEnabled())
 				{
-					CAULDRON_WITCHERY_ENABLE_FLAG.addGameModeAddon(gameModeAddon);
 					CAULDRON_WITCHERY_ISLAND_PROTECTION.addGameModeAddon(gameModeAddon);
 
 					gameModeAddon.getAdminCommand().ifPresent(command ->
@@ -120,7 +130,6 @@ public class CauldronWitcheryAddon extends Addon
 			this.registerListener(new ItemsInsideCauldronListener(this));
 
 			// Register Flags
-			this.registerFlag(CAULDRON_WITCHERY_ENABLE_FLAG);
 			this.registerFlag(CAULDRON_WITCHERY_ISLAND_PROTECTION);
 
 			// Register Request Handlers
@@ -294,18 +303,8 @@ public class CauldronWitcheryAddon extends Addon
 // Section: Flags
 // ---------------------------------------------------------------------
 
-
-	/**
-	 * This flag allows to enable or disable Magic Summon addon in particular world.
-	 */
-	public static Flag CAULDRON_WITCHERY_ENABLE_FLAG =
-		new Flag.Builder("CAULDRON_WITCHERY_ENABLE_FLAG", Material.PIG_SPAWN_EGG).
-			type(Flag.Type.WORLD_SETTING).defaultSetting(true).build();
-
 	/**
 	 * This flag allows to define which users can summon mobs using magic.
 	 */
-	public static Flag CAULDRON_WITCHERY_ISLAND_PROTECTION =
-		new Flag.Builder("CAULDRON_WITCHERY_ISLAND_PROTECTION", Material.CHICKEN_SPAWN_EGG).
-			defaultRank(RanksManager.VISITOR_RANK).build();
+	public static Flag CAULDRON_WITCHERY_ISLAND_PROTECTION;
 }
