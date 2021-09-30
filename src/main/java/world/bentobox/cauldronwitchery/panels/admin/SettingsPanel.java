@@ -58,39 +58,21 @@ public class SettingsPanel extends CommonPanel
         panelBuilder.item(10, this.createButton(Action.SUCCESS_DAMAGE));
         panelBuilder.item(19, this.createButton(Action.FAIL_DAMAGE));
 
+        panelBuilder.item(30, this.createButton(Action.FAIL_DESTROY_CAULDRON));
+        panelBuilder.item(31, this.createButton(Action.CORRECT_FAIL_MESSAGE));
 
-        panelBuilder.item(13, this.createButton(Action.SUCCESS_TIMINGS));
-
-        if (!this.settings.getSuccessfulTimings().isEmpty())
-        {
-            // Show buttons only if timings are enabled.
-            panelBuilder.item(14, this.createButton(Action.SUCCESS_LIGHTNING_DAMAGE));
-            panelBuilder.item(15, this.createButton(Action.SUCCESS_HIT_PLAYER));
-            panelBuilder.item(16, this.createButton(Action.SUCCESS_DESTROY_CAULDRON));
-        }
-
-        panelBuilder.item(22, this.createButton(Action.FAIL_TIMINGS));
-
-        if (!this.settings.getErrorTimings().isEmpty())
-        {
-            // Show buttons only if timings are enabled.
-            panelBuilder.item(23, this.createButton(Action.FAIL_LIGHTNING_DAMAGE));
-            panelBuilder.item(24, this.createButton(Action.FAIL_HIT_PLAYER));
-            panelBuilder.item(25, this.createButton(Action.FAIL_DESTROY_CAULDRON));
-        }
-
-        panelBuilder.item(28, this.createButton(Action.MIX_IN_CAULDRON));
+        panelBuilder.item(12, this.createButton(Action.MIX_IN_CAULDRON));
 
         if (this.settings.isMixInCauldron())
         {
-            panelBuilder.item(29, this.createButton(Action.EXACT_COUNT));
+            panelBuilder.item(13, this.createButton(Action.EXACT_COUNT));
 
             if (!this.settings.isExactExtraCount())
             {
-                panelBuilder.item(30, this.createButton(Action.REMOVE_LEFT_OVERS));
+                panelBuilder.item(14, this.createButton(Action.REMOVE_LEFT_OVERS));
             }
 
-            panelBuilder.item(31, this.createButton(Action.REMOVE_ON_FAIL));
+            panelBuilder.item(15, this.createButton(Action.REMOVE_ON_FAIL));
         }
 
         panelBuilder.item(44, this.returnButton);
@@ -244,142 +226,11 @@ public class SettingsPanel extends CommonPanel
                 description.add("");
                 description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
             }
-            case SUCCESS_LIGHTNING_DAMAGE -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isSuccessfulDamage() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.LIGHTNING_ROD);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setSuccessfulDamage(!this.settings.isSuccessfulDamage());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isSuccessfulDamage();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case SUCCESS_HIT_PLAYER -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isSuccessfulHitPlayer() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.PLAYER_HEAD);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setSuccessfulHitPlayer(!this.settings.isSuccessfulHitPlayer());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isSuccessfulHitPlayer();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case SUCCESS_DESTROY_CAULDRON -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isSuccessfulDestroyCauldron() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.CAULDRON);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setSuccessfulDestroyCauldron(!this.settings.isSuccessfulDestroyCauldron());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isSuccessfulDestroyCauldron();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case SUCCESS_TIMINGS -> {
-                icon = new ItemStack(Material.REPEATER);
-                description.add(this.user.getTranslation(reference + "value",
-                    "[timings]",
-                    this.settings.getSuccessfulTimings().stream().
-                        map(String::valueOf).
-                        collect(Collectors.joining(", "))));
-
-
-                clickHandler = (panel, user, clickType, i) ->
-                {
-                    // Create consumer that process description change
-                    Consumer<String> consumer = value ->
-                    {
-                        if (value != null)
-                        {
-                            this.settings.setSuccessfulTimings(Arrays.stream(value.split(" ")).
-                                filter(NumberUtils::isNumber).
-                                map(Long::valueOf).
-                                collect(Collectors.toList()));
-                        }
-
-                        this.build();
-                    };
-
-                    if (!this.settings.getErrorTimings().isEmpty() && clickType.isShiftClick())
-                    {
-                        // Reset to the empty value
-                        consumer.accept("");
-                    }
-                    else
-                    {
-                        // start conversation
-                        ConversationUtils.createStringInput(consumer,
-                            user,
-                            user.getTranslation(Constants.CONVERSATIONS + "write-long-list"),
-                            user.getTranslation(Constants.CONVERSATIONS + "long-list-updated"));
-                    }
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-
-                if (!this.settings.getSuccessfulTimings().isEmpty())
-                {
-                    description.add(this.user.getTranslation(Constants.TIPS + "shift-click-to-reset"));
-                }
-            }
-            case FAIL_LIGHTNING_DAMAGE -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isErrorDamage() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.LIGHTNING_ROD);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setErrorDamage(!this.settings.isErrorDamage());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isErrorDamage();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case FAIL_HIT_PLAYER -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isErrorHitPlayer() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.PLAYER_HEAD);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setErrorHitPlayer(!this.settings.isErrorHitPlayer());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isErrorHitPlayer();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
             case FAIL_DESTROY_CAULDRON -> {
                 description.add(this.user.getTranslation(reference +
                     (this.settings.isErrorDestroyCauldron() ? "enabled" : "disabled")));
 
-                icon = new ItemStack(Material.CAULDRON);
+                icon = new ItemStack(Material.TNT);
                 clickHandler = (panel, user1, clickType, i) -> {
                     this.settings.setErrorDestroyCauldron(!this.settings.isErrorDestroyCauldron());
                     panel.getInventory().setItem(i, this.createButton(button).getItem());
@@ -391,56 +242,21 @@ public class SettingsPanel extends CommonPanel
                 description.add("");
                 description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
             }
-            case FAIL_TIMINGS -> {
-                icon = new ItemStack(Material.REPEATER);
-                description.add(this.user.getTranslation(reference + "value",
-                    "[timings]",
-                    this.settings.getErrorTimings().stream().
-                        map(String::valueOf).
-                        collect(Collectors.joining(", "))));
+            case CORRECT_FAIL_MESSAGE -> {
+                description.add(this.user.getTranslation(reference +
+                    (this.settings.isCorrectErrorMessage() ? "enabled" : "disabled")));
 
-
-                clickHandler = (panel, user, clickType, i) ->
-                {
-                    // Create consumer that process description change
-                    Consumer<String> consumer = value ->
-                    {
-                        if (value != null)
-                        {
-                            this.settings.setErrorTimings(Arrays.stream(value.split(" ")).
-                                filter(NumberUtils::isNumber).
-                                map(Long::valueOf).
-                                collect(Collectors.toList()));
-                        }
-
-                        this.build();
-                    };
-
-                    if (!this.settings.getErrorTimings().isEmpty() && clickType.isShiftClick())
-                    {
-                        // Reset to the empty value
-                        consumer.accept("");
-                    }
-                    else
-                    {
-                        // start conversation
-                        ConversationUtils.createStringInput(consumer,
-                            user,
-                            user.getTranslation(Constants.CONVERSATIONS + "write-long-list"),
-                            user.getTranslation(Constants.CONVERSATIONS + "long-list-updated"));
-                    }
-
+                icon = new ItemStack(Material.MAP);
+                clickHandler = (panel, user1, clickType, i) -> {
+                    this.settings.setCorrectErrorMessage(!this.settings.isCorrectErrorMessage());
+                    panel.getInventory().setItem(i, this.createButton(button).getItem());
+                    this.addon.saveSettings();
                     return true;
                 };
-                glow = true;
+                glow = this.settings.isCorrectErrorMessage();
 
                 description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-
-                if (!this.settings.getErrorTimings().isEmpty())
-                {
-                    description.add(this.user.getTranslation(Constants.TIPS + "shift-click-to-reset"));
-                }
+                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
             }
             default -> {
                 icon = new ItemStack(Material.PAPER);
@@ -497,15 +313,8 @@ public class SettingsPanel extends CommonPanel
         REMOVE_LEFT_OVERS,
         REMOVE_ON_FAIL,
 
-        SUCCESS_LIGHTNING_DAMAGE,
-        SUCCESS_HIT_PLAYER,
-        SUCCESS_DESTROY_CAULDRON,
-        SUCCESS_TIMINGS,
-
-        FAIL_LIGHTNING_DAMAGE,
-        FAIL_HIT_PLAYER,
         FAIL_DESTROY_CAULDRON,
-        FAIL_TIMINGS,
+        CORRECT_FAIL_MESSAGE
     }
 
     /**
