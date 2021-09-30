@@ -7,10 +7,7 @@
 package world.bentobox.cauldronwitchery.tasks;
 
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Lightable;
@@ -49,7 +46,7 @@ public class ParticleSpawnTask implements Runnable
             return;
         }
 
-        if (this.runCounter++ > 5 * 4 * 5)
+        if (this.runCounter++ > 100)
         {
             // Update blocklist
             this.blockSet.clear();
@@ -59,6 +56,7 @@ public class ParticleSpawnTask implements Runnable
                 map(item -> item.getLocation().getBlock()).
                 filter(block -> block.getType().name().contains("CAULDRON")).
                 forEach(this.blockSet::add);
+            this.runCounter = 0;
         }
 
         // Iterate through blocks to spawn particles.
@@ -81,11 +79,6 @@ public class ParticleSpawnTask implements Runnable
                 if (type == Material.WATER_CAULDRON)
                 {
                     world.spawnParticle(Particle.WATER_SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
-
-                    if (this.runCounter % 3 == 0)
-                    {
-                        world.spawnParticle(Particle.BUBBLE_COLUMN_UP, center, 3);
-                    }
                 }
                 else if (type == Material.POWDER_SNOW_CAULDRON)
                 {
@@ -129,6 +122,12 @@ public class ParticleSpawnTask implements Runnable
                     127,
                     0,
                     127);
+            }
+
+            if (this.runCounter % 40 == 1)
+            {
+                // Play sound lava poping
+                world.playSound(center, Sound.BLOCK_LAVA_POP, 0.5f, 0.5f);
             }
         }
     }
