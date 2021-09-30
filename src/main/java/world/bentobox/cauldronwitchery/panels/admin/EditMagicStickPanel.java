@@ -292,13 +292,23 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
         switch (button)
         {
             case NAME -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NAME, this.magicStick.getFriendlyName()));
+
+                if (this.magicStick.getFriendlyName().isBlank())
+                {
+                    description.add(this.user.getTranslation(reference + "no-value"));
+                }
+                else
+                {
+                    description.add(this.user.getTranslation(reference + "value",
+                        Constants.PARAMETER_NAME, this.magicStick.getFriendlyName()));
+                }
 
                 icon = new ItemStack(Material.NAME_TAG);
 
                 clickHandler = (panel, user, clickType, i) ->
                 {
+                    this.selectedButton = null;
+
                     // Create consumer that process description change
                     Consumer<String> consumer = value ->
                     {
@@ -336,11 +346,20 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
             case DESCRIPTION -> {
                 icon = new ItemStack(Material.WRITTEN_BOOK);
 
-                description.add(this.user.getTranslation(reference + "value"));
-                description.add(Util.translateColorCodes(this.magicStick.getDescription()));
+                if (this.magicStick.getDescription().isBlank())
+                {
+                    description.add(this.user.getTranslation(reference + "no-value"));
+                }
+                else
+                {
+                    description.add(this.user.getTranslation(reference + "value"));
+                    description.add(Util.translateColorCodes(this.magicStick.getDescription()));
+                }
 
                 clickHandler = (panel, user, clickType, i) ->
                 {
+                    this.selectedButton = null;
+
                     // Create consumer that process description change
                     Consumer<List<String>> consumer = value ->
                     {
@@ -396,7 +415,9 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
 
                 clickHandler = (panel, user, clickType, i) ->
                 {
-                    this.selectedButton = button;
+                    // selects and deselects the element
+                    this.selectedButton = this.selectedButton == button ? null : button;
+
                     this.build();
                     return true;
                 };
@@ -425,7 +446,7 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
                     description.add(this.user.getTranslation(reference + "title"));
 
                     this.magicStick.getPermissions().forEach(permission ->
-                        description.add(this.user.getTranslation(reference + "permission",
+                        description.add(this.user.getTranslation(reference + "value",
                             "[permission]", permission)));
                 }
 
@@ -433,6 +454,8 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
 
                 clickHandler = (panel, user, clickType, i) ->
                 {
+                    this.selectedButton = null;
+
                     // Create consumer that process description change
                     Consumer<List<String>> consumer = value ->
                     {
@@ -477,6 +500,8 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
 
                 icon = new ItemStack(Material.REPEATER);
                 clickHandler = (panel, user, clickType, i) -> {
+                    this.selectedButton = null;
+
                     Consumer<Number> numberConsumer = number -> {
                         if (number != null)
                         {
@@ -503,11 +528,20 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
             case BOOK -> {
                 icon = new ItemStack(Material.WRITTEN_BOOK);
 
-                description.add(this.user.getTranslation(reference + "value"));
-                description.add(Util.translateColorCodes(this.magicStick.getBookName()));
+                if (this.magicStick.getBookName().isBlank())
+                {
+                    description.add(this.user.getTranslation(reference + "no-value"));
+                }
+                else
+                {
+                    description.add(this.user.getTranslation(reference + "value",
+                        "[book]", Util.translateColorCodes(this.magicStick.getBookName())));
+                }
 
                 clickHandler = (panel, user, clickType, i) ->
                 {
+                    this.selectedButton = null;
+
                     // Create consumer that process description change
                     Consumer<String> consumer = value ->
                     {
@@ -550,6 +584,8 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
             case ADD_RECIPE -> {
                 icon = new ItemStack(Material.WATER_BUCKET);
                 clickHandler = (panel, user, clickType, slot) -> {
+                    this.selectedButton = null;
+
                     RecipeTypeSelector.open(this.user,
                         type -> {
                             this.magicStick.getRecipeList().add(type);
@@ -566,6 +602,7 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
             case REMOVE_RECIPE -> {
                 icon = new ItemStack(Material.LAVA_BUCKET);
                 clickHandler = (panel, user, clickType, slot) -> {
+                    this.selectedButton = null;
 
                     // Generate descriptions for these challenges
                     Map<Recipe, String> elementDescriptionMap = this.magicStick.getRecipeList().stream().
