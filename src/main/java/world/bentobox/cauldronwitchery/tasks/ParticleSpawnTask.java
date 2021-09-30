@@ -46,7 +46,8 @@ public class ParticleSpawnTask implements Runnable
             return;
         }
 
-        if (this.runCounter++ > 100)
+        // Update entity list every 5 * 20 ticks.
+        if (this.runCounter++ > 20)
         {
             // Update blocklist
             this.blockSet.clear();

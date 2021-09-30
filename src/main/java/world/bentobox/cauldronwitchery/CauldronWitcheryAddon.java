@@ -3,8 +3,12 @@ package world.bentobox.cauldronwitchery;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.JarFile;
 
 import world.bentobox.bentobox.api.addons.Addon;
@@ -18,6 +22,7 @@ import world.bentobox.cauldronwitchery.listeners.CauldronClickListener;
 import world.bentobox.cauldronwitchery.listeners.ItemsInsideCauldronListener;
 import world.bentobox.cauldronwitchery.managers.CauldronWitcheryImportManager;
 import world.bentobox.cauldronwitchery.managers.CauldronWitcheryManager;
+import world.bentobox.cauldronwitchery.tasks.ParticleSpawnTask;
 
 
 public class CauldronWitcheryAddon extends Addon
@@ -71,6 +76,8 @@ public class CauldronWitcheryAddon extends Addon
 
 		this.importManager = new CauldronWitcheryImportManager(this);
 
+		List<World> worldList = new ArrayList<>();
+
 		this.getPlugin().getAddonsManager().getGameModeAddons().forEach(gameModeAddon -> {
 			if (!this.settings.getDisabledGameModes().contains(gameModeAddon.getDescription().getName()))
 			{
@@ -83,12 +90,31 @@ public class CauldronWitcheryAddon extends Addon
 						new WitcheryAdminCommand(this, command));
 				}
 
+				worldList.add(gameModeAddon.getOverWorld());
+
+				if (gameModeAddon.getWorldSettings().isNetherGenerate())
+				{
+					worldList.add(gameModeAddon.getNetherWorld());
+				}
+
+				if (gameModeAddon.getWorldSettings().isEndGenerate())
+				{
+					worldList.add(gameModeAddon.getEndWorld());
+				}
+
 				this.hooked = true;
 			}
 		});
 
 		if (this.hooked)
 		{
+			// Init ParticleSpawnRunnable.
+			// Store task that will be running.
+			this.particleTask = Bukkit.getScheduler().runTaskTimer(this.getPlugin(),
+				new ParticleSpawnTask(this, worldList),
+				20,
+				5);
+
 			// Register the listener.
 			this.registerListener(new CauldronClickListener(this));
 			this.registerListener(new ItemsInsideCauldronListener(this));
@@ -114,7 +140,11 @@ public class CauldronWitcheryAddon extends Addon
 	@Override
 	public void onDisable()
 	{
-		// Do some staff...
+		// Stop particle task.
+		if (this.particleTask != null)
+		{
+			this.particleTask.cancel();
+		}
 	}
 
 
@@ -131,6 +161,12 @@ public class CauldronWitcheryAddon extends Addon
 			this.loadSettings();
 			this.getAddonManager().reload();
 			this.log("CauldronWitchery reloaded.");
+		}
+
+		// Stop particle task.
+		if (this.particleTask != null)
+		{
+			this.particleTask.cancel();
 		}
 	}
 
@@ -249,6 +285,10 @@ public class CauldronWitcheryAddon extends Addon
 	 */
 	private CauldronWitcheryImportManager importManager;
 
+	/**
+	 * Stores the id of the particle task.
+	 */
+	private BukkitTask particleTask;
 
 // ---------------------------------------------------------------------
 // Section: Flags
