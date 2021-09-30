@@ -73,8 +73,8 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
 
         PanelUtils.fillBorder(panelBuilder, 5, Material.MAGENTA_STAINED_GLASS_PANE);
 
-        panelBuilder.item(1, this.createButton(Action.CREATE_MAGIC_STICK));
-        panelBuilder.item(2, this.createButton(Action.DELETE_MAGIC_STICK));
+        panelBuilder.item(1, this.createButton(Action.ADD_MAGIC_STICK));
+        panelBuilder.item(2, this.createButton(Action.REMOVE_MAGIC_STICK));
 
         this.populateElements(panelBuilder, this.filterElements);
 
@@ -134,7 +134,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
 
         switch (button)
         {
-            case CREATE_MAGIC_STICK -> {
+            case ADD_MAGIC_STICK -> {
                 description.add(this.user.getTranslationOrNothing(reference + ".description"));
                 description.add("");
                 description.add(this.user.getTranslation(Constants.TIPS + "click-to-create"));
@@ -186,7 +186,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
                     return true;
                 };
             }
-            case DELETE_MAGIC_STICK -> {
+            case REMOVE_MAGIC_STICK -> {
                 icon = this.selectedMagicSticks.isEmpty() ? Material.BARRIER : Material.LAVA_BUCKET;
                 glow = !this.selectedMagicSticks.isEmpty();
 
@@ -194,7 +194,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
 
                 if (!this.selectedMagicSticks.isEmpty())
                 {
-                    description.add(this.user.getTranslation(reference + ".list"));
+                    description.add(this.user.getTranslation(reference + ".title"));
                     this.selectedMagicSticks.forEach(bundle ->
                         description.add(this.user.getTranslation(reference + ".value",
                             "[stick]", bundle.getFriendlyName())));
@@ -362,11 +362,11 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
         /**
          * Allows to add new stick.
          */
-        CREATE_MAGIC_STICK,
+        ADD_MAGIC_STICK,
         /**
          * Allows to delete selected stick.
          */
-        DELETE_MAGIC_STICK
+        REMOVE_MAGIC_STICK
     }
 
 
