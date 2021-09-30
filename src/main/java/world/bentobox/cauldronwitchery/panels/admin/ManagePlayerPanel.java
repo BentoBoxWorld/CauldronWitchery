@@ -145,6 +145,8 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
                     collect(Collectors.toList());
             }
 
+            this.activeTab = button;
+
             this.searchString = "";
             this.filterElements = this.elementList;
 
