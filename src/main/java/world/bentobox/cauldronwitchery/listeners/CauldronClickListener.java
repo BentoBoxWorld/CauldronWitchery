@@ -2,19 +2,17 @@ package world.bentobox.cauldronwitchery.listeners;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 
 import world.bentobox.bentobox.api.flags.FlagListener;
 import world.bentobox.bentobox.api.user.User;
@@ -114,14 +112,17 @@ public class CauldronClickListener extends FlagListener implements Listener
             return;
         }
 
+        Collection<Entity> nearbyEntities =
+            block.getWorld().getNearbyEntities(block.getBoundingBox(),
+                entity -> EntityType.DROPPED_ITEM.equals(entity.getType()));
+
         // Run the recipe processing task in next tick.
         Bukkit.getScheduler().runTaskAsynchronously(this.addon.getPlugin(),
             () -> new RecipeProcessingTask(this.addon,
                 user,
                 block,
                 this.addon.getAddonManager().getMagicStick(event.getItem(), user),
-                block.getWorld().getNearbyEntities(block.getBoundingBox(),
-                    entity -> EntityType.DROPPED_ITEM.equals(entity.getType()))));
+                nearbyEntities).run());
     }
 
 
