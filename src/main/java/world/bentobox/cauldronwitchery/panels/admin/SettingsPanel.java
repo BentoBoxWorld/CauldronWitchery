@@ -179,7 +179,7 @@ public class SettingsPanel extends CommonPanel
             }
             case EXACT_COUNT -> {
                 description.add(this.user.getTranslation(reference +
-                    (this.settings.isMixInCauldron() ? "enabled" : "disabled")));
+                    (this.settings.isExactExtraCount() ? "enabled" : "disabled")));
 
                 icon = new ItemStack(Material.COMPARATOR);
                 clickHandler = (panel, user1, clickType, i) -> {

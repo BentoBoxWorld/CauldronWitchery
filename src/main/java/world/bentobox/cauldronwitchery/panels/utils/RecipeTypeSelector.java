@@ -52,9 +52,9 @@ public record RecipeTypeSelector(User user, Consumer<Recipe> consumer)
 			type(Panel.Type.HOPPER).
 			name(this.user.getTranslation(Constants.TITLE + "type-selector"));
 
-		panelBuilder.item(0, this.getButton(Type.ENTITY));
-		panelBuilder.item(2, this.getButton(Type.ITEM));
-		panelBuilder.item(4, this.getButton(Type.BOOK));
+		panelBuilder.item(0, this.getButton(Type.ENTITY_TYPE));
+		panelBuilder.item(2, this.getButton(Type.ITEM_TYPE));
+		panelBuilder.item(4, this.getButton(Type.BOOK_TYPE));
 
 		panelBuilder.build();
 	}
@@ -81,7 +81,7 @@ public record RecipeTypeSelector(User user, Consumer<Recipe> consumer)
 
 		switch (type)
 		{
-			case ENTITY -> {
+			case ENTITY_TYPE -> {
 				icon = new ItemStack(Material.CREEPER_HEAD);
 				clickHandler = (
 					(panel, user1, clickType, slot) ->
@@ -90,7 +90,7 @@ public record RecipeTypeSelector(User user, Consumer<Recipe> consumer)
 						return true;
 					});
 			}
-			case ITEM -> {
+			case ITEM_TYPE -> {
 				icon = new ItemStack(Material.GRASS_BLOCK);
 				clickHandler = (
 					(panel, user1, clickType, slot) ->
@@ -99,7 +99,7 @@ public record RecipeTypeSelector(User user, Consumer<Recipe> consumer)
 						return true;
 					});
 			}
-			case BOOK -> {
+			case BOOK_TYPE -> {
 				icon = new ItemStack(Material.KNOWLEDGE_BOOK);
 				clickHandler = (
 					(panel, user1, clickType, slot) ->
@@ -128,8 +128,8 @@ public record RecipeTypeSelector(User user, Consumer<Recipe> consumer)
 	 */
 	private enum Type
 	{
-		ITEM,
-		ENTITY,
-		BOOK
+		ITEM_TYPE,
+		ENTITY_TYPE,
+		BOOK_TYPE
 	}
 }

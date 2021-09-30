@@ -674,8 +674,11 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
                 !event.getCurrentItem().getType().equals(Material.AIR) &&
                 event.getRawSlot() > 44)
             {
+                ItemStack itemStack = event.getCurrentItem().clone();
+                itemStack.setAmount(1);
+
                 // set material and amount only. Other data should be removed.
-                EditMagicStickPanel.this.magicStick.setMagicStick(event.getCurrentItem().clone());
+                EditMagicStickPanel.this.magicStick.setMagicStick(itemStack);
                 // Deselect icon
                 EditMagicStickPanel.this.selectedButton = null;
                 // Update name and description

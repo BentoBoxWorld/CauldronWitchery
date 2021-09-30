@@ -141,7 +141,7 @@ public class RecipeSelector extends PagedSelector<Recipe>
 				{
 					description.add(this.user.getTranslation(reference + "title"));
 					this.selectedElements.forEach(recipe -> {
-						description.add(this.user.getTranslation(reference + "element",
+						description.add(this.user.getTranslation(reference + "value",
 							"[element]", recipe.getRecipeName(this.user)));
 					});
 				}
@@ -192,15 +192,13 @@ public class RecipeSelector extends PagedSelector<Recipe>
 	@Override
 	protected PanelItem createElementButton(Recipe recipe)
 	{
-		final String reference = Constants.BUTTON + "recipe.";
-
 		List<String> description = new ArrayList<>();
 		description.add(this.objectDescriptionMap.get(recipe));
 		description.add("");
 
 		if (this.selectedElements.contains(recipe))
 		{
-			description.add(this.user.getTranslation(reference + "selected"));
+			description.add(this.user.getTranslation( Constants.DESCRIPTIONS +  "selected"));
 			description.add(this.user.getTranslation(Constants.TIPS + "click-to-deselect"));
 		}
 		else
