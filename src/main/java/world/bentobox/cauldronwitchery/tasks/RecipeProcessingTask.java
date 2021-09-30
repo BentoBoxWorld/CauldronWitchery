@@ -125,7 +125,21 @@ public class RecipeProcessingTask implements Runnable
         }
 
         // Select any recipe that matches outcome.
-        Optional<Recipe> recipeOptional = recipeStream.findAny();
+        Optional<Recipe> recipeOptional;
+
+        if (this.missingPermissions(this.magicStick.getPermissions()))
+        {
+            lastErrorMessage = new StringBuilder();
+            lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "missing-permissions"));
+
+            // Set empty as recipe fails.
+            recipeOptional = Optional.empty();
+        }
+        else
+        {
+            // Find any from remaining.
+            recipeOptional = recipeStream.findAny();
+        }
 
         if (recipeOptional.isPresent() &&
             this.didMagicWorked(recipeOptional.get(), itemInOffHand, lastErrorMessage))
