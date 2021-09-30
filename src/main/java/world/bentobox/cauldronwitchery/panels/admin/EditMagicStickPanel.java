@@ -258,7 +258,8 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
     protected PanelItem createElementButton(Recipe recipe)
     {
         return new PanelItemBuilder().
-            name(recipe.getRecipeName(this.user)).
+            name(this.user.getTranslation(Constants.BUTTON + "recipe.name",
+                "[value]", recipe.getRecipeName(this.user))).
             icon(recipe.getIcon()).
             description(this.generateRecipeDescription(recipe, null)).
             description("").

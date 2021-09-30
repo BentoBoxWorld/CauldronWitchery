@@ -150,7 +150,8 @@ public class EditRecipePanel extends CommonPanel
         }
 
         return new PanelItemBuilder().
-            name(recipe.getRecipeName(this.user)).
+            name(this.user.getTranslation(Constants.BUTTON + "recipe.name",
+                "[value]", recipe.getRecipeName(this.user))).
             description(description).
             icon(recipe.getIcon()).
             clickHandler((panel, user, clickType, slot) -> {
@@ -197,7 +198,8 @@ public class EditRecipePanel extends CommonPanel
     private PanelItem createElementButton(ItemRecipe recipe)
     {
         return new PanelItemBuilder().
-            name(recipe.getRecipeName(this.user)).
+            name(this.user.getTranslation(Constants.BUTTON + "recipe.name",
+                "[value]", recipe.getRecipeName(this.user))).
             description(this.generateRecipeDescription(recipe, null)).
             description("").
             description(this.selectedButton != Button.REWARD_ITEM ?
@@ -224,7 +226,8 @@ public class EditRecipePanel extends CommonPanel
     private PanelItem createElementButton(EntityRecipe recipe)
     {
         return new PanelItemBuilder().
-            name(recipe.getRecipeName(this.user)).
+            name(this.user.getTranslation(Constants.BUTTON + "recipe.name",
+                "[value]", recipe.getRecipeName(this.user))).
             description(this.generateRecipeDescription(recipe, null)).
             description("").
             description(this.user.getTranslation(Constants.TIPS + "click-to-edit")).

@@ -111,7 +111,7 @@ public abstract class CommonPanel
         final String reference = Constants.DESCRIPTIONS + "recipe.";
 
         String bookName = !recipe.getBookName().isBlank() ?
-            recipe.getBookName() :
+            "" :
             this.user.getTranslation(reference + "book.no-book");
 
         String cauldron;
@@ -179,7 +179,7 @@ public abstract class CommonPanel
                 missingPermissions.forEach(permission ->
                 {
                     permissionBuilder.append("\n");
-                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
+                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-element",
                         Constants.PARAMETER_PERMISSION, permission));
                 });
             }
@@ -193,7 +193,7 @@ public abstract class CommonPanel
 
 
         String returnString = this.user.getTranslationOrNothing(reference + "book.lore",
-            "[book]", bookName,
+            "[no-book]", bookName,
             "[cauldron]", cauldron,
             "[knowledge]", knowledge,
             "[ingredient]", mainIngredient,
@@ -217,8 +217,7 @@ public abstract class CommonPanel
     {
         final String reference = Constants.DESCRIPTIONS + "recipe.";
 
-        String itemName = recipe.getItemStack() != null ?
-            Utils.prettifyObject(recipe.getItemStack(), this.user) :
+        String itemName = recipe.getItemStack() != null ? "" :
             this.user.getTranslation(reference + "item.no-item");
 
         String cauldron;
@@ -301,7 +300,7 @@ public abstract class CommonPanel
 
 
         String returnString = this.user.getTranslationOrNothing(reference + "item.lore",
-            "[item]", itemName,
+            "[no-item]", itemName,
             "[cauldron]", cauldron,
             "[knowledge]", knowledge,
             "[ingredient]", mainIngredient,
@@ -326,7 +325,7 @@ public abstract class CommonPanel
         final String reference = Constants.DESCRIPTIONS + "recipe.";
 
         String entityName = recipe.getEntityType() != null ?
-            Utils.prettifyObject(recipe.getEntityType(), this.user) :
+            "" :
             this.user.getTranslation(reference + "entity.no-entity");
 
         String cauldron;
@@ -409,7 +408,7 @@ public abstract class CommonPanel
 
 
         String returnString = this.user.getTranslationOrNothing(reference + "entity.lore",
-            "[entity]", entityName,
+            "[no-entity]", entityName,
             "[cauldron]", cauldron,
             "[knowledge]", knowledge,
             "[ingredient]", mainIngredient,
