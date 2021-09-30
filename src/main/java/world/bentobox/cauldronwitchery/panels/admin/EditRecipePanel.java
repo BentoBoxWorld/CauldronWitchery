@@ -14,7 +14,6 @@ import world.bentobox.bentobox.api.panels.PanelListener;
 import world.bentobox.bentobox.api.panels.builders.PanelBuilder;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
 import world.bentobox.bentobox.api.user.User;
-import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.database.object.MagicStickObject;
 import world.bentobox.cauldronwitchery.database.object.recipe.BookRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.EntityRecipe;
@@ -77,6 +76,7 @@ public class EditRecipePanel extends CommonPanel
             this.user.getTranslation(Constants.TITLE + "edit-recipe"));
 
         PanelUtils.fillBorder(panelBuilder);
+        panelBuilder.listener(new IconChanger());
 
         if (this.recipe instanceof BookRecipe bookRecipe)
         {
@@ -85,7 +85,6 @@ public class EditRecipePanel extends CommonPanel
         else if (this.recipe instanceof ItemRecipe itemRecipe)
         {
             panelBuilder.item(10, this.createElementButton(itemRecipe));
-            panelBuilder.listener(new IconChanger());
         }
         else if (this.recipe instanceof EntityRecipe entityRecipe)
         {
@@ -180,7 +179,7 @@ public class EditRecipePanel extends CommonPanel
                     ConversationUtils.createStringInput(consumer,
                         user,
                         user.getTranslation(Constants.CONVERSATIONS + "write-book-name"),
-                        user.getTranslation(Constants.CONVERSATIONS + "book-name-updated"));
+                        user.getTranslation(Constants.CONVERSATIONS + "book-name-changed"));
                 }
 
                 return true;
@@ -205,8 +204,8 @@ public class EditRecipePanel extends CommonPanel
                 this.user.getTranslation(Constants.TIPS + "click-on-item")).
             icon(recipe.getIcon()).
             clickHandler((panel, user, clickType, slot) -> {
-                // Open challenges edit screen.
-                this.selectedButton = Button.REWARD_ITEM;
+                // Selects and deselects item
+                this.selectedButton = this.selectedButton == Button.REWARD_ITEM ? null : Button.REWARD_ITEM;
                 this.build();
 
                 return true;
@@ -273,6 +272,9 @@ public class EditRecipePanel extends CommonPanel
 
                 icon = new ItemStack(Material.REPEATER);
                 clickHandler = (panel, user, clickType, i) -> {
+                    // deselects item
+                    this.selectedButton = null;
+
                     Consumer<Number> numberConsumer = number -> {
                         if (number != null)
                         {
@@ -302,6 +304,9 @@ public class EditRecipePanel extends CommonPanel
 
                 icon = new ItemStack(Material.REPEATER);
                 clickHandler = (panel, user, clickType, i) -> {
+                    // deselects item
+                    this.selectedButton = null;
+
                     Consumer<Number> numberConsumer = number -> {
                         if (number != null)
                         {
@@ -330,7 +335,8 @@ public class EditRecipePanel extends CommonPanel
 
                 clickHandler = (panel, user, clickType, i) ->
                 {
-                    this.selectedButton = button;
+                    // selects / deselects the button.
+                    this.selectedButton = this.selectedButton == button ? null : button;
                     this.build();
                     return true;
                 };
@@ -361,12 +367,15 @@ public class EditRecipePanel extends CommonPanel
                         stream().
                         sorted(Comparator.comparing(ItemStack::getType)).
                         forEach(itemStack ->
-                            description.add(this.user.getTranslationOrNothing(reference + "list",
+                            description.add(this.user.getTranslationOrNothing(reference + "value",
                                 "[item]", Utils.prettifyObject(itemStack, this.user))));
                 }
 
                 icon = new ItemStack(Material.CHEST);
                 clickHandler = (panel, user, clickType, slot) -> {
+                    // deselects item
+                    this.selectedButton = null;
+
                     ItemSelector.open(this.user,
                         this.recipe.getExtraIngredients(),
                         (status, value) -> {
@@ -390,6 +399,9 @@ public class EditRecipePanel extends CommonPanel
 
                 icon = new ItemStack(Material.EXPERIENCE_BOTTLE);
                 clickHandler = (panel, user, clickType, i) -> {
+                    // deselects item
+                    this.selectedButton = null;
+
                     Consumer<Number> numberConsumer = number -> {
                         if (number != null)
                         {
@@ -418,6 +430,9 @@ public class EditRecipePanel extends CommonPanel
                     "[type]", Utils.prettifyObject(this.recipe.getCauldronType(), this.user)));
                 icon = new ItemStack(Material.CAULDRON);
                 clickHandler = (panel, user, clickType, slot) -> {
+                    // deselects item
+                    this.selectedButton = null;
+
                     Set<Material> validBlocks = new HashSet<>(Arrays.stream(Material.values()).toList());
                     validBlocks.remove(Material.CAULDRON);
                     validBlocks.remove(Material.WATER_CAULDRON);
@@ -450,6 +465,9 @@ public class EditRecipePanel extends CommonPanel
 
                 icon = new ItemStack(Material.LEAD);
                 clickHandler = (panel, user, clickType, i) -> {
+                    // deselects item
+                    this.selectedButton = null;
+
                     Consumer<Number> numberConsumer = number -> {
                         if (number != null)
                         {
@@ -491,6 +509,9 @@ public class EditRecipePanel extends CommonPanel
                 }
 
                 clickHandler = (panel, user, clickType, slot) -> {
+                    // deselects item
+                    this.selectedButton = null;
+
                     if (clickType.isRightClick())
                     {
                         this.recipe.setTemperature((Utils.getPreviousValue(Recipe.Temperature.values(),
@@ -523,7 +544,7 @@ public class EditRecipePanel extends CommonPanel
                     description.add(this.user.getTranslation(reference + "title"));
 
                     this.recipe.getPermissions().forEach(permission ->
-                        description.add(this.user.getTranslation(reference + "permission",
+                        description.add(this.user.getTranslation(reference + "value",
                             "[permission]", permission)));
                 }
 
@@ -531,6 +552,9 @@ public class EditRecipePanel extends CommonPanel
 
                 clickHandler = (panel, user, clickType, i) ->
                 {
+                    // deselects item
+                    this.selectedButton = null;
+
                     // Create consumer that process description change
                     Consumer<List<String>> consumer = value ->
                     {
@@ -621,17 +645,15 @@ public class EditRecipePanel extends CommonPanel
                     // Rebuild icon
                     EditRecipePanel.this.build();
                 }
-                else if (EditRecipePanel.this.selectedButton == Button.REWARD_ITEM)
+                else if (EditRecipePanel.this.selectedButton == Button.REWARD_ITEM &&
+                    EditRecipePanel.this.recipe instanceof ItemRecipe itemRecipe)
                 {
-                    if (EditRecipePanel.this.recipe instanceof ItemRecipe itemRecipe)
-                    {
-                        // set material and amount only. Other data should be removed.
-                        itemRecipe.setItemStack(event.getCurrentItem().clone());
-                        // Deselect icon
-                        EditRecipePanel.this.selectedButton = null;
-                        // Rebuild icon
-                        EditRecipePanel.this.build();
-                    }
+                    // set material and amount only. Other data should be removed.
+                    itemRecipe.setItemStack(event.getCurrentItem().clone());
+                    // Deselect icon
+                    EditRecipePanel.this.selectedButton = null;
+                    // Rebuild icon
+                    EditRecipePanel.this.build();
                 }
             }
         }
