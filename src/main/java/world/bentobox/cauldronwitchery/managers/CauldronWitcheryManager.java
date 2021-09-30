@@ -9,7 +9,6 @@ package world.bentobox.cauldronwitchery.managers;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.UnsafeValues;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;

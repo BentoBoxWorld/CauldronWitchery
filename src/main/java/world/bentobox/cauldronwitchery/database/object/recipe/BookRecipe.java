@@ -13,7 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import world.bentobox.bentobox.api.user.User;
-import world.bentobox.cauldronwitchery.utils.Utils;
 
 
 /**

@@ -7,12 +7,10 @@
 package world.bentobox.cauldronwitchery.panels.admin;
 
 
-import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.configuration.Config;

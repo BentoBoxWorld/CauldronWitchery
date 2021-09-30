@@ -11,7 +11,6 @@ import com.google.gson.annotations.Expose;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.cauldronwitchery.utils.Utils;
 
