@@ -368,9 +368,9 @@ public class CauldronWitcheryManager
             return null;
         }
 
-        bookMeta.setTitle(dataSection.getString("title"));
-        bookMeta.setAuthor(dataSection.getString("author"));
-        bookMeta.setDisplayName(dataSection.getString("display-name"));
+        bookMeta.setTitle(Util.translateColorCodes(dataSection.getString("title", "")));
+        bookMeta.setAuthor(Util.translateColorCodes(dataSection.getString("author", "")));
+        bookMeta.setDisplayName(Util.translateColorCodes(dataSection.getString("display-name", "")));
 
         // Add lang to the persistent data.
         bookMeta.getPersistentDataContainer().set(
@@ -386,7 +386,7 @@ public class CauldronWitcheryManager
 
         List<String> pages = new ArrayList<>(100);
 
-        ConfigurationSection pagesSection = bookTranslation.getConfigurationSection("pages");
+        ConfigurationSection pagesSection = dataSection.getConfigurationSection("pages");
 
         int lastFilledPage = 0;
 
@@ -403,6 +403,11 @@ public class CauldronWitcheryManager
                     pages.add(i, Util.translateColorCodes(pageContent));
                     lastFilledPage = i;
                 }
+                else
+                {
+                    // Add empty page.
+                    pages.add(i, "");
+                }
             }
         }
 
@@ -416,7 +421,7 @@ public class CauldronWitcheryManager
             map(MagicStickObject::getRecipeList).
             orElse(Collections.emptyList());
 
-        ConfigurationSection recipeSection = bookTranslation.getConfigurationSection("recipe");
+        ConfigurationSection recipeSection = dataSection.getConfigurationSection("recipe");
 
         if (recipeSection != null)
         {
@@ -426,7 +431,7 @@ public class CauldronWitcheryManager
 
                 if (recipe instanceof EntityRecipe entityRecipe)
                 {
-                    recipePage = new StringBuilder(recipeSection.getString("mob-recipePage", "").
+                    recipePage = new StringBuilder(recipeSection.getString("mob-header", "").
                         replace("[mob]", Utils.prettifyObject(entityRecipe.getEntityType(), user)).
                         replace("[level]", String.valueOf(recipe.getExperience())).
                         replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
@@ -434,7 +439,7 @@ public class CauldronWitcheryManager
                 }
                 else if (recipe instanceof ItemRecipe itemRecipe)
                 {
-                    recipePage = new StringBuilder(recipeSection.getString("item-recipePage", "").
+                    recipePage = new StringBuilder(recipeSection.getString("item-header", "").
                         replace("[item]", Utils.prettifyObject(itemRecipe.getItemStack(), user)).
                         replace("[level]", String.valueOf(recipe.getExperience())).
                         replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
@@ -459,7 +464,7 @@ public class CauldronWitcheryManager
                         continue;
                     }
 
-                    recipePage = new StringBuilder(recipeSection.getString("book-recipePage", "").
+                    recipePage = new StringBuilder(recipeSection.getString("book-header", "").
                         replace("[book]", name).
                         replace("[level]", String.valueOf(recipe.getExperience())).
                         replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
@@ -480,7 +485,19 @@ public class CauldronWitcheryManager
                         replace("[item]", Utils.prettifyObject(extraIngredient, user)));
                 }
 
-                pages.add(lastFilledPage++, Util.translateColorCodes(recipePage.toString()));
+                if (recipe.getTemperature() == Recipe.Temperature.COOL)
+                {
+                    recipePage.append("\n");
+                    recipePage.append(recipeSection.getString("cooling", ""));
+                }
+
+                if (recipe.getTemperature() == Recipe.Temperature.HEAT)
+                {
+                    recipePage.append("\n");
+                    recipePage.append(recipeSection.getString("heating", ""));
+                }
+
+                pages.set(lastFilledPage++, Util.translateColorCodes(recipePage.toString()));
             }
         }
 
@@ -491,8 +508,14 @@ public class CauldronWitcheryManager
 
             if (pageContent != null)
             {
-                pages.add(lastFilledPage, Util.translateColorCodes(pageContent));
+                pages.set(lastFilledPage, Util.translateColorCodes(pageContent));
             }
+        }
+
+        // Clear empty pages.
+        if (pages.size() >= lastFilledPage + 1)
+        {
+            pages.subList(lastFilledPage + 1, pages.size()).clear();
         }
 
         bookMeta.setPages(pages);
