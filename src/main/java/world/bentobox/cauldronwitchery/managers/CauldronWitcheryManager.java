@@ -192,7 +192,7 @@ public class CauldronWitcheryManager
         if (user != null)
         {
             Utils.sendMessage(user,
-                user.getTranslation(Constants.MESSAGES + "magic-stick-loaded",
+                user.getTranslation(Constants.CONVERSATIONS + "magic-stick-loaded",
                     "[stick]", magicStick.getMagicStick().getType().name()));
         }
 
