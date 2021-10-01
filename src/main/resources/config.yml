@@ -23,46 +23,17 @@ cauldron:
   # Setting it to `true` will remove all items inside cauldron if magic fails.
   # This option works only if `mix-in-cauldron` is enabled.
   remove-on-fail: false
-lightning:
-  successful:
-    # Allows to toggle lightning between visual and damage mode when recipe worked.
-    # Setting it to `true` will summon actual lightning that will damage and set things on fire
-    # Setting it to `false` will just make visual lightning and sound.
-    damage: false
-    # Allows to toggle lightning should target cauldron or player who performed successful magic.
-    # Setting it to `true` will force lightning to target player.
-    # Setting it to `false` will force lightning to target cauldron.
-    hit-player: false
-    # Allows to toggle lightning should destroy the cauldron after successful magic.
-    # Setting it to `true` will force lightning to destroy cauldron.
-    # Setting it to `false` will not allow lightning to destroy cauldron.
-    destroy-cauldron: false
-    # Allows to set the ticks daley between lightning strikes.
-    # If left empty, lightning will not strike.
-    timings:
-      - 20
-      - 30
-      - 40
-      - 50
   error:
-    # Allows to toggle lightning between visual and damage mode when recipe did worked.
-    # Setting it to `true` will summon actual lightning that will damage and set things on fire
-    # Setting it to `false` will just make visual lightning and sound.
-    damage: true
-    # Allows to toggle lightning should target cauldron or player when magic failed.
-    # Setting it to `true` will force lightning to target player.
-    # Setting it to `false` will force lightning to target cauldron.
-    hit-player: false
-    # Allows to toggle lightning should destroy the cauldron after failed magic.
-    # Setting it to `true` will force lightning to destroy cauldron.
-    # Setting it to `false` will not allow lightning to destroy cauldron.
+    # Allows to toggle failing should destroy the cauldron.
+    # Setting it to `true` will destroy cauldron.
+    # Setting it to `false` will not destroy cauldron.
     destroy-cauldron: false
-    # Allows to set the ticks daley between lightning strikes.
-    # If left empty, lightning will not strike.
-    timings:
-      - 20
-      - 40
-      - 60
+    # Allows to toggle if failing recipe should display correct reason or
+    # generic message about failing.
+    correct-message: true
+command:
+  # Allows to change label for admin command.
+  admin-command: witchery
 # 
 # This list stores GameModes in which CauldronWitchery addon should not work.
 # To disable addon it is necessary to write its name in new line that starts with -. Example:
