@@ -19,6 +19,12 @@ cauldron-witchery:
       book:
         parameters: '<player> <book>'
         description: 'Generates requested book for requested player.'
+      reload-books:
+        parameters: ''
+        description: 'Reloads book translations.'
+      reload-sticks:
+        parameters: ''
+        description: 'Reloads magic sticks from database.'
   gui:
     titles:
       # The title for the Main GUI
