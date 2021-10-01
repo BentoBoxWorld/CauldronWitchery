@@ -545,6 +545,21 @@ public class CauldronWitcheryManager
     }
 
 
+    /**
+     * This method returns all book names based on en-US language.
+     * en-US is considered as default books, and if someone removes them...
+     * well... it will just not return book names.
+     * @return List of book names.
+     */
+    public List<String> getAllBookNames()
+    {
+        return this.translatedBooks.keySet().stream().
+            filter(name -> name.endsWith("-en-US")).
+            map(name -> name.replace("-en-US", "")).
+            collect(Collectors.toList());
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variable
 // ---------------------------------------------------------------------

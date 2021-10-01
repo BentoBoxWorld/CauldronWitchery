@@ -13,6 +13,12 @@ cauldron-witchery:
       main:
         parameters: ''
         description: 'Main admin command. Opens GUI.'
+      give:
+        parameters: '<stick_id>'
+        description: 'Gives a method caller magic stick with given id.'
+      book:
+        parameters: '<player> <book>'
+        description: 'Generates requested book for requested player.'
   gui:
     titles:
       # The title for the Main GUI
@@ -546,6 +552,8 @@ cauldron-witchery:
   errors:
     no-player-data: "&c There are no stored player data"
     no-library-entries: "&c Could not find any entry with specified setting."
+    no-magic-stick: "&c Could not find magic stick with `[id]` for [gamemode]."
+    no-magic-book: "&c Could not find book with name: [book]."
   messages:
     # Message that appears if player has not a correct main ingredient in hand for magic stick.
     incorrect-main-ingredient: "&c Hmm, missing the last ingredient... What was the main item?"
