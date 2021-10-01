@@ -1,26 +1,19 @@
 name: CauldronWitchery
 main: world.bentobox.cauldronwitchery.CauldronWitcheryAddon
 version: ${version}${build.number}
+api-version: 1.17
 repository: 'BentoBoxWorld/CauldronWitchery'
 metrics: true
 
-authors:
+original-idea-authors:
   - ShakeforProtein
   - PhysicsProdigy
+authors:
   - BONNe
 
 softdepend: AcidIsland, BSkyBlock, CaveBlock, SkyGrid, Level
 
 permissions:
-  bskyblock.magicsummon:
-    description: Let the player use the '/island cauldronwitchery' command
-    default: true
-  acidisland.magicsummon:
-    description: Let the player use the '/ai cauldronwitchery' command
-    default: true
-  caveblock.magicsummon:
-    description: Let the player use the '/cave cauldronwitchery' command
-    default: true
-  skygrid.magicsummon:
-    description: Let the player use the '/skygrid cauldronwitchery' command
-    default: true
+  "[gamemode].admin.witchery":
+    description: Let the player use the '/[admin_cmd] witchery' command
+    default: op
