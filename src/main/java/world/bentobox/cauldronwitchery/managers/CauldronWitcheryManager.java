@@ -111,46 +111,13 @@ public class CauldronWitcheryManager
 
 
     /**
-     * This method tries to load all book translations.
+     * This method reload sticks.
      */
-    private void loadBookTranslations()
+    public void reloadSticks()
     {
-        // Filter for files ending with .yml with a name whose length is >= 6 (xx.yml)
-        FilenameFilter ymlFilter = (dir, name) ->
-            name.toLowerCase(java.util.Locale.ENGLISH).endsWith(".yml") && name.length() >= 6;
-
-        // Get the folder
-        File localeDir = new File(this.addon.getDataFolder(), "books");
-
-        if (!localeDir.exists())
-        {
-            // If there is no locale folder, then return
-            return;
-        }
-
-        // Run through the files and store the locales
-        for (File bookTranslation : Objects.requireNonNull(localeDir.listFiles(ymlFilter)))
-        {
-            // Drop YML at the end.
-            String bookName = bookTranslation.getName().substring(0, bookTranslation.getName().length() - 4);
-
-            try
-            {
-                YamlConfiguration languageYaml = YamlConfiguration.loadConfiguration(bookTranslation);
-
-                if (!this.translatedBooks.containsKey(bookName))
-                {
-                    // Merge into current bookTranslation
-                    this.translatedBooks.put(bookName, languageYaml);
-                }
-            }
-            catch (Exception e)
-            {
-                this.addon.logError("Could not load '" + bookTranslation.getName() + "' : " + e.getMessage()
-                    + " with the following cause '" + e.getCause() + "'." +
-                    " The file has likely an invalid YML format or has been made unreadable during the process.");
-            }
-        }
+        this.magicStickDataCache.clear();
+        this.addon.log("Loading magic sticks from database...");
+        this.magicStickDatabase.loadObjects().forEach(this::loadMagicStick);
     }
 
 
@@ -325,6 +292,61 @@ public class CauldronWitcheryManager
 // ---------------------------------------------------------------------
 // Section: Book Section
 // ---------------------------------------------------------------------
+
+
+    /**
+     * This method reloads books.
+     */
+    public void reloadBooks()
+    {
+        this.translatedBooks.clear();
+        this.addon.log("Loading book translations...");
+        this.loadBookTranslations();
+    }
+
+
+    /**
+     * This method tries to load all book translations.
+     */
+    private void loadBookTranslations()
+    {
+        // Filter for files ending with .yml with a name whose length is >= 6 (xx.yml)
+        FilenameFilter ymlFilter = (dir, name) ->
+            name.toLowerCase(java.util.Locale.ENGLISH).endsWith(".yml") && name.length() >= 6;
+
+        // Get the folder
+        File localeDir = new File(this.addon.getDataFolder(), "books");
+
+        if (!localeDir.exists())
+        {
+            // If there is no locale folder, then return
+            return;
+        }
+
+        // Run through the files and store the locales
+        for (File bookTranslation : Objects.requireNonNull(localeDir.listFiles(ymlFilter)))
+        {
+            // Drop YML at the end.
+            String bookName = bookTranslation.getName().substring(0, bookTranslation.getName().length() - 4);
+
+            try
+            {
+                YamlConfiguration languageYaml = YamlConfiguration.loadConfiguration(bookTranslation);
+
+                if (!this.translatedBooks.containsKey(bookName))
+                {
+                    // Merge into current bookTranslation
+                    this.translatedBooks.put(bookName, languageYaml);
+                }
+            }
+            catch (Exception e)
+            {
+                this.addon.logError("Could not load '" + bookTranslation.getName() + "' : " + e.getMessage()
+                    + " with the following cause '" + e.getCause() + "'." +
+                    " The file has likely an invalid YML format or has been made unreadable during the process.");
+            }
+        }
+    }
 
 
     /**

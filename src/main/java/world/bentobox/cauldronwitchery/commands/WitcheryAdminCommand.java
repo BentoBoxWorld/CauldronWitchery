@@ -43,8 +43,8 @@ public class WitcheryAdminCommand extends CompositeCommand
         this.setParametersHelp(Constants.ADMIN_COMMANDS + "main.parameters");
         this.setDescription(Constants.ADMIN_COMMANDS + "main.description");
 
-        new GenerateMagicStickCommand(this.getAddon(), this);
-        new CraftBookCommand(this.getAddon(), this);
+        new GetCommand(this.getAddon(), this);
+        new ReloadCommand(this.getAddon(), this);
     }
 
 
@@ -69,6 +69,37 @@ public class WitcheryAdminCommand extends CompositeCommand
 // ---------------------------------------------------------------------
 // Section: Sub commands
 // ---------------------------------------------------------------------
+
+
+    /**
+     * Generic get wrapper. This command is just a wrapper around `get book` or `get stick`
+     */
+    public static class GetCommand extends CompositeCommand
+    {
+        public GetCommand(CauldronWitcheryAddon addon, CompositeCommand parent)
+        {
+            super(addon, parent, "get");
+        }
+
+
+        @Override
+        public void setup()
+        {
+            this.setOnlyPlayer(true);
+            this.setPermission("admin.witchery");
+
+            new GenerateMagicStickCommand(this.getAddon(), this);
+            new CraftBookCommand(this.getAddon(), this);
+        }
+
+
+        @Override
+        public boolean execute(User user, String s, List<String> list)
+        {
+            this.showHelp(this, user);
+            return true;
+        }
+    }
 
 
     /**
@@ -263,6 +294,100 @@ public class WitcheryAdminCommand extends CompositeCommand
             }
 
             return Optional.of(Util.tabLimit(returnList, lastString));
+        }
+    }
+
+
+    /**
+     * Generic reload wrapper. This command is just a wrapper around `reload books` or `reload sticks`
+     */
+    public static class ReloadCommand extends CompositeCommand
+    {
+        public ReloadCommand(CauldronWitcheryAddon addon, CompositeCommand parent)
+        {
+            super(addon, parent, "reload");
+        }
+
+
+        @Override
+        public void setup()
+        {
+            this.setOnlyPlayer(true);
+            this.setPermission("admin.witchery");
+
+            new ReloadMagicStickCommand(this.getAddon(), this);
+            new ReloadBookCommand(this.getAddon(), this);
+        }
+
+
+        @Override
+        public boolean execute(User user, String s, List<String> list)
+        {
+            this.showHelp(this, user);
+            return true;
+        }
+    }
+
+
+    /**
+     * This method reloads magic sticks from database.
+     */
+    public static class ReloadMagicStickCommand extends CompositeCommand
+    {
+        public ReloadMagicStickCommand(CauldronWitcheryAddon addon, CompositeCommand parent)
+        {
+            super(addon, parent, "sticks");
+        }
+
+
+        @Override
+        public void setup()
+        {
+            this.setOnlyPlayer(true);
+            this.setPermission("admin.witchery");
+            this.setParametersHelp(Constants.ADMIN_COMMANDS + "reload-sticks.parameters");
+            this.setDescription(Constants.ADMIN_COMMANDS + "reload-sticks.description");
+        }
+
+
+        @Override
+        public boolean execute(User user, String s, List<String> list)
+        {
+            this.<CauldronWitcheryAddon>getAddon().getAddonManager().reloadSticks();
+            Utils.sendMessage(user, user.getTranslation(Constants.CONVERSATIONS + "sticks-reload"));
+            return true;
+        }
+    }
+
+
+    /**
+     * This method reloads books from database.
+     */
+    public static class ReloadBookCommand extends CompositeCommand
+    {
+        public ReloadBookCommand(CauldronWitcheryAddon addon, CompositeCommand parent)
+        {
+            super(addon, parent, "books");
+        }
+
+
+        @Override
+        public void setup()
+        {
+            this.setOnlyPlayer(true);
+            this.setPermission("admin.witchery");
+
+            this.setParametersHelp(Constants.ADMIN_COMMANDS + "reload-books.parameters");
+            this.setDescription(Constants.ADMIN_COMMANDS + "reload-books.description");
+        }
+
+
+        @Override
+        public boolean execute(User user, String s, List<String> list)
+        {
+            this.<CauldronWitcheryAddon>getAddon().getAddonManager().reloadBooks();
+            Utils.sendMessage(user, user.getTranslation(Constants.CONVERSATIONS + "books-reload"));
+            return true;
         }
     }
 }

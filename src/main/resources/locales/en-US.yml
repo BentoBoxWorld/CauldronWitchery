@@ -549,6 +549,8 @@ cauldron-witchery:
     # Message that appears after updating search value.
     search-updated: "&a Search value updated."
     magic-stick-loaded: "&a Magic stick [stick] is loaded."
+    books-reload: "&a Books are reloaded."
+    sticks-reload: "&a Magic sticks are reloaded."
   errors:
     no-player-data: "&c There are no stored player data"
     no-library-entries: "&c Could not find any entry with specified setting."
