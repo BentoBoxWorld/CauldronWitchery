@@ -104,21 +104,6 @@
             <id>codemc-repo</id>
             <url>https://repo.codemc.org/repository/maven-public/</url>
         </repository>
-        <!--Vault Repo is down. -->
-        <!--<repository> -->
-        <!--<id>vault-repo</id> -->
-        <!--<url>http://nexus.hc.to/content/repositories/pub_releases</url> -->
-        <!--</repository> -->
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-        <!-- Panel Utils Repository  -->
-        <repository>
-            <id>github</id>
-            <name>GitHub BONNe Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/BONNePlayground/PanelUtils</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -132,6 +117,7 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>plugin-annotations</artifactId>
             <version>1.2.3-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>world.bentobox</groupId>
@@ -242,21 +228,21 @@
                 <configuration>
                     <minimizeJar>true</minimizeJar>
                     <artifactSet>
-                        <excludes>
-                            <exclude>com.googlecode.json-simple:json-simple</exclude>
-                            <exclude>org.jetbrains:annotations</exclude>
-                            <exclude>com.google.guava:*</exclude>
-                            <exclude>commons-lang:commons-lang</exclude>
-                            <exclude>org.yaml:snakeyaml</exclude>
-                            <exclude>org.apache.maven.shared:*</exclude>
-                            <exclude>org.bukkit:*</exclude>
-                            <exclude>org.apache.maven:*</exclude>
-                            <exclude>com.google.code.gson:*</exclude>
-                            <exclude>junit:*</exclude>
-                            <exclude>org.eclipse.jdt:*</exclude>
-                            <exclude>org.hamcrest:*</exclude>
-                        </excludes>
+                        <includes>
+                            <include>lv.id.bonne:panelutils:*</include>
+                        </includes>
                     </artifactSet>
+                    <transformers>
+                        <!-- Add a transformer to exclude any other manifest files (possibly from dependencies). -->
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                            <resource>MANIFEST.MF</resource>
+                        </transformer>
+                        <!-- Add a transformer to include your custom manifest file. -->
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            <resource>META-INF/MANIFEST.MF</resource>
+                            <file>src/main/resources/META-INF/MANIFEST.MF</file>
+                        </transformer>
+                    </transformers>
                 </configuration>
                 <executions>
                     <execution>
