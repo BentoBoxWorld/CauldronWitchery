@@ -124,7 +124,7 @@ cauldron-witchery:
           &7 Allows to wipe
           &7 magic stick database.
       wipe_user_database:
-        name: "&f&l Wipe Database"
+        name: "&f&l Wipe User Database"
         description: |-
           &7 Allows to wipe
           &7 Cauldron Witchery
@@ -533,9 +533,9 @@ cauldron-witchery:
     # Message that appears after successful permission updating.
     permissions-changed: "&a Success, challenge permissions were updated."
     # Message that appears after clicking
-    write-book-name: "&e Please enter a new reward text in chat and 'quit' on a line by itself to finish."
+    write-book-name: "&e Please enter a new book name in chat or 'cancel' on a line by itself to cancel."
     # Message that appears after successful reward-text change.
-    book-name-changed: "&a Success, the reward text was updated."
+    book-name-changed: "&a Success, the book name was updated."
     # Message that appears when user clicks on library installation.
     start-downloading: "&a Starting to download and import Cauldron Witchery Library."
     # Message that appears when writing multiline text.
@@ -577,9 +577,9 @@ cauldron-witchery:
     # Message that appears if player has not filled cauldron with a liquid enough.
     not-filled-cauldron: "&c Hmm, may be I need to fill the cauldron..."
     # Message that appears if cauldron is too hot. Requires extra cooling below it.
-    too-hot-cauldron: "&c Hmm, need to add more heat to the cauldron... May be put hot below it?"
+    too-cold-cauldron: "&c Hmm, need to add more heat to the cauldron... May be put hot below it?"
     # Message that appears if cauldron is too cold. Requires extra heating below it.
-    too-cold-cauldron: "&c Hmm, need to cool cauldron at the end... May be put something cold below it?"
+    too-hot-cauldron: "&c Hmm, need to cool cauldron at the end... May be put something cold below it?"
     # Message that appears if player has not enough main ingredient in offhand.
     missing-main-ingredient: "&c Hmm, need more last ingredients..."
     # Message that appears if player has not enough experience.
