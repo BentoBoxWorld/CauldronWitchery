@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,11 +91,12 @@ public class RecipeProcessingTask implements Runnable
         // This list will contain last error message for the failure.
         StringBuilder lastErrorMessage = new StringBuilder();
 
-        Stream<Recipe> recipeStream = this.magicStick.getRecipeList().stream().
+        List<Recipe> recipeList = this.magicStick.getRecipeList().stream().
             filter(recipe -> recipe.getMainIngredient() != null).
-            filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand));
+            filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand)).
+            collect(Collectors.toList());
 
-        if (recipeStream.toList().isEmpty())
+        if (recipeList.isEmpty())
         {
             // Missing main ingredient
             lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "incorrect-main-ingredient"));
@@ -102,11 +104,10 @@ public class RecipeProcessingTask implements Runnable
         else
         {
             // Filter by cauldron type.
-            recipeStream = recipeStream.filter(recipe ->
-                recipe.getCauldronType().equals(this.block.getType()));
+            recipeList.removeIf(recipe -> !recipe.getCauldronType().equals(this.block.getType()));
         }
 
-        if (recipeStream.toList().isEmpty())
+        if (recipeList.isEmpty())
         {
             // Missing main ingredient
             lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "incorrect-cauldron"));
@@ -114,11 +115,11 @@ public class RecipeProcessingTask implements Runnable
         else
         {
             // Filter by extra ingredients.
-            recipeStream = recipeStream.filter(recipe -> recipe.getExtraIngredients().stream().allMatch(
+            recipeList.removeIf(recipe -> !recipe.getExtraIngredients().stream().allMatch(
                 ingredient -> this.containsAtLeast(ingredient, 1)));
         }
 
-        if (recipeStream.toList().isEmpty())
+        if (recipeList.isEmpty())
         {
             // Missing extra ingredients
             lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "incorrect-extra-ingredients"));
@@ -138,7 +139,7 @@ public class RecipeProcessingTask implements Runnable
         else
         {
             // Find any from remaining.
-            recipeOptional = recipeStream.findAny();
+            recipeOptional = recipeList.stream().findAny();
         }
 
         if (recipeOptional.isPresent() &&
