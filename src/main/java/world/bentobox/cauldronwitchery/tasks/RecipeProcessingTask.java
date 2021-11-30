@@ -573,7 +573,7 @@ public class RecipeProcessingTask implements Runnable
                                 ItemStack itemStack = itemEntity.getItemStack();
 
                                 // Remove either the full amount or the remaining amount
-                                if (itemStack.getAmount() >= amount)
+                                if (itemStack.getAmount() > amount)
                                 {
                                     itemStack.setAmount(itemStack.getAmount() - amount);
                                     // Update entity item stack.
