@@ -519,7 +519,8 @@ public class RecipeProcessingTask implements Runnable
         offhandItem.setAmount(offhandItem.getAmount() - recipe.getMainIngredient().getAmount());
 
         // Reduce player xp.
-        this.user.getPlayer().setExp(recipe.getExperience());
+        int experience = this.user.getPlayer().getTotalExperience() - (int) recipe.getExperience();
+        this.user.getPlayer().setTotalExperience(experience);
 
         // Empty the cauldron
         if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
