@@ -603,6 +603,8 @@ cauldron-witchery:
     no-library-entries: "&c Neizdevās atrast bibliotēkas ierakstu."
     no-magic-stick: "&c Neizdevās atrast burvju nūjiņu ar `[id]` iekš [gamemode]."
     no-magic-book: "&c Neizdevās atrast grāmatu: [book]."
+    no-available-sticks: "&c Neizdevās atrast nevienu burvju nūjiņu iekš [gamemode]."
+    player-not-found: "&c Neizdevās atrast spēlētāju."
     no-load: "&c Neizdevās ielādēt [file]. Iemesls: [description]"
     no-file: "&c Neizdevās atrast [file]."
     not-a-gamemode-world: "&c Pasaule [world] nav Papildinājuma Spēles pasaule."
