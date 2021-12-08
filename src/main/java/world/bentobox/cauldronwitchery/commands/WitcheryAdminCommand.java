@@ -1,5 +1,7 @@
 package world.bentobox.cauldronwitchery.commands;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -116,7 +118,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         @Override
         public void setup()
         {
-            this.setOnlyPlayer(true);
+            this.setOnlyPlayer(false);
             this.setPermission("admin.witchery");
             this.setParametersHelp(Constants.ADMIN_COMMANDS + "give.parameters");
             this.setDescription(Constants.ADMIN_COMMANDS + "give.description");
@@ -126,7 +128,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         @Override
         public boolean execute(User user, String s, List<String> list)
         {
-            if (list.size() != 1)
+            if (list.isEmpty() || list.size() > 2)
             {
                 this.showHelp(this, user);
                 return true;
@@ -134,18 +136,39 @@ public class WitcheryAdminCommand extends CompositeCommand
 
             String gamemode = Utils.getGameMode(this.getWorld());
 
-            MagicStickObject object = this.<CauldronWitcheryAddon>getAddon().
-                getAddonManager().getMagicStickById(gamemode.toLowerCase() + "_" + list.get(0));
+            MagicStickObject object;
+            User target;
+
+            if (list.size() == 1)
+            {
+                object = this.<CauldronWitcheryAddon>getAddon().
+                    getAddonManager().getMagicStickById(gamemode.toLowerCase() + "_" + list.get(0));
+                target = user;
+            }
+            else
+            {
+                object = this.<CauldronWitcheryAddon>getAddon().
+                    getAddonManager().getMagicStickById(gamemode.toLowerCase() + "_" + list.get(1));
+
+                UUID uuid = Util.getUUID(list.get(0));
+
+                target = uuid == null ? null : User.getInstance(uuid);
+            }
+
 
             if (object == null)
             {
                 Utils.sendMessage(user, user.getTranslation(Constants.ERRORS + "no-magic-stick",
-                    "[id]", list.get(0),
+                    "[id]", list.size() == 1 ? list.get(0) : list.get(1),
                     "[gamemode]", Utils.getGameMode(this.getWorld())));
             }
-            else if (user.isPlayer() && user.getLocation() != null)
+            else if (target == null || !target.isPlayer() || target.getLocation() == null)
             {
-                this.getWorld().dropItemNaturally(user.getLocation(), object.getMagicStick());
+                Utils.sendMessage(user, user.getTranslation(Constants.ERRORS + "player-not-found"));
+            }
+            else
+            {
+                target.getWorld().dropItemNaturally(target.getLocation(), object.getMagicStick());
             }
 
             return true;
@@ -157,12 +180,12 @@ public class WitcheryAdminCommand extends CompositeCommand
         {
             if (args.isEmpty()) return Optional.empty();
 
-            String lastString = args.get(args.size() - 1);
+            String lastString = args.get(args.size() - 1).toLowerCase();
 
             List<String> returnList;
             final int size = args.size();
 
-            if (size == 1)
+            if (size == 4 || size == 5)
             {
                 String gamemode = Utils.getGameMode(this.getWorld()).toLowerCase() + "_";
 
@@ -171,8 +194,15 @@ public class WitcheryAdminCommand extends CompositeCommand
                     stream().
                     map(MagicStickObject::getUniqueId).
                     map(name -> name.replaceFirst(gamemode, "")).
-                    filter(magicStick -> magicStick.toLowerCase().startsWith(args.get(1).toLowerCase())).
                     collect(Collectors.toList());
+
+                if (size == 4)
+                {
+                    // Add all players to the first list.
+                    returnList.addAll(Bukkit.getOnlinePlayers().stream().
+                        map(Player::getName).
+                        collect(Collectors.toList()));
+                }
             }
             else
             {

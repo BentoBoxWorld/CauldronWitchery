@@ -14,8 +14,8 @@ cauldron-witchery:
         parameters: ''
         description: 'Main admin command. Opens GUI.'
       give:
-        parameters: '<stick_id>'
-        description: 'Gives a method caller magic stick with given id.'
+        parameters: '[player] <stick_id>'
+        description: 'Gives a method caller or targeted player magic stick with given id.'
       book:
         parameters: '<player> <book>'
         description: 'Generates requested book for requested player.'
@@ -562,6 +562,8 @@ cauldron-witchery:
     no-library-entries: "&c Could not find any entry with specified setting."
     no-magic-stick: "&c Could not find magic stick with `[id]` for [gamemode]."
     no-magic-book: "&c Could not find book with name: [book]."
+    no-available-sticks: "&c Could not find any magic sticks for [gamemode]."
+    player-not-found: "&c Given player is not found."
     no-load: "&c Could not load [file]. Reason: [description]"
     no-file: "&c Cannot find [file]."
     not-a-gamemode-world: "&c World [world] is not a GameMode World."
