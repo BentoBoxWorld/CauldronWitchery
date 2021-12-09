@@ -15,6 +15,8 @@ magic-sticks:
     # Sets the description for magic stick.
     description: |-
       &7 Fragile Stick
+    # Sets the cost for magic stick. Requires vault and plugin with economy.
+    cost: 0
     # There are 3 type of recipes: mob, item and book.
     # Each recipe starts with `- [recipe_type]` see below.
     recipes:

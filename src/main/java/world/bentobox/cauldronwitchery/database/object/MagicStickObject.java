@@ -9,15 +9,15 @@ package world.bentobox.cauldronwitchery.database.object;
 
 import com.google.gson.annotations.Expose;
 import org.bukkit.inventory.ItemStack;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.bukkit.inventory.meta.ItemMeta;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.database.objects.DataObject;
 import world.bentobox.bentobox.database.objects.Table;
+import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.database.object.recipe.Recipe;
+import world.bentobox.cauldronwitchery.utils.Utils;
 
 
 /**
@@ -53,7 +53,20 @@ public class MagicStickObject implements DataObject
      */
     public ItemStack getMagicStick()
     {
-        return magicStick.clone();
+        ItemStack itemStack = this.magicStick.clone();
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        if (itemMeta != null)
+        {
+            // Update display name
+            itemMeta.setDisplayName(Util.translateColorCodes(this.friendlyName));
+            // Update description
+            itemMeta.setLore(Arrays.stream(Util.translateColorCodes(this.getDescription()).split("\n")).toList());
+            // Update meta.
+            itemStack.setItemMeta(itemMeta);
+        }
+
+        return itemStack;
     }
 
 
@@ -117,8 +130,11 @@ public class MagicStickObject implements DataObject
 // ---------------------------------------------------------------------
 
 
-    @Override
-    public MagicStickObject clone()
+    /**
+     * This method copies the current object.
+     * @return Copy of current object.
+     */
+    public MagicStickObject copy()
     {
         MagicStickObject object = new MagicStickObject();
         object.setUniqueId(this.uniqueId);
@@ -133,6 +149,8 @@ public class MagicStickObject implements DataObject
 
         object.setPermissions(new HashSet<>(this.getPermissions()));
         object.setComplexity(this.complexity);
+
+        object.setPurchaseCost(this.purchaseCost);
 
         return object;
     }
@@ -226,6 +244,28 @@ public class MagicStickObject implements DataObject
     }
 
 
+    /**
+     * Gets purchase cost.
+     *
+     * @return the purchase cost
+     */
+    public double getPurchaseCost()
+    {
+        return purchaseCost;
+    }
+
+
+    /**
+     * Sets purchase cost.
+     *
+     * @param purchaseCost the purchase cost
+     */
+    public void setPurchaseCost(double purchaseCost)
+    {
+        this.purchaseCost = purchaseCost;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -283,4 +323,10 @@ public class MagicStickObject implements DataObject
      */
     @Expose
     private float complexity;
+
+    /**
+     * Money cost for buying the magic stick.
+     */
+    @Expose
+    private double purchaseCost;
 }

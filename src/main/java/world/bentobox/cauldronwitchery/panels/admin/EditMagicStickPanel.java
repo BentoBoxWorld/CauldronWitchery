@@ -168,6 +168,7 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
         panelBuilder.item(20, this.createButton(Button.DESCRIPTION));
 
         panelBuilder.item(13, this.createButton(Button.BOOK));
+        panelBuilder.item(22, this.createButton(Button.COST));
         //panelBuilder.item(22, this.createButton(Button.COMPLEXITY));
         panelBuilder.item(31, this.createButton(Button.PERMISSIONS));
     }
@@ -526,6 +527,37 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
                 description.add("");
                 description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
             }
+            case COST -> {
+                description.add(this.user.getTranslation(reference + "value",
+                    Constants.PARAMETER_NUMBER, String.valueOf(this.magicStick.getPurchaseCost())));
+
+                icon = new ItemStack(this.addon.isEconomyProvided() ? Material.GOLD_INGOT : Material.BARRIER);
+                clickHandler = (panel, user, clickType, i) -> {
+                    this.selectedButton = null;
+
+                    Consumer<Number> numberConsumer = number -> {
+                        if (number != null)
+                        {
+                            this.magicStick.setPurchaseCost(number.doubleValue());
+                        }
+
+                        // reopen panel
+                        this.build();
+                    };
+
+                    ConversationUtils.createNumericInput(numberConsumer,
+                        this.user,
+                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
+                        0,
+                        Double.POSITIVE_INFINITY);
+
+                    return true;
+                };
+                glow = false;
+
+                description.add("");
+                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
+            }
             case BOOK -> {
                 icon = new ItemStack(Material.WRITTEN_BOOK);
 
@@ -744,6 +776,8 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
 
         PERMISSIONS,
         COMPLEXITY,
+
+        COST,
 
         ADD_RECIPE,
         REMOVE_RECIPE

@@ -21,6 +21,7 @@ import java.io.FilenameFilter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import net.milkbowl.vault.economy.EconomyResponse;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.Database;
 import world.bentobox.bentobox.util.Util;
@@ -579,6 +580,79 @@ public class CauldronWitcheryManager
             filter(name -> name.endsWith("-en-US")).
             map(name -> name.replace("-en-US", "")).
             collect(Collectors.toList());
+    }
+
+
+    /**
+     * Returns if given user can buy this magic stick.
+     *
+     * @param magicStick the magic stick
+     * @param user the user
+     * @return the boolean true, if user has permissions to buy magic stick.
+     */
+    public boolean canPurchase(MagicStickObject magicStick, User user)
+    {
+        return magicStick.getPermissions().isEmpty() ||
+            user.isOp() ||
+            magicStick.getPermissions().stream().allMatch(user::hasPermission);
+    }
+
+
+    /**
+     * This method process magic stick purchase.
+     * @param user User who buys magic stick.
+     * @param magicStick Magic Stick object that is purchased.
+     */
+    public void purchaseStick(User user, MagicStickObject magicStick)
+    {
+        if (this.addon.isEconomyProvided())
+        {
+            if (this.addon.getEconomyProvider().has(user, magicStick.getPurchaseCost()) && user.getLocation() != null)
+            {
+                EconomyResponse withdraw = this.addon.getEconomyProvider().withdraw(user, magicStick.getPurchaseCost());
+
+                if (withdraw.transactionSuccess())
+                {
+                    user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+
+                    String name = magicStick.getFriendlyName().isBlank() ?
+                        Utils.prettifyObject(magicStick.getMagicStick(), user) :
+                        magicStick.getFriendlyName();
+
+                    Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "purchased-stick",
+                        Constants.PARAMETER_NAME, name,
+                        Constants.PARAMETER_NUMBER, String.valueOf(magicStick.getPurchaseCost())));
+                }
+                else
+                {
+                    Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "could-not-withdraw",
+                        Constants.PARAMETER_VALUE, withdraw.errorMessage));
+                }
+            }
+            else
+            {
+                String name = magicStick.getFriendlyName().isBlank() ?
+                    Utils.prettifyObject(magicStick.getMagicStick(), user) :
+                    magicStick.getFriendlyName();
+
+                Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "not-enough-money",
+                    Constants.PARAMETER_NAME, name));
+            }
+        }
+        else
+        {
+            if (user.getLocation() != null)
+            {
+                user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+
+                String name = magicStick.getFriendlyName().isBlank() ?
+                    Utils.prettifyObject(magicStick.getMagicStick(), user) :
+                    magicStick.getFriendlyName();
+
+                Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "free-stick",
+                    Constants.PARAMETER_NAME, name));
+            }
+        }
     }
 
 

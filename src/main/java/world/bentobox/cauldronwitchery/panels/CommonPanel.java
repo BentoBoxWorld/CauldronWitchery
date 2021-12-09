@@ -19,6 +19,7 @@ import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
+import world.bentobox.cauldronwitchery.database.object.MagicStickObject;
 import world.bentobox.cauldronwitchery.database.object.recipe.BookRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.EntityRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.ItemRecipe;
@@ -444,6 +445,73 @@ public abstract class CommonPanel
         }
 
         return "";
+    }
+
+
+    /**
+     * Generate stick description string.
+     *
+     * @param magicStick the magic stick
+     * @param target the target
+     * @return the string
+     */
+    protected String generateStickDescription(MagicStickObject magicStick, User target)
+    {
+        final String reference = Constants.DESCRIPTIONS + "stick.";
+
+        String costString;
+
+        if (this.addon.isEconomyProvided())
+        {
+            costString = this.user.getTranslationOrNothing(reference + "cost",
+                Constants.PARAMETER_NUMBER, String.valueOf(magicStick.getPurchaseCost()));
+        }
+        else
+        {
+            costString = "";
+        }
+
+        String permissions;
+
+        if (!magicStick.getPermissions().isEmpty())
+        {
+            // Yes list duplication for complete menu.
+            List<String> missingPermissions = magicStick.getPermissions().stream().
+                filter(permission -> target == null || !target.hasPermission(permission)).
+                sorted().
+                collect(Collectors.toList());
+
+            StringBuilder permissionBuilder = new StringBuilder();
+
+            if (missingPermissions.size() == 1)
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
+                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
+            }
+            else if (!missingPermissions.isEmpty())
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
+                missingPermissions.forEach(permission ->
+                {
+                    permissionBuilder.append("\n");
+                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
+                        Constants.PARAMETER_PERMISSION, permission));
+                });
+            }
+
+            permissions = permissionBuilder.toString();
+        }
+        else
+        {
+            permissions = "";
+        }
+
+        String returnString = this.user.getTranslation(reference + "lore",
+            "[description]", magicStick.getDescription(),
+            "[cost]", costString,
+            "[permissions]", permissions);
+
+        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
     }
 
 

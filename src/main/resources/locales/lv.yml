@@ -9,6 +9,10 @@ meta:
 
 cauldron-witchery:
   commands:
+    player:
+      main:
+        parameters: ''
+        description: 'Galvenā spēlētāju komanda. Atver izvēlni.'
     admin:
       main:
         parameters: ''
@@ -27,6 +31,8 @@ cauldron-witchery:
         description: 'Pārlādē maģiskās nūjiņas no datubāzes.'
   gui:
     titles:
+      sticks-gui: "&0&l Burvju Nūjiņas"
+      recipes-gui: "&0&l Burvestības"
       # The title for the Main GUI
       admin-panel: "&0&l Administratora Panelis"
       edit-stick: "&0&l Labot Burvju Nūjiņu: [stick]"
@@ -172,6 +178,12 @@ cauldron-witchery:
         description: |-
           &7 Mainīt sarežģītību.
         value: "&7 Šobrīd: &r [number]"
+      cost:
+        name: "&f&l Cena"
+        description: |-
+          &7 Mainīt burvju nūjiņas
+          &7 cenu.
+        value: "&7 Šobrīd: &r $[number]"
       add_recipe:
         name: "&f&l Pievienot Recepti"
         description: |-
@@ -467,6 +479,12 @@ cauldron-witchery:
       select-before: |-
         &e Izvēlies &7 elementu(-s)
         &7 pirms turpināt.
+      left-click-to-view: |-
+        &e Kreisais klikšķis,
+        &7 lai skatītu burvestības.
+      right-click-to-buy: |-
+        &e Labais klikšķis,
+        &7 lai pirktu.
     descriptions:
       # Text that is added for selected element.
       selected: "&2 Izvēlēts"
@@ -513,6 +531,15 @@ cauldron-witchery:
         temperature-normal: "&7 Normāla temperatūra"
         temperature-cool: "&7 Nepieciešama dzesēšana"
         temperature-heat: "&7 Nepieciešama karsēšana"
+        permission-single: "&7 Nepieciešama: [permission]"
+        permissions-title: "&7 Atļaujas:"
+        permissions-element: "&7 - [permission]"
+      stick:
+        lore: |-
+          [description]
+          [cost]
+          [permissions]
+        cost: "&7 Cena: $[number]"
         permission-single: "&7 Nepieciešama: [permission]"
         permissions-title: "&7 Atļaujas:"
         permissions-element: "&7 - [permission]"
@@ -598,6 +625,7 @@ cauldron-witchery:
     magic-stick-loaded: "&a Burvju nūjiņa [stick] ir ielādēta."
     books-reload: "&a Grāmatas pārlādētas."
     sticks-reload: "&a  Burvju nūjiņas pārlādētas."
+    no-recipes: "&c Neizdevās atrast nevienu recepti priekš &r [stick]"
   errors:
     no-player-data: "&c Nav saglabāti spēlētāju dati."
     no-library-entries: "&c Neizdevās atrast bibliotēkas ierakstu."
@@ -637,6 +665,14 @@ cauldron-witchery:
     something-went-wrong: "&4 Eksperiments nogāja greizi!!!"
     # Message that appears at the end of successful recipe.
     it-worked: "&d Tas.... Tas... Tas nostrādāta!!!"
+    # Message that appears when player buys a magic stick
+    purchased-stick: "&d Tu iegādājies &r [name] &r&d par [value]."
+    # Message that appears when player gets a stick for free (no economy provided).
+    free-stick: "&d Tu iegādājies &r [name]."
+    # Message that appears when player does not have enough money.
+    not-enough-money: "&c Tev pietrūkst līdzekļi, lai iegādātos &r [name]."
+    # Message that appears when something went wrong while withdrawing founds.
+    could-not-withdraw: "&c Kaut kas nogāja greizi cenšoties pārskaitīt līdzekļus. Kļūda: [value]"
 protection:
   flags:
     CAULDRON_WITCHERY_ISLAND_PROTECTION:

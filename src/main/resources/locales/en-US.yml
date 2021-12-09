@@ -9,6 +9,10 @@ meta:
 
 cauldron-witchery:
   commands:
+    player:
+      main:
+        parameters: ''
+        description: 'Main player command. Opens GUI.'
     admin:
       main:
         parameters: ''
@@ -27,6 +31,8 @@ cauldron-witchery:
         description: 'Reloads magic sticks from database.'
   gui:
     titles:
+      sticks-gui: "&0&l Magic Sticks"
+      recipes-gui: "&0&l Recipes"
       # The title for the Main GUI
       admin-panel: "&0&l Admin Menu"
       edit-stick: "&0&l Edit Magic Stick: [stick]"
@@ -181,6 +187,12 @@ cauldron-witchery:
           &7 Allows to change
           &7 the complexity value.
         value: "&7 Currently: &r [number]"
+      cost:
+        name: "&f&l Purchase Cost"
+        description: |-
+          &7 Allows to change
+          &7 the purchase cost.
+        value: "&7 Currently: &r $[number]"
       add_recipe:
         name: "&f&l Add Recipe"
         description: |-
@@ -430,6 +442,8 @@ cauldron-witchery:
       click-to-previous: "&e Click &7 to view previous page."
       click-to-next: "&e Click &7 to view next page."
       select-before: "&e Select &7 item(-s) before proceed."
+      left-click-to-view: "&e Left Click &7 to view recipes."
+      right-click-to-buy: "&e Right Click &7 to buy."
     descriptions:
       # Text that is added for selected element.
       selected: "&2 Selected"
@@ -474,6 +488,15 @@ cauldron-witchery:
         temperature-normal: "&7 Normal temperature"
         temperature-cool: "&7 Requires cooling"
         temperature-heat: "&7 Requires heating"
+        permission-single: "&7 Requires [permission]"
+        permissions-title: "&7 Required permissions:"
+        permissions-element: "&7 - [permission]"
+      stick:
+        lore: |-
+          [description]
+          [cost]
+          [permissions]
+        cost: "&7 Buy for $[number]"
         permission-single: "&7 Requires [permission]"
         permissions-title: "&7 Required permissions:"
         permissions-element: "&7 - [permission]"
@@ -569,6 +592,7 @@ cauldron-witchery:
     not-a-gamemode-world: "&c World [world] is not a GameMode World."
     exist-magic-sticks: "&c Magic Sticks already exists. Cannot load before old ones are removed."
     file-exist: "&c File with name [file] already exist. Cannot replace."
+    no-recipes: "&c Could not found any recipes for &r [stick]"
   messages:
     # Message that appears if player has not a correct main ingredient in hand for magic stick.
     incorrect-main-ingredient: "&c Hmm, missing the last ingredient... What was the main item?"
@@ -596,6 +620,14 @@ cauldron-witchery:
     something-went-wrong: "&4 Experiment gone horribly wrong!!!"
     # Message that appears at the end of successful recipe.
     it-worked: "&d It... it ... it succeeded!!!"
+    # Message that appears when player buys a magic stick
+    purchased-stick: "&d You purchased &r [name] &r&d for [value]."
+    # Message that appears when player gets a stick for free (no economy provided).
+    free-stick: "&d You purchased &r [name]."
+    # Message that appears when player does not have enough money.
+    not-enough-money: "&c You do not have enough money to by &r [name]."
+    # Message that appears when something went wrong while withdrawing founds.
+    could-not-withdraw: "&c Something went wrong while withdrawing money. Error: [value]"
 protection:
   flags:
     CAULDRON_WITCHERY_ISLAND_PROTECTION:

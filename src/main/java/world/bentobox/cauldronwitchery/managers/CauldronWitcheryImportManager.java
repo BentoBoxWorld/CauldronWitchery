@@ -187,6 +187,8 @@ public class CauldronWitcheryImportManager
             magicStick.setBookName(section.getString("book", ""));
             // Set recipes.
             magicStick.setRecipeList(this.populateRecipes(section.getList("recipes")));
+            // Set cost
+            magicStick.setPurchaseCost(section.getDouble("cost", 0));
 
             this.addon.getAddonManager().saveMagicStick(magicStick);
             this.addon.getAddonManager().loadMagicStick(magicStick, true, null);
@@ -394,7 +396,7 @@ public class CauldronWitcheryImportManager
                     stream().
                     map(object -> {
                         // Use clone to avoid any changes in existing object.
-                        MagicStickObject clone = object.clone();
+                        MagicStickObject clone = object.copy();
                         // Remove gamemode name from object id.
                         clone.setUniqueId(object.getUniqueId().replaceFirst(replacementString, ""));
 

@@ -15,9 +15,11 @@ import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.configuration.Config;
 import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.api.flags.clicklisteners.CycleClick;
+import world.bentobox.bentobox.hooks.VaultHook;
 import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.commands.WitcheryAdminCommand;
+import world.bentobox.cauldronwitchery.commands.WitcheryPlayerCommand;
 import world.bentobox.cauldronwitchery.configs.Settings;
 import world.bentobox.cauldronwitchery.listeners.CauldronClickListener;
 import world.bentobox.cauldronwitchery.listeners.ItemsInsideCauldronListener;
@@ -45,6 +47,9 @@ public class CauldronWitcheryAddon extends Addon
 		this.saveResource("template.yml",false);
 		// Save all books
 		this.loadBooks();
+		// Save Panels
+		this.saveResource("panels/recipe_panel.yml", false);
+		this.saveResource("panels/stick_panel.yml",false);
 	}
 
 
@@ -98,6 +103,8 @@ public class CauldronWitcheryAddon extends Addon
 
 					gameModeAddon.getAdminCommand().ifPresent(command ->
 						new WitcheryAdminCommand(this, command));
+					gameModeAddon.getPlayerCommand().ifPresent(command ->
+						new WitcheryPlayerCommand(this, command));
 				}
 
 				worldList.add(gameModeAddon.getOverWorld());
@@ -140,6 +147,35 @@ public class CauldronWitcheryAddon extends Addon
 			this.logError("CauldronWitchery could not hook into any GameMode so will not do anything!");
 			this.setState(State.DISABLED);
 		}
+	}
+
+
+	/**
+	 * Processes that are running after everything is loaded.
+	 */
+	@Override
+	public void allLoaded()
+	{
+		super.allLoaded();
+
+		// Try to find Vault Plugin and if it does not exist, display a warning
+		this.getPlugin().getVault().ifPresentOrElse(hook ->
+		{
+			this.vaultHook = hook;
+
+			if (this.vaultHook.hook())
+			{
+				this.log("Cauldron Witchery Addon hooked into Economy.");
+			}
+			else
+			{
+				this.logWarning("Cauldron Witchery Addon could not hook into valid Economy.");
+			}
+		}, () ->
+		{
+			this.vaultHook = null;
+			this.logWarning("Vault plugin not found. Economy will not work!");
+		});
 	}
 
 
@@ -270,6 +306,27 @@ public class CauldronWitcheryAddon extends Addon
 	}
 
 
+	/**
+	 *
+	 * @return economyProvided variable.
+	 */
+	public boolean isEconomyProvided()
+	{
+		return this.vaultHook != null && this.vaultHook.hook();
+	}
+
+
+	/**
+	 * Returns VaultHook. Used to get easier access to Economy. NEVER USE WITHOUT isEconomyProvided or null
+	 * check.
+	 * @return VaultHook or null.
+	 */
+	public VaultHook getEconomyProvider()
+	{
+		return vaultHook;
+	}
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -298,6 +355,12 @@ public class CauldronWitcheryAddon extends Addon
 	 * Stores the id of the particle task.
 	 */
 	private BukkitTask particleTask;
+
+	/**
+	 * VaultHook that process economy.
+	 */
+	private VaultHook vaultHook;
+
 
 // ---------------------------------------------------------------------
 // Section: Flags

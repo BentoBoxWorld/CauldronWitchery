@@ -32,6 +32,8 @@ cauldron:
     # generic message about failing.
     correct-message: true
 command:
+  # Allows to change label for player command.
+  player-command: witchery
   # Allows to change label for admin command.
   admin-command: witchery
 # 

@@ -256,6 +256,28 @@ public class Settings implements ConfigObject
     }
 
 
+	/**
+	 * Gets player main command.
+	 *
+	 * @return the player main command
+	 */
+	public String getPlayerMainCommand()
+	{
+		return playerMainCommand;
+	}
+
+
+	/**
+	 * Sets player main command.
+	 *
+	 * @param playerMainCommand the player main command
+	 */
+	public void setPlayerMainCommand(String playerMainCommand)
+	{
+		this.playerMainCommand = playerMainCommand;
+	}
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -314,6 +336,10 @@ public class Settings implements ConfigObject
 	@ConfigComment("Allows to change label for admin command.")
 	@ConfigEntry(path = "command.admin-command")
 	private String adminMainCommand = "witchery";
+
+	@ConfigComment("Allows to change label for player command.")
+	@ConfigEntry(path = "command.player-command")
+	private String playerMainCommand = "witchery";
 
 	@ConfigComment("")
 	@ConfigComment("This list stores GameModes in which CauldronWitchery addon should not work.")
