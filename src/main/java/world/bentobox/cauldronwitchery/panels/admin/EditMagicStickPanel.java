@@ -166,6 +166,7 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
         // Alternative to anvil usage.
         panelBuilder.item(19, this.createButton(Button.NAME));
         panelBuilder.item(20, this.createButton(Button.DESCRIPTION));
+        panelBuilder.item(29, this.createButton(Button.ORDER));
 
         panelBuilder.item(13, this.createButton(Button.BOOK));
         panelBuilder.item(22, this.createButton(Button.COST));
@@ -558,6 +559,37 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
                 description.add("");
                 description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
             }
+            case ORDER -> {
+                description.add(this.user.getTranslation(reference + "value",
+                    Constants.PARAMETER_NUMBER, String.valueOf(this.magicStick.getOrder())));
+
+                icon = new ItemStack(Material.HOPPER);
+                clickHandler = (panel, user, clickType, i) -> {
+                    this.selectedButton = null;
+
+                    Consumer<Number> numberConsumer = number -> {
+                        if (number != null)
+                        {
+                            this.magicStick.setOrder(number.intValue());
+                        }
+
+                        // reopen panel
+                        this.build();
+                    };
+
+                    ConversationUtils.createNumericInput(numberConsumer,
+                        this.user,
+                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
+                        Integer.MIN_VALUE,
+                        Integer.MAX_VALUE);
+
+                    return true;
+                };
+                glow = false;
+
+                description.add("");
+                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
+            }
             case BOOK -> {
                 icon = new ItemStack(Material.WRITTEN_BOOK);
 
@@ -778,6 +810,7 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
         COMPLEXITY,
 
         COST,
+        ORDER,
 
         ADD_RECIPE,
         REMOVE_RECIPE

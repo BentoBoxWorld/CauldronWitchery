@@ -151,6 +151,7 @@ public class MagicStickObject implements DataObject
         object.setComplexity(this.complexity);
 
         object.setPurchaseCost(this.purchaseCost);
+        object.setOrder(this.order);
 
         return object;
     }
@@ -266,6 +267,28 @@ public class MagicStickObject implements DataObject
     }
 
 
+    /**
+     * Gets order.
+     *
+     * @return the order
+     */
+    public int getOrder()
+    {
+        return order;
+    }
+
+
+    /**
+     * Sets order.
+     *
+     * @param order the order
+     */
+    public void setOrder(int order)
+    {
+        this.order = order;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -329,4 +352,10 @@ public class MagicStickObject implements DataObject
      */
     @Expose
     private double purchaseCost;
+
+    /**
+     * Defines order number for the stick in the guis.
+     */
+    @Expose
+    private int order;
 }

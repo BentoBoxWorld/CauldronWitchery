@@ -17,6 +17,8 @@ magic-sticks:
       &7 Fragile Stick
     # Sets the cost for magic stick. Requires vault and plugin with economy.
     cost: 0
+    # Sets order number for the magic sticks in GUI's.
+    order: 0
     # There are 3 type of recipes: mob, item and book.
     # Each recipe starts with `- [recipe_type]` see below.
     recipes:
@@ -46,6 +48,8 @@ magic-sticks:
         temperature: NORMAL
         # List of permissions that are required for the recipe to work.
         permissions: []
+        # Sets order number for the recipes in GUI's.
+        order: 0
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: COW
@@ -72,6 +76,8 @@ magic-sticks:
         temperature: NORMAL
         # List of permissions that are required for the recipe to work.
         permissions: [ ]
+        # Sets order number for the recipes in GUI's.
+        order: 0
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: PIG
@@ -98,6 +104,8 @@ magic-sticks:
         temperature: NORMAL
         # List of permissions that are required for the recipe to work.
         permissions: []
+        # Sets order number for the recipes in GUI's.
+        order: 0
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: CHICKEN

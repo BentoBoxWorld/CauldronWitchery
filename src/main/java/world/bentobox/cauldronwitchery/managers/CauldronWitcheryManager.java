@@ -236,6 +236,8 @@ public class CauldronWitcheryManager
 
         return this.magicStickDataCache.values().stream().
             filter(stick -> stick.getUniqueId().startsWith(name)).
+            sorted(Comparator.comparingInt(MagicStickObject::getOrder).
+                thenComparing(MagicStickObject::getFriendlyName)).
             collect(Collectors.toList());
     }
 

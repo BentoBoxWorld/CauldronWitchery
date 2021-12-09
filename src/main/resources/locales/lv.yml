@@ -184,6 +184,11 @@ cauldron-witchery:
           &7 Mainīt burvju nūjiņas
           &7 cenu.
         value: "&7 Šobrīd: &r $[number]"
+      order:
+        name: "&f&l Secības Numurs"
+        description: |-
+          &7 Mainīt secības numuru.
+        value: "&7 Currently: &r [number]"
       add_recipe:
         name: "&f&l Pievienot Recepti"
         description: |-

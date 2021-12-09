@@ -189,6 +189,8 @@ public class CauldronWitcheryImportManager
             magicStick.setRecipeList(this.populateRecipes(section.getList("recipes")));
             // Set cost
             magicStick.setPurchaseCost(section.getDouble("cost", 0));
+            // Set order.
+            magicStick.setOrder(section.getInt("order", 0));
 
             this.addon.getAddonManager().saveMagicStick(magicStick);
             this.addon.getAddonManager().loadMagicStick(magicStick, true, null);
@@ -235,6 +237,9 @@ public class CauldronWitcheryImportManager
                 recipe.setExperience((int) hashMap.getOrDefault("experience", 0));
                 recipe.setPermissions(new HashSet<>());
                 recipe.getPermissions().addAll((List<String>) hashMap.getOrDefault("permissions", Collections.emptyList()));
+
+                // Set order.
+                recipe.setOrder((int) hashMap.getOrDefault("order", 0));
 
                 recipe.setMainIngredient(matchItem((String) hashMap.get("ingredient"), new ItemStack(Material.PAPER)));
 

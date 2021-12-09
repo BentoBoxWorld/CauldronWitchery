@@ -240,6 +240,28 @@ public abstract class Recipe
     }
 
 
+    /**
+     * Gets order.
+     *
+     * @return the order
+     */
+    public int getOrder()
+    {
+        return order;
+    }
+
+
+    /**
+     * Sets order.
+     *
+     * @param order the order
+     */
+    public void setOrder(int order)
+    {
+        this.order = order;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Methods
 // ---------------------------------------------------------------------
@@ -285,6 +307,8 @@ public abstract class Recipe
 
         clone.setRewardPoints(this.getRewardPoints());
         clone.setComplexity(this.getComplexity());
+
+        clone.setOrder(this.getOrder());
     }
 
 
@@ -381,4 +405,10 @@ public abstract class Recipe
      */
     @Expose
     private float complexity;
+
+    /**
+     * Order number for recipe.
+     */
+    @Expose
+    private int order;
 }

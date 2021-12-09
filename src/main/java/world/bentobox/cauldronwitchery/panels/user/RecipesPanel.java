@@ -12,6 +12,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,10 @@ public class RecipesPanel extends CommonPanel
 
         this.magicStick = magicStick;
         this.recipes = magicStick.getRecipeList();
+        this.recipes.sort(Comparator.comparingInt(Recipe::getOrder).thenComparing(
+            (o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(
+                o1.getRecipeName(this.user),
+                o2.getRecipeName(this.user))));
     }
 
 

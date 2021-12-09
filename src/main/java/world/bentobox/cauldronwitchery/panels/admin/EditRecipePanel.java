@@ -91,6 +91,9 @@ public class EditRecipePanel extends CommonPanel
             panelBuilder.item(10, this.createElementButton(entityRecipe));
         }
 
+        panelBuilder.item(19, this.createButton(Button.ORDER));
+
+
         // Main Ingredients.
         panelBuilder.item(12, this.createButton(Button.MAIN_INGREDIENT));
         panelBuilder.item(21, this.createButton(Button.EXTRA_INGREDIENTS));
@@ -597,6 +600,37 @@ public class EditRecipePanel extends CommonPanel
                     description.add(this.user.getTranslation(Constants.TIPS + "shift-click-to-reset"));
                 }
             }
+            case ORDER -> {
+                description.add(this.user.getTranslation(reference + "value",
+                    Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getOrder())));
+
+                icon = new ItemStack(Material.HOPPER);
+                clickHandler = (panel, user, clickType, i) -> {
+                    this.selectedButton = null;
+
+                    Consumer<Number> numberConsumer = number -> {
+                        if (number != null)
+                        {
+                            this.recipe.setOrder(number.intValue());
+                        }
+
+                        // reopen panel
+                        this.build();
+                    };
+
+                    ConversationUtils.createNumericInput(numberConsumer,
+                        this.user,
+                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
+                        Integer.MIN_VALUE,
+                        Integer.MAX_VALUE);
+
+                    return true;
+                };
+                glow = false;
+
+                description.add("");
+                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
+            }
             default -> {
                 icon = new ItemStack(Material.PAPER);
                 clickHandler = null;
@@ -710,7 +744,9 @@ public class EditRecipePanel extends CommonPanel
 
         PERMISSIONS,
 
-        REWARD_ITEM
+        REWARD_ITEM,
+
+        ORDER
     }
 
 

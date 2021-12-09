@@ -193,6 +193,12 @@ cauldron-witchery:
           &7 Allows to change
           &7 the purchase cost.
         value: "&7 Currently: &r $[number]"
+      order:
+        name: "&f&l Order"
+        description: |-
+          &7 Allows to change
+          &7 the order number.
+        value: "&7 Currently: &r [number]"
       add_recipe:
         name: "&f&l Add Recipe"
         description: |-
