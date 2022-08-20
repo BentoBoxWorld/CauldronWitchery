@@ -349,6 +349,7 @@ public abstract class CommonPanel
                 "[number]", String.valueOf(recipe.getExperience()));
 
         String mainIngredient = this.user.getTranslation(reference + "main-ingredient",
+            "[count]", String.valueOf(recipe.getMainIngredient().getAmount()),
             "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
 
 
@@ -365,6 +366,7 @@ public abstract class CommonPanel
             recipe.getExtraIngredients().forEach(item -> {
                 extraItems.append("\n");
                 extraItems.append(this.user.getTranslation(reference + "extra-element",
+                    "[count]", String.valueOf(item.getAmount()),
                     "[item]", Utils.prettifyObject(item, this.user)));
             });
         }
