@@ -573,21 +573,24 @@ public class RecipeProcessingTask implements Runnable
                             {
                                 ItemStack itemStack = itemEntity.getItemStack();
 
-                                // Remove either the full amount or the remaining amount
-                                if (itemStack.getAmount() > amount)
+                                if (ingredient.isSimilar(itemStack))
                                 {
-                                    itemStack.setAmount(itemStack.getAmount() - amount);
-                                    // Update entity item stack.
-                                    itemEntity.setItemStack(itemStack);
-                                    amount = 0;
-                                }
-                                else
-                                {
-                                    amount -= itemStack.getAmount();
+                                    // Remove either the full amount or the remaining amount
+                                    if (itemStack.getAmount() > amount)
+                                    {
+                                        itemStack.setAmount(itemStack.getAmount() - amount);
+                                        // Update entity item stack.
+                                        itemEntity.setItemStack(itemStack);
+                                        amount = 0;
+                                    }
+                                    else
+                                    {
+                                        amount -= itemStack.getAmount();
 
-                                    // Remove all cauldron items on fail.
-                                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
-                                        itemEntity::remove);
+                                        // Remove all cauldron items on fail.
+                                        Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                                            itemEntity::remove);
+                                    }
                                 }
                             }
                         }
