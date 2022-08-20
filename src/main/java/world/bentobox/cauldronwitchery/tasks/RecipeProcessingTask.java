@@ -350,7 +350,7 @@ public class RecipeProcessingTask implements Runnable
             return false;
         }
 
-        if (recipe.getExperience() > this.user.getPlayer().getTotalExperience())
+        if (recipe.getExperience() > Utils.getTotalExperience(this.user.getPlayer()))
         {
             // Not enough experience
             errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "missing-knowledge"));
@@ -519,8 +519,8 @@ public class RecipeProcessingTask implements Runnable
         offhandItem.setAmount(offhandItem.getAmount() - recipe.getMainIngredient().getAmount());
 
         // Reduce player xp.
-        int experience = this.user.getPlayer().getTotalExperience() - (int) recipe.getExperience();
-        this.user.getPlayer().setTotalExperience(experience);
+        int experience = Utils.getTotalExperience(this.user.getPlayer()) - (int) recipe.getExperience();
+        Utils.setTotalExperience(this.user.getPlayer(), experience);
 
         // Empty the cauldron
         if (recipe.getCauldronType() == Material.WATER_CAULDRON ||

@@ -10,6 +10,7 @@ package world.bentobox.cauldronwitchery.utils;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -303,6 +304,109 @@ public class Utils
     {
         user.sendMessage(user.getTranslation(Constants.CONVERSATIONS + "prefix") + message);
     }
+
+
+
+// ---------------------------------------------------------------------
+// Section: User experience related methods
+// Code is taken from https://hub.spigotmc.org/stash/projects/PLUGIN/repos/essentials/browse/Essentials/src/com/earth2me/essentials/craftbukkit/SetExpFix.java
+// ---------------------------------------------------------------------
+
+
+    /**
+     * This method sets player total level to the new value.
+     * @param player Player whose EXP must be changed.
+     * @param experience The new value for experience.
+     */
+    public static void setTotalExperience(final Player player, final int experience)
+    {
+        // Reset value to 0.
+        player.setExp(0);
+        player.setLevel(0);
+
+        int amount = experience;
+
+        while (amount > 0)
+        {
+            final int expToLevel = Utils.getExpAtLevel(player);
+            amount -= expToLevel;
+
+            if (amount >= 0)
+            {
+                // give until next level
+                player.giveExp(expToLevel);
+            }
+            else
+            {
+                // give the rest
+                amount += expToLevel;
+                player.giveExp(amount);
+                amount = 0;
+            }
+        }
+    }
+
+
+    /**
+     * This method returns experience at player level.
+     * @param player Player whose EXP must be returned.
+     * @return Experience points at player leve.
+     */
+    private static int getExpAtLevel(final Player player)
+    {
+        return Utils.getExpAtLevel(player.getLevel());
+    }
+
+
+    /**
+     * This method calculates experience at the given level.
+     * @param level Level that must be reached.
+     * @return Experience for the level.
+     */
+    public static int getExpAtLevel(final int level)
+    {
+        if (level <= 15)
+        {
+            return 2 * level + 7;
+        }
+
+        if (level <=30)
+        {
+            return 5 * level - 38;
+        }
+
+        return 9 * level - 158;
+    }
+
+
+    /**
+     * This method returns total player experience calculated from player level.
+     * @param player Player whose total experience must be returned.
+     * @return Total experience points for given player.
+     */
+    public static int getTotalExperience(final Player player)
+    {
+        int exp = Math.round(Utils.getExpAtLevel(player) * player.getExp());
+        int currentLevel = player.getLevel();
+
+        while (currentLevel > 0)
+        {
+            currentLevel--;
+            exp += Utils.getExpAtLevel(currentLevel);
+        }
+
+        if (exp < 0)
+        {
+            exp = Integer.MAX_VALUE;
+        }
+
+        return exp;
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: Translation related methods
+// ---------------------------------------------------------------------
 
 
     /**
