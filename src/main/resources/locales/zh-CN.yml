@@ -1,28 +1,29 @@
+---
 meta:
   authors:
-    - BONNe
-
+  - BONNe
 cauldron-witchery:
   commands:
+    player:
+      main:
+        description: 主要玩家指挥。打开图形用户界面。
     admin:
       main:
-        parameters: ''
-        description: '管理员主指令. 将会打开 GUI 界面.'
+        description: 管理员主指令. 将会打开 GUI 界面.
       give:
-        parameters: '<魔法杖ID>'
-        description: '给予相应玩家相应 ID 的魔法杖.'
+        parameters: "<魔法杖ID>"
+        description: 给予相应玩家相应 ID 的魔法杖.
       book:
-        parameters: '<玩家> <书>'
-        description: '为相应玩家生成相应的书.'
+        parameters: "<玩家> <书>"
+        description: 为相应玩家生成相应的书.
       reload-books:
-        parameters: ''
-        description: '重载书的翻译.'
+        description: 重载书的翻译.
       reload-sticks:
-        parameters: ''
-        description: ＇从数据库中重载魔法杖.'
+        description: "＇从数据库中重载魔法杖.'"
   gui:
     titles:
-      # GUI 菜单的标题
+      sticks-gui: "&0&l 魔术棒"
+      recipes-gui: "&0&l 食谱"
       admin-panel: "&0&l 管理员菜单"
       edit-stick: "&0&l 编辑魔法杖: [stick]"
       edit-recipe: "&0&l 编辑配方"
@@ -43,24 +44,19 @@ cauldron-witchery:
           &7 或关闭 GUI
       previous:
         name: "&f&l 上一页"
-        description: |-
-          &7 切换到第 &e [number] &7 页
+        description: "&7 切换到第 &e [number] &7 页"
       next:
         name: "&f&l 下一页"
-        description: |-
-          &7 切换到 &e [number] &7 页
+        description: "&7 切换到 &e [number] &7 页"
       quit:
         name: "&f&l 关闭"
-        description: |-
-          &7 关闭当前 GUI.
+        description: "&7 关闭当前 GUI."
       save:
         name: "&f&l 保存"
-        description: |-
-          &7 保存更改并返回.
+        description: "&7 保存更改并返回."
       cancel:
         name: "&f&l 取消"
-        description: |-
-          &7 取消更改并返回.
+        description: "&7 取消更改并返回."
       search:
         name: "&f&l 搜索"
         description: |-
@@ -79,8 +75,7 @@ cauldron-witchery:
           &7 魔法杖
       manage_bundles:
         name: "&f&l 管理包"
-        description: |-
-          &7 管理包
+        description: "&7 管理包"
       edit_settings:
         name: "&f&l 编辑设置"
         description: |-
@@ -143,8 +138,7 @@ cauldron-witchery:
         no-value: "&7 暂未设置描述."
       stick:
         name: "&f&l 魔法杖"
-        description: |-
-          &7 魔法杖.
+        description: "&7 魔法杖."
       book:
         name: "&f&l 书"
         description: |-
@@ -166,6 +160,18 @@ cauldron-witchery:
           &7 更改
           &7 复杂程度.
         value: "&7 当前复杂度: &r [number]"
+      cost:
+        name: "&f&l 采购成本"
+        description: |-
+          &7 允许更改
+          &7 采购成本。
+        value: "&7 当前： &r $[number]"
+      order:
+        name: "&f&l 订单"
+        description: |-
+          &7 允许更改
+          &7 订单号。
+        value: "&7 当前： &r [number]"
       add_recipe:
         name: "&f&l 添加配方"
         description: |-
@@ -204,8 +210,7 @@ cauldron-witchery:
         value: "&7 当前经验: &r [number]"
       cauldron_type:
         name: "&f&l Cauldron 类型"
-        description: |-
-          &7 为配方设置 cauldron 类型.
+        description: "&7 为配方设置 cauldron 类型."
         value: "&7 当前类型: &r [type]"
       cauldron_level:
         name: "&f&l Cauldron 等级"
@@ -333,13 +338,11 @@ cauldron-witchery:
           &7 合成一本书.
       material:
         name: "&f&l [material]"
-        description: |-
-          &7 材料 ID: [id]
+        description: "&7 材料 ID: [id]"
         selected: "&2 已选定"
       entity:
         name: "&f&l [entity]"
-        description: |-
-          &7 实体 ID: [id]
+        description: "&7 实体 ID: [id]"
         selected: "&2 已选定"
       recipe:
         name: "&f&l 配方: [value]"
@@ -389,6 +392,8 @@ cauldron-witchery:
       click-to-previous: "&e 点击&7查看上一页."
       click-to-next: "&e 点击&7查看下一页."
       select-before: "&7 在进行下一步操作之前请先&e选择&7物品."
+      left-click-to-view: "&e 左键单击 &7 查看食谱。"
+      right-click-to-buy: "&e 右键单击 &7 购买。"
     descriptions:
       selected: "&2 已选定"
       recipe:
@@ -435,22 +440,26 @@ cauldron-witchery:
         permission-single: "&7 需要 [permission]"
         permissions-title: "&7 需要的权限:"
         permissions-element: "&7 - [permission]"
-      # 图书馆入口的描述
+      stick:
+        lore: |-
+          [description]
+          [cost]
+          [permissions]
+        cost: "&7 购买 $[number]"
+        permission-single: "&7 需要[permission]"
+        permissions-title: "&7 所需权限："
+        permissions-element: "&7 - [permission]"
       library:
-        author: '&7 作者: &e [author]'
-        version: '&7 使用 CauldronWitchery &e [version] &7制作'
-        lang: '&7 语言: &e [lang]'
-        gamemode: '&7 主要给: &e [gamemode]'
+        author: "&7 作者: &e [author]"
+        version: "&7 使用 CauldronWitchery &e [version] &7制作"
+        lang: "&7 语言: &e [lang]"
+        gamemode: "&7 主要给: &e [gamemode]"
   conversations:
     prefix: "&l&6 [BentoBox]: &r"
-    # 可用于确认输入的字符. (用“,”隔开)
-    confirm-string: "true, on, yes, confirm, y, valid, correct"
-    # 可用于取消输入的字符. (用“,”隔开)
-    deny-string: "false, off, no, deny, n, invalid, incorrect"
-    # 可用于取消对话的字符. (只能设置一个)
-    cancel-string: "cancel"
-    # 可用于退出对话的字符. (用“,”隔开)
-    exit-string: "cancel, exit, quit"
+    confirm-string: true, on, yes, confirm, y, valid, correct
+    deny-string: false, off, no, deny, n, invalid, incorrect
+    cancel-string: cancel
+    exit-string: cancel, exit, quit
     cancelled: "&c 对话取消!"
     input-number: "&e 请在聊天栏中输入一个数字."
     input-seconds: "&e 请在聊天栏中输入秒数."
@@ -489,11 +498,14 @@ cauldron-witchery:
     no-library-entries: "&c 无法为特定的设置找到入口."
     no-magic-stick: "&c 无法为 [gamemode] 找到 ID 为 '[id]' 的魔法杖."
     no-magic-book: "&c 无法找到名为: [book] 的书."
+    no-available-sticks: "&c 无法为 [gamemode] 找到任何魔法棒。"
+    player-not-found: "&c 未找到给定的播放器。"
     no-load: "&c 无法加载文件 [file]. 原因: [description]"
     no-file: "&c 无法找到文件 [file]."
     not-a-gamemode-world: "&c 世界 [world] 不是魔法世界."
     exist-magic-sticks: "&c 魔法杖已存在. 请先移除现有的那根."
     file-exist: "&c 文件名 [file] 已经存在. 无法替换."
+    no-recipes: "&c 找不到 &r [stick] 的任何食谱"
   messages:
     incorrect-main-ingredient: "&c 嗯, 貌似还缺主材料...... 主材料是什么?"
     incorrect-cauldron: "&c 嗯, 需要尝试下不同的 cauldron 液体."
@@ -508,13 +520,16 @@ cauldron-witchery:
     missing-extra-ingredients: "&c 嗯, 我需要往 cauldron 中放入更多额外材料......"
     something-went-wrong: "&4 实验严重错误!!!"
     it-worked: "&d 它...... 它 ... 成功了!!!"
+    purchased-stick: "&r&d 您以 [value]&d 购买了 &r [name]。"
+    free-stick: "&d 您购买了 &r [name]。"
+    not-enough-money: "&c 你没有足够的钱来使用 &r [name]。"
+    could-not-withdraw: "&c 取钱时出了点问题。错误：[value]"
 protection:
   flags:
     CAULDRON_WITCHERY_ISLAND_PROTECTION:
       description: |-
         &5 切换访客是否可用
         &5 岛屿上的 cauldron.
-      name: "Cauldron 保护"
-      hint: |-
-        &c 您不可以在此处使用 cauldron.
+      name: Cauldron 保护
+      hint: "&c 您不可以在此处使用 cauldron."
       icon: CHICKEN_SPAWN_EGG
