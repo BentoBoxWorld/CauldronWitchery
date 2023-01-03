@@ -288,7 +288,7 @@ magic-sticks:
         # Extra ingredients for recipe. It follows format: https://docs.bentobox.world/en/latest/BentoBox/ItemParser/
         # In settings you can specify if these items must be dropped into cauldron or kept in player inventory.
         extra:
-          - NETTERRACK:40
+          - NETHERRACK:40
         # Experience points that will be taken from player.
         experience: 10
         # Type of cauldron:
