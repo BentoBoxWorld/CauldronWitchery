@@ -115,86 +115,19 @@ public abstract class CommonPanel
             "" :
             this.user.getTranslation(reference + "book.no-book");
 
-        String cauldron;
-
-        int level = switch (recipe.getCauldronType()) {
-            case LAVA_CAULDRON -> 3;
-            case CAULDRON -> 0;
-            default -> recipe.getCauldronLevel();
-        };
-
-        cauldron = this.user.getTranslation(reference + "cauldron-level-" + level,
-            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
-
-        String knowledge = recipe.getExperience() == 0 ? "" :
-            this.user.getTranslation(reference + "knowledge",
-                "[number]", String.valueOf(recipe.getExperience()));
-
-        String mainIngredient = this.user.getTranslation(reference + "main-ingredient",
-            "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
-
-
-        StringBuilder extraItems = new StringBuilder();
-
-        if (recipe.getExtraIngredients().isEmpty())
-        {
-            extraItems.append(this.user.getTranslation(reference + "no-extra"));
-        }
-        else
-        {
-            extraItems.append(this.user.getTranslation(reference + "extra-title"));
-
-            recipe.getExtraIngredients().forEach(item -> {
-                extraItems.append("\n");
-                extraItems.append(this.user.getTranslation(reference + "extra-element",
-                    "[item]", Utils.prettifyObject(item, this.user)));
-            });
-        }
-
-        String temperature = this.user.getTranslation(reference + "temperature-" + recipe.getTemperature().name().toLowerCase());
-
-        String permissions;
-
-        if (!recipe.getPermissions().isEmpty())
-        {
-            // Yes list duplication for complete menu.
-            List<String> missingPermissions = recipe.getPermissions().stream().
-                filter(permission -> target == null || !target.hasPermission(permission)).
-                sorted().
-                collect(Collectors.toList());
-
-            StringBuilder permissionBuilder = new StringBuilder();
-
-            if (missingPermissions.size() == 1)
-            {
-                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
-                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
-            }
-            else if (!missingPermissions.isEmpty())
-            {
-                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
-                missingPermissions.forEach(permission ->
-                {
-                    permissionBuilder.append("\n");
-                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-element",
-                        Constants.PARAMETER_PERMISSION, permission));
-                });
-            }
-
-            permissions = permissionBuilder.toString();
-        }
-        else
-        {
-            permissions = "";
-        }
-
+        String cauldron = this.generateCauldronText(recipe);
+        String knowledge = this.generateKnowledgeText(recipe);
+        String mainIngredient = this.generateMainIngredientText(recipe);
+        String extraItems = this.generateExtraIngredientText(recipe);
+        String temperature = this.generateTemperatureText(recipe);
+        String permissions = this.generatePermissionText(recipe, target);
 
         String returnString = this.user.getTranslationOrNothing(reference + "book.lore",
             "[no-book]", bookName,
             "[cauldron]", cauldron,
             "[knowledge]", knowledge,
             "[ingredient]", mainIngredient,
-            "[extra]", extraItems.toString(),
+            "[extra]", extraItems,
             "[temperature]", temperature,
             "[permissions]", permissions);
 
@@ -217,87 +150,19 @@ public abstract class CommonPanel
         String itemName = recipe.getItemStack() != null ? "" :
             this.user.getTranslation(reference + "item.no-item");
 
-        String cauldron;
-
-        int level = switch (recipe.getCauldronType()) {
-            case LAVA_CAULDRON -> 3;
-            case CAULDRON -> 0;
-            default -> recipe.getCauldronLevel();
-        };
-
-        cauldron = this.user.getTranslation(reference + "cauldron-level-" + level,
-            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
-
-        String knowledge = recipe.getExperience() == 0 ? "" :
-            this.user.getTranslation(reference + "knowledge",
-                "[number]", String.valueOf(recipe.getExperience()));
-
-        String mainIngredient = this.user.getTranslation(reference + "main-ingredient",
-            "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
-
-
-        StringBuilder extraItems = new StringBuilder();
-
-        if (recipe.getExtraIngredients().isEmpty())
-        {
-            extraItems.append(this.user.getTranslation(reference + "no-extra"));
-        }
-        else
-        {
-            extraItems.append(this.user.getTranslation(reference + "extra-title"));
-
-            recipe.getExtraIngredients().forEach(item -> {
-                extraItems.append("\n");
-                extraItems.append(this.user.getTranslation(reference + "extra-element",
-                    "[item]", Utils.prettifyObject(item, this.user)));
-            });
-        }
-
-        String temperature = this.user.getTranslation(reference + "temperature-" +
-            recipe.getTemperature().name().toLowerCase());
-
-        String permissions;
-
-        if (!recipe.getPermissions().isEmpty())
-        {
-            // Yes list duplication for complete menu.
-            List<String> missingPermissions = recipe.getPermissions().stream().
-                filter(permission -> target == null || !target.hasPermission(permission)).
-                sorted().
-                collect(Collectors.toList());
-
-            StringBuilder permissionBuilder = new StringBuilder();
-
-            if (missingPermissions.size() == 1)
-            {
-                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
-                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
-            }
-            else if (!missingPermissions.isEmpty())
-            {
-                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
-                missingPermissions.forEach(permission ->
-                {
-                    permissionBuilder.append("\n");
-                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
-                        Constants.PARAMETER_PERMISSION, permission));
-                });
-            }
-
-            permissions = permissionBuilder.toString();
-        }
-        else
-        {
-            permissions = "";
-        }
-
+        String cauldron = this.generateCauldronText(recipe);
+        String knowledge = this.generateKnowledgeText(recipe);
+        String mainIngredient = this.generateMainIngredientText(recipe);
+        String extraItems = this.generateExtraIngredientText(recipe);
+        String temperature = this.generateTemperatureText(recipe);
+        String permissions = this.generatePermissionText(recipe, target);
 
         String returnString = this.user.getTranslationOrNothing(reference + "item.lore",
             "[no-item]", itemName,
             "[cauldron]", cauldron,
             "[knowledge]", knowledge,
             "[ingredient]", mainIngredient,
-            "[extra]", extraItems.toString(),
+            "[extra]", extraItems,
             "[temperature]", temperature,
             "[permissions]", permissions);
 
@@ -321,89 +186,19 @@ public abstract class CommonPanel
             "" :
             this.user.getTranslation(reference + "entity.no-entity");
 
-        String cauldron;
-
-        int level = switch (recipe.getCauldronType()) {
-            case LAVA_CAULDRON -> 3;
-            case CAULDRON -> 0;
-            default -> recipe.getCauldronLevel();
-        };
-
-        cauldron = this.user.getTranslation(reference + "cauldron-level-" + level,
-            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
-
-        String knowledge = recipe.getExperience() == 0 ? "" :
-            this.user.getTranslation(reference + "knowledge",
-                "[number]", String.valueOf(recipe.getExperience()));
-
-        String mainIngredient = this.user.getTranslation(reference + "main-ingredient",
-            "[count]", String.valueOf(recipe.getMainIngredient().getAmount()),
-            "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
-
-
-        StringBuilder extraItems = new StringBuilder();
-
-        if (recipe.getExtraIngredients().isEmpty())
-        {
-            extraItems.append(this.user.getTranslation(reference + "no-extra"));
-        }
-        else
-        {
-            extraItems.append(this.user.getTranslation(reference + "extra-title"));
-
-            recipe.getExtraIngredients().forEach(item -> {
-                extraItems.append("\n");
-                extraItems.append(this.user.getTranslation(reference + "extra-element",
-                    "[count]", String.valueOf(item.getAmount()),
-                    "[item]", Utils.prettifyObject(item, this.user)));
-            });
-        }
-
-        String temperature = this.user.getTranslation(reference + "temperature-" +
-            recipe.getTemperature().name().toLowerCase());
-
-        String permissions;
-
-        if (!recipe.getPermissions().isEmpty())
-        {
-            // Yes list duplication for complete menu.
-            List<String> missingPermissions = recipe.getPermissions().stream().
-                filter(permission -> target == null || !target.hasPermission(permission)).
-                sorted().
-                collect(Collectors.toList());
-
-            StringBuilder permissionBuilder = new StringBuilder();
-
-            if (missingPermissions.size() == 1)
-            {
-                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
-                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
-            }
-            else if (!missingPermissions.isEmpty())
-            {
-                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
-                missingPermissions.forEach(permission ->
-                {
-                    permissionBuilder.append("\n");
-                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
-                        Constants.PARAMETER_PERMISSION, permission));
-                });
-            }
-
-            permissions = permissionBuilder.toString();
-        }
-        else
-        {
-            permissions = "";
-        }
-
+        String cauldron = this.generateCauldronText(recipe);
+        String knowledge = this.generateKnowledgeText(recipe);
+        String mainIngredient = this.generateMainIngredientText(recipe);
+        String extraItems = this.generateExtraIngredientText(recipe);
+        String temperature = this.generateTemperatureText(recipe);
+        String permissions = this.generatePermissionText(recipe, target);
 
         String returnString = this.user.getTranslationOrNothing(reference + "entity.lore",
             "[no-entity]", entityName,
             "[cauldron]", cauldron,
             "[knowledge]", knowledge,
             "[ingredient]", mainIngredient,
-            "[extra]", extraItems.toString(),
+            "[extra]", extraItems,
             "[temperature]", temperature,
             "[permissions]", permissions);
 
@@ -512,6 +307,154 @@ public abstract class CommonPanel
     public static void reopen(CommonPanel panel)
     {
         panel.build();
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: Private methods
+// ---------------------------------------------------------------------
+
+    /**
+     * This method generates cauldron text.
+     * @param recipe Recipe that is generated.
+     * @return Cauldron message.
+     */
+    private String generateCauldronText(Recipe recipe)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        int level = switch (recipe.getCauldronType()) {
+            case LAVA_CAULDRON -> 3;
+            case CAULDRON -> 0;
+            default -> recipe.getCauldronLevel();
+        };
+
+        return this.user.getTranslation(reference + "cauldron-level-" + level,
+            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
+    }
+
+
+    /**
+     * This method generates knowledge text.
+     * @param recipe Recipe that is generated.
+     * @return Knowledge message.
+     */
+    private String generateKnowledgeText(Recipe recipe)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        return recipe.getExperience() == 0 ? "" :
+            this.user.getTranslation(reference + "knowledge",
+                "[number]", String.valueOf(recipe.getExperience()));
+    }
+
+
+    /**
+     * This method generates main ingredient text.
+     * @param recipe Recipe that is generated.
+     * @return Main ingredient message.
+     */
+    private String generateMainIngredientText(Recipe recipe)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        return this.user.getTranslation(reference + "main-ingredient",
+            "[count]", String.valueOf(recipe.getMainIngredient().getAmount()),
+            "[item]", Utils.prettifyObject(recipe.getMainIngredient(), this.user));
+    }
+
+
+    /**
+     * This method generates extra ingredient text.
+     * @param recipe Recipe that is generated.
+     * @return Extra ingredient message.
+     */
+    private String generateExtraIngredientText(Recipe recipe)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        StringBuilder extraItems = new StringBuilder();
+
+        if (recipe.getExtraIngredients().isEmpty())
+        {
+            extraItems.append(this.user.getTranslation(reference + "no-extra"));
+        }
+        else
+        {
+            extraItems.append(this.user.getTranslation(reference + "extra-title"));
+
+            recipe.getExtraIngredients().forEach(item -> {
+                extraItems.append("\n");
+                extraItems.append(this.user.getTranslation(reference + "extra-element",
+                    "[count]", String.valueOf(item.getAmount()),
+                    "[item]", Utils.prettifyObject(item, this.user)));
+            });
+        }
+
+        return extraItems.toString();
+    }
+
+
+    /**
+     * This method generates temperature text.
+     * @param recipe Recipe that is generated.
+     * @return Temperature message.
+     */
+    private String generateTemperatureText(Recipe recipe)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        return this.user.getTranslation(reference + "temperature-" +
+            recipe.getTemperature().name().toLowerCase());
+    }
+
+
+    /**
+     * This method generates permission text.
+     * @param recipe Recipe that is generated.
+     * @param target User who permission are checked.
+     * @return Permission message.
+     */
+    private String generatePermissionText(Recipe recipe, User target)
+    {
+        final String reference = Constants.DESCRIPTIONS + "recipe.";
+
+        String permissions;
+
+        if (!recipe.getPermissions().isEmpty())
+        {
+            // Yes list duplication for complete menu.
+            List<String> missingPermissions = recipe.getPermissions().stream().
+                filter(permission -> target == null || !target.hasPermission(permission)).
+                sorted().
+                toList();
+
+            StringBuilder permissionBuilder = new StringBuilder();
+
+            if (missingPermissions.size() == 1)
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permission-single",
+                    Constants.PARAMETER_PERMISSION, missingPermissions.get(0)));
+            }
+            else if (!missingPermissions.isEmpty())
+            {
+                permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-title"));
+                missingPermissions.forEach(permission ->
+                {
+                    permissionBuilder.append("\n");
+                    permissionBuilder.append(this.user.getTranslationOrNothing(reference + "permissions-list",
+                        Constants.PARAMETER_PERMISSION, permission));
+                });
+            }
+
+            permissions = permissionBuilder.toString();
+        }
+        else
+        {
+            permissions = "";
+        }
+
+        return permissions;
     }
 
 
