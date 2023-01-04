@@ -184,6 +184,31 @@ public class CauldronWitcheryImportManager
             magicStick.setMagicStick(matchItem(section.getString("stick"),
                 new ItemStack(Material.STICK)));
 
+            // Add name and description only if requested.
+            if (section.contains("name"))
+            {
+                magicStick.setFriendlyName(section.getString("name"));
+            }
+
+            if (section.contains("description"))
+            {
+                if (section.isString("description"))
+                {
+                    magicStick.setDescription(section.getString("description"));
+                }
+                else if (section.isList("description"))
+                {
+                    StringBuilder builder = new StringBuilder();
+
+                    section.getStringList("description").forEach(line -> {
+                        builder.append(line);
+                        builder.append("\n");
+                    });
+
+                    magicStick.setDescription(builder.toString());
+                }
+            }
+
             magicStick.setBookName(section.getString("book", ""));
             // Set recipes.
             magicStick.setRecipeList(this.populateRecipes(section.getList("recipes")));
