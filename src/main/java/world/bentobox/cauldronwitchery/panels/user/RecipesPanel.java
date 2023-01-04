@@ -23,6 +23,7 @@ import world.bentobox.bentobox.api.panels.builders.TemplatedPanelBuilder;
 import world.bentobox.bentobox.api.panels.reader.ItemTemplateRecord;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.database.object.MagicStickObject;
+import world.bentobox.cauldronwitchery.database.object.recipe.BookRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.Recipe;
 import world.bentobox.cauldronwitchery.panels.CommonPanel;
 import world.bentobox.cauldronwitchery.utils.Constants;
@@ -120,15 +121,28 @@ public class RecipesPanel extends CommonPanel
         // Template specification are always more important than dynamic content.
         builder.icon(template.icon() != null ? template.icon().clone() : recipe.getIcon());
 
+        String recipeName;
+
+        if (recipe instanceof BookRecipe bookRecipe)
+        {
+            recipeName = this.manager.craftBookName(this.user,
+                bookRecipe.getBookName(),
+                recipe.getRecipeName(this.user));
+        }
+        else
+        {
+            recipeName = recipe.getRecipeName(this.user);
+        }
+
         // Template specific title is always more important than recipe name.
         if (template.title() != null && !template.title().isBlank())
         {
             builder.name(this.user.getTranslation(this.world, template.title(),
-                Constants.PARAMETER_NAME, recipe.getRecipeName(this.user)));
+                Constants.PARAMETER_NAME, recipeName));
         }
         else
         {
-            builder.name(Util.translateColorCodes(recipe.getRecipeName(this.user)));
+            builder.name(Util.translateColorCodes(recipeName));
         }
 
         if (template.description() != null && !template.description().isBlank())

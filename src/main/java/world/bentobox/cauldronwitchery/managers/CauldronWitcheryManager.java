@@ -680,6 +680,35 @@ public class CauldronWitcheryManager
     }
 
 
+    /**
+     * This method returns the book name.
+     *
+     * @param user User who will see the book.
+     * @param bookId The book ID.
+     * @param backup The backup name.
+     * @return The name of given book.
+     */
+    public String craftBookName(User user, String bookId, String backup)
+    {
+        YamlConfiguration bookConfiguration =
+            this.getBookConfiguration(bookId, user.getLocale().toLanguageTag());
+
+        String name;
+
+        if (bookConfiguration != null)
+        {
+            name = bookConfiguration.getString(bookId + ".title", backup);
+        }
+        else
+        {
+            // Cannot add this book.
+            name = backup;
+        }
+
+        return name;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variable
 // ---------------------------------------------------------------------

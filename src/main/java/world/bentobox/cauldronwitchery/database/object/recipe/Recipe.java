@@ -369,7 +369,7 @@ public abstract class Recipe
      * Stores recipe name
      */
     @Expose
-    private String recipeDisplayName;
+    private String recipeDisplayName = "";
 
     /**
      * The main ingredient -> last item.
