@@ -92,6 +92,7 @@ public class EditRecipePanel extends CommonPanel
         }
 
         panelBuilder.item(19, this.createButton(Button.ORDER));
+        panelBuilder.item(28, this.createButton(Button.NAME));
 
 
         // Main Ingredients.
@@ -631,6 +632,47 @@ public class EditRecipePanel extends CommonPanel
                 description.add("");
                 description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
             }
+            case NAME -> {
+                if (this.recipe.getRecipeDisplayName().isBlank())
+                {
+                    description.add(this.user.getTranslation(reference + "no-value"));
+                }
+                else
+                {
+                    description.add(this.user.getTranslation(reference + "value",
+                        Constants.PARAMETER_NAME, this.recipe.getRecipeDisplayName()));
+                }
+
+                icon = new ItemStack(Material.NAME_TAG);
+
+                clickHandler = (panel, user, clickType, i) ->
+                {
+                    this.selectedButton = null;
+
+                    // Create consumer that process description change
+                    Consumer<String> consumer = value ->
+                    {
+                        if (value != null)
+                        {
+                            this.recipe.setRecipeDisplayName(value);
+                        }
+
+                        this.build();
+                    };
+
+                    // start conversation
+                    ConversationUtils.createStringInput(consumer,
+                        user,
+                        user.getTranslation(Constants.CONVERSATIONS + "write-name"),
+                        user.getTranslation(Constants.CONVERSATIONS + "name-changed"));
+
+                    return true;
+                };
+                glow = false;
+
+                description.add("");
+                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
+            }
             default -> {
                 icon = new ItemStack(Material.PAPER);
                 clickHandler = null;
@@ -746,7 +788,8 @@ public class EditRecipePanel extends CommonPanel
 
         REWARD_ITEM,
 
-        ORDER
+        ORDER,
+        NAME
     }
 
 
