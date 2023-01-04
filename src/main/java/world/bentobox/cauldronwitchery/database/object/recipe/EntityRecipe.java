@@ -67,7 +67,16 @@ public class EntityRecipe extends Recipe
     @Override
     public String getRecipeName(User user)
     {
-        return Utils.prettifyObject(this.entityType, user);
+        if (this.getRecipeDisplayName() == null ||
+            this.getRecipeDisplayName().isBlank() ||
+            user.getTranslation(this.getRecipeDisplayName()).isBlank())
+        {
+            return Utils.prettifyObject(this.entityType, user);
+        }
+        else
+        {
+            return user.getTranslation(this.getRecipeDisplayName());
+        }
     }
 
     /**

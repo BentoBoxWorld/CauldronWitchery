@@ -454,6 +454,9 @@ cauldron-witchery:
       # Text that is added for selected element.
       selected: "&2 Selected"
       recipe:
+        # The first line of button
+        name: "&f [name]"
+        # The description generators.
         book:
           lore: |-
             [no-book]

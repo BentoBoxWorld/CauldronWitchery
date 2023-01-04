@@ -69,5 +69,6 @@ recipe_panel:
             tooltip: cauldron-witchery.gui.tips.click-to-return
   reusable:
     recipe_button:
+      title: cauldron-witchery.gui.descriptions.recipe.name
       data:
         type: RECIPE

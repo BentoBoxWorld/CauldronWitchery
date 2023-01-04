@@ -262,6 +262,28 @@ public abstract class Recipe
     }
 
 
+    /**
+     * Gets recipe display name.
+     *
+     * @return the recipe display name
+     */
+    public String getRecipeDisplayName()
+    {
+        return recipeDisplayName;
+    }
+
+
+    /**
+     * Sets recipe display name.
+     *
+     * @param recipeDisplayName the recipe display name
+     */
+    public void setRecipeDisplayName(String recipeDisplayName)
+    {
+        this.recipeDisplayName = recipeDisplayName;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Methods
 // ---------------------------------------------------------------------
@@ -295,6 +317,7 @@ public abstract class Recipe
      */
     protected void populateClone(Recipe clone)
     {
+        clone.setRecipeDisplayName(this.getRecipeDisplayName());
         clone.setCauldronType(this.getCauldronType());
         clone.setCauldronLevel(this.getCauldronLevel());
         clone.setTemperature(this.getTemperature());
@@ -341,6 +364,12 @@ public abstract class Recipe
 // Section: Variables
 // ---------------------------------------------------------------------
 
+
+    /**
+     * Stores recipe name
+     */
+    @Expose
+    private String recipeDisplayName;
 
     /**
      * The main ingredient -> last item.

@@ -65,7 +65,16 @@ public class BookRecipe extends Recipe
     @Override
     public String getRecipeName(User user)
     {
-        return this.bookName;
+        if (this.getRecipeDisplayName() == null ||
+            this.getRecipeDisplayName().isBlank() ||
+            user.getTranslation(this.getRecipeDisplayName()).isBlank())
+        {
+            return this.bookName;
+        }
+        else
+        {
+            return user.getTranslation(this.getRecipeDisplayName());
+        }
     }
 
 

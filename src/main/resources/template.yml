@@ -25,6 +25,10 @@ magic-sticks:
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: SHEEP
+        # The custom name of this recipe.
+        # It can be an actual name or a link to the locale string.
+        # If the name is not present, then it will use MOB translation text.
+        # name: cauldron-witchery.entity.sheep
         # Main ingredient material. It always should be in player offhand.
         # Write format can be found in: https://docs.bentobox.world/en/latest/BentoBox/ItemParser/
         ingredient: WHITE_WOOL
@@ -53,6 +57,10 @@ magic-sticks:
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: COW
+        # The custom name of this recipe.
+        # It can be an actual name or a link to the locale string.
+        # If the name is not present, then it will use MOB translation text.
+        # name: cauldron-witchery.entity.cow
         # Main ingredient material. It always should be in player offhand.
         # Write format can be found in: https://docs.bentobox.world/en/latest/BentoBox/ItemParser/
         ingredient: LEATHER
@@ -81,6 +89,10 @@ magic-sticks:
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: PIG
+        # The custom name of this recipe.
+        # It can be an actual name or a link to the locale string.
+        # If the name is not present, then it will use MOB translation text.
+        # name: cauldron-witchery.entity.pig
         # Main ingredient material. It always should be in player offhand.
         # Write format can be found in: https://docs.bentobox.world/en/latest/BentoBox/ItemParser/
         ingredient: CARROT
@@ -109,6 +121,10 @@ magic-sticks:
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: CHICKEN
+        # The custom name of this recipe.
+        # It can be an actual name or a link to the locale string.
+        # If the name is not present, then it will use MOB translation text.
+        # name: cauldron-witchery.entity.chicken
         # Main ingredient material. It always should be in player offhand.
         # Write format can be found in: https://docs.bentobox.world/en/latest/BentoBox/ItemParser/
         ingredient: FEATHER
@@ -135,6 +151,10 @@ magic-sticks:
       # Item recipe allows to summon any item stack.
       # Item will be created using format: https://docs.bentobox.world/en/latest/BentoBox/ItemParser/
       - item: DIAMOND
+        # The custom name of this recipe.
+        # It can be an actual name or a link to the locale string.
+        # If the name is not present, then it will use Item translation text.
+        # name: "cauldron-witchery.item.diamond"
         ingredient: COAL:8
         extra:
           - BLUE_DYE:8
@@ -143,6 +163,10 @@ magic-sticks:
         temperature: HEAT
         permissions: []
       - item: GRASS_BLOCK
+        # The custom name of this recipe.
+        # It can be an actual name or a link to the locale string.
+        # If the name is not present, then it will use Item translation text.
+        # name: "cauldron-witchery.item.grass_block"
         ingredient: DIRT
         extra:
           - WHEAT_SEEDS:9
@@ -153,6 +177,10 @@ magic-sticks:
         permissions: []
       # Book recipe allows to summon any book that exists in books directory.
       - book: first_grimoire
+        # The custom name of this recipe.
+        # It can be an actual name or a link to the locale string.
+        # If the name is not present, then it will use Book name text.
+        # name: "cauldron-witchery.book.first_grimoire"
         ingredient: BOOK
         extra:
           - LEATHER:2

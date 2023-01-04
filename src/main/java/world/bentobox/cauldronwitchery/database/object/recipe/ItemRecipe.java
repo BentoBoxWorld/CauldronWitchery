@@ -75,7 +75,16 @@ public class ItemRecipe extends Recipe
     @Override
     public String getRecipeName(User user)
     {
-        return Utils.prettifyObject(this.itemStack, user);
+        if (this.getRecipeDisplayName() == null ||
+            this.getRecipeDisplayName().isBlank() ||
+            user.getTranslation(this.getRecipeDisplayName()).isBlank())
+        {
+            return Utils.prettifyObject(this.itemStack, user);
+        }
+        else
+        {
+            return user.getTranslation(this.getRecipeDisplayName());
+        }
     }
 
 
