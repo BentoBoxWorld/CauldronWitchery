@@ -454,11 +454,31 @@ public class CauldronWitcheryManager
             {
                 StringBuilder recipePage;
 
+                int level = switch (recipe.getCauldronType()) {
+                    case LAVA_CAULDRON -> 3;
+                    case CAULDRON -> 0;
+                    default -> recipe.getCauldronLevel();
+                };
+
+                String cauldronLevel;
+
+                ConfigurationSection cauldronSection = recipeSection.getConfigurationSection("cauldron_level");
+
+                if (cauldronSection != null)
+                {
+                    cauldronLevel = cauldronSection.getString(String.valueOf(level), "");
+                }
+                else
+                {
+                    cauldronLevel = "";
+                }
+
                 if (recipe instanceof EntityRecipe entityRecipe)
                 {
                     recipePage = new StringBuilder(recipeSection.getString("mob-header", "").
                         replace("[mob]", Utils.prettifyObject(entityRecipe.getEntityType(), user)).
                         replace("[level]", String.valueOf(recipe.getExperience())).
+                        replace("[cauldron_level]", cauldronLevel).
                         replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
                         replace("[offhand]", Utils.prettifyObject(recipe.getMainIngredient(), user)));
                 }
@@ -467,6 +487,7 @@ public class CauldronWitcheryManager
                     recipePage = new StringBuilder(recipeSection.getString("item-header", "").
                         replace("[item]", Utils.prettifyObject(itemRecipe.getItemStack(), user)).
                         replace("[level]", String.valueOf(recipe.getExperience())).
+                        replace("[cauldron_level]", cauldronLevel).
                         replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
                         replace("[offhand]", Utils.prettifyObject(recipe.getMainIngredient(), user)));
                 }
@@ -492,6 +513,7 @@ public class CauldronWitcheryManager
                     recipePage = new StringBuilder(recipeSection.getString("book-header", "").
                         replace("[book]", name).
                         replace("[level]", String.valueOf(recipe.getExperience())).
+                        replace("[cauldron_level]", cauldronLevel).
                         replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
                         replace("[offhand]", Utils.prettifyObject(recipe.getMainIngredient(), user)));
                 }

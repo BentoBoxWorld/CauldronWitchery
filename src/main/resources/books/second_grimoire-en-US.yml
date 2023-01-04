@@ -18,17 +18,17 @@ second_grimoire:
     mob-header: |-
       &2&l [mob]
       &r&l Key ingredient: &r [offhand]
-      &r A &n [cauldron] &r and
+      &r A [cauldron_level] &n [cauldron] &r and
       &r&n [level] &r parts Knowledge!
     item-header: |-
       &2&l [item]
       &r&l Key ingredient: &r [offhand]
-      &r A &n [cauldron] &r and
-      v&n [level] &r parts Knowledge!
+      &r A [cauldron_level] &n [cauldron] &r and
+      &r&n [level] &r parts Knowledge!
     book-header: |-
       &r&2&l [book]
       &r&l Key ingredient: &r [offhand]
-      &r A &n [cauldron] &r and
+      &r A [cauldron_level] &n [cauldron] &r and
       &r&n [level] &r parts Knowledge!
     extra-title: |-
       &r&n Extra ingredients:
@@ -38,4 +38,9 @@ second_grimoire:
       &r Need to provide extra &c heating!
     cooling: |-
       &r Need to provide extra &b cooling!
+    cauldron_level:
+      0: empty
+      1: filled once
+      2: filled twice
+      3: full
   lang: English

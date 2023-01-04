@@ -16,17 +16,17 @@ third_grimoire:
     mob-header: |-
       &2&l [mob]
       &r&l Galvenais Ingredients: &r [offhand]
-      &r&n [cauldron] &r un
+      &r&n [cauldron_level] [cauldron] &r un
       &r&n [level] &r pieredzes punkti!
     item-header: |-
       &2&l [item]
       &r&l Galvenais Ingredients: &r [offhand]
-      &r&n [cauldron] &r un
+      &r&n [cauldron_level] [cauldron] &r un
       &r&n [level] &r pieredzes punkti!
     book-header: |-
       &r&2&l [book]
       &r&l Galvenais Ingredients: &r [offhand]
-      &r&n [cauldron] &r un
+      &r&n [cauldron_level] [cauldron] &r un
       &r&n [level] &r pieredzes punkti!
     extra-title: |-
       &r&n Papildus:
@@ -36,4 +36,9 @@ third_grimoire:
       &r Nepieciešams papildus &c karstums!
     cooling: |-
       &r Nepieciešams papildus &b dzesēšana!
+    cauldron_level:
+      0: tukšs
+      1: pildīts vienreiz
+      2: pildīts divreiz
+      3: pilns
   lang: Latviešu
