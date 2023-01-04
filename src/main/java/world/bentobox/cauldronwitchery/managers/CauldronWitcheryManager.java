@@ -607,7 +607,7 @@ public class CauldronWitcheryManager
      */
     public void purchaseStick(User user, MagicStickObject magicStick)
     {
-        if (this.addon.isEconomyProvided())
+        if (this.addon.isEconomyProvided() && magicStick.getPurchaseCost() > 0.0)
         {
             if (this.addon.getEconomyProvider().has(user, magicStick.getPurchaseCost()) && user.getLocation() != null)
             {
@@ -623,7 +623,7 @@ public class CauldronWitcheryManager
 
                     Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "purchased-stick",
                         Constants.PARAMETER_NAME, name,
-                        Constants.PARAMETER_NUMBER, String.valueOf(magicStick.getPurchaseCost())));
+                        Constants.PARAMETER_VALUE, String.valueOf(magicStick.getPurchaseCost())));
                 }
                 else
                 {
