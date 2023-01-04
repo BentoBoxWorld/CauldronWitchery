@@ -484,8 +484,10 @@ cauldron-witchery:
             [knowledge]
             [permissions]
           no-entity: "&c Entity is not set."
-        cauldron: "&7 Cauldron: [cauldron]"
-        leveled-cauldron: "&7 Cauldron: [cauldron] filled [level]"
+        cauldron-level-0: "&7 Cauldron: empty [cauldron]"
+        cauldron-level-1: "&7 Cauldron: once filled [cauldron]"
+        cauldron-level-2: "&7 Cauldron: twice filled [cauldron]"
+        cauldron-level-3: "&7 Cauldron: full [cauldron]"
         knowledge: "&7 Experience: [number]"
         main-ingredient: "&7 Last Ingredient: [item] ([count])"
         no-extra: "&7 No extra ingredients"

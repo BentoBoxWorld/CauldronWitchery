@@ -117,18 +117,14 @@ public abstract class CommonPanel
 
         String cauldron;
 
-        if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
-            recipe.getCauldronType() == Material.POWDER_SNOW_CAULDRON)
-        {
-            cauldron = this.user.getTranslation(reference + "leveled-cauldron",
-                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user),
-                "[level]", String.valueOf(recipe.getCauldronLevel()));
-        }
-        else
-        {
-            cauldron = this.user.getTranslation(reference + "cauldron",
-                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
-        }
+        int level = switch (recipe.getCauldronType()) {
+            case LAVA_CAULDRON -> 3;
+            case CAULDRON -> 0;
+            default -> recipe.getCauldronLevel();
+        };
+
+        cauldron = this.user.getTranslation(reference + "cauldron-level-" + level,
+            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
 
         String knowledge = recipe.getExperience() == 0 ? "" :
             this.user.getTranslation(reference + "knowledge",
@@ -223,18 +219,14 @@ public abstract class CommonPanel
 
         String cauldron;
 
-        if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
-            recipe.getCauldronType() == Material.POWDER_SNOW_CAULDRON)
-        {
-            cauldron = this.user.getTranslation(reference + "leveled-cauldron",
-                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user),
-                "[level]", String.valueOf(recipe.getCauldronLevel()));
-        }
-        else
-        {
-            cauldron = this.user.getTranslation(reference + "cauldron",
-                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
-        }
+        int level = switch (recipe.getCauldronType()) {
+            case LAVA_CAULDRON -> 3;
+            case CAULDRON -> 0;
+            default -> recipe.getCauldronLevel();
+        };
+
+        cauldron = this.user.getTranslation(reference + "cauldron-level-" + level,
+            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
 
         String knowledge = recipe.getExperience() == 0 ? "" :
             this.user.getTranslation(reference + "knowledge",
@@ -331,18 +323,14 @@ public abstract class CommonPanel
 
         String cauldron;
 
-        if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
-            recipe.getCauldronType() == Material.POWDER_SNOW_CAULDRON)
-        {
-            cauldron = this.user.getTranslation(reference + "leveled-cauldron",
-                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user),
-                "[level]", String.valueOf(recipe.getCauldronLevel()));
-        }
-        else
-        {
-            cauldron = this.user.getTranslation(reference + "cauldron",
-                "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
-        }
+        int level = switch (recipe.getCauldronType()) {
+            case LAVA_CAULDRON -> 3;
+            case CAULDRON -> 0;
+            default -> recipe.getCauldronLevel();
+        };
+
+        cauldron = this.user.getTranslation(reference + "cauldron-level-" + level,
+            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
 
         String knowledge = recipe.getExperience() == 0 ? "" :
             this.user.getTranslation(reference + "knowledge",
