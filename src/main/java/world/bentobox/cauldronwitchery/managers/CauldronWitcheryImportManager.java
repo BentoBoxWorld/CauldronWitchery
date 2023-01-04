@@ -266,6 +266,9 @@ public class CauldronWitcheryImportManager
                 recipe.setPermissions(new HashSet<>());
                 recipe.getPermissions().addAll((List<String>) hashMap.getOrDefault("permissions", Collections.emptyList()));
 
+                // Reads the temperature
+                recipe.setTemperature(matchTemperature((String) hashMap.get("temperature"), Recipe.Temperature.NORMAL));
+
                 // Set order.
                 recipe.setOrder((int) hashMap.getOrDefault("order", 0));
 
@@ -592,6 +595,31 @@ public class CauldronWitcheryImportManager
     {
         EntityType item = matchEntity(text);
         return item == null ? defaultItem : item;
+    }
+
+
+    /**
+     * Match Temperature type.
+     *
+     * @param text the text
+     * @param defaultValue the default Temperature
+     * @return the Temperature type
+     */
+    private static Recipe.Temperature matchTemperature(@Nullable String text, Recipe.Temperature defaultValue)
+    {
+        if (text == null || text.isBlank())
+        {
+            return defaultValue;
+        }
+
+        try
+        {
+            return Recipe.Temperature.valueOf(text.toUpperCase());
+        }
+        catch (Exception e)
+        {
+            return defaultValue;
+        }
     }
 
 
