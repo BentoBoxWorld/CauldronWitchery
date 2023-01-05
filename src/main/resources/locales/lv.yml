@@ -1,39 +1,29 @@
-###########################################################################################
-# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
-# the one at http://yaml-online-parser.appspot.com                                        #
-###########################################################################################
-
+---
 meta:
   authors:
-    - BONNe
-
+  - BONNe
 cauldron-witchery:
   commands:
     player:
       main:
-        parameters: ''
-        description: 'Galvenā spēlētāju komanda. Atver izvēlni.'
+        description: Galvenā spēlētāju komanda. Atver izvēlni.
     admin:
       main:
-        parameters: ''
-        description: 'Galvenā administratora komanda. Atver izvēlni.'
+        description: Galvenā administratora komanda. Atver izvēlni.
       give:
-        parameters: '<burvju_nūjiņa>'
-        description: 'Izdod spēlētājam burvju nūjiņu.'
+        parameters: "<burvju_nūjiņa>"
+        description: Izdod spēlētājam burvju nūjiņu.
       book:
-        parameters: '<spēlētājs> <grāmata>'
-        description: 'Ģenerē bruvju grāmatu priekš prasītā spēlētāja.'
+        parameters: "<spēlētājs> <grāmata>"
+        description: Ģenerē bruvju grāmatu priekš prasītā spēlētāja.
       reload-books:
-        parameters: ''
-        description: 'Pārlādē grāmatu tulkojumus.'
+        description: Pārlādē grāmatu tulkojumus.
       reload-sticks:
-        parameters: ''
-        description: 'Pārlādē maģiskās nūjiņas no datubāzes.'
+        description: Pārlādē maģiskās nūjiņas no datubāzes.
   gui:
     titles:
       sticks-gui: "&0&l Burvju Nūjiņas"
       recipes-gui: "&0&l Burvestības"
-      # The title for the Main GUI
       admin-panel: "&0&l Administratora Panelis"
       edit-stick: "&0&l Labot Burvju Nūjiņu: [stick]"
       edit-recipe: "&0&l Labot Recepti"
@@ -47,41 +37,29 @@ cauldron-witchery:
       block-selector: "&0&l Bluku Izvēlne"
       entity-selector: "&0&l Radību Izvēlne"
     buttons:
-      # Button that is used to return to previous GUI or exit it completely.
       return:
         name: "&f&l Atpakaļ"
         description: |-
           &7 Atgriezties uz
           &7 iepriekšējo izvēlni
-      # Button that is used in multi-page GUIs which allows to return to previous page.
       previous:
         name: "&f&l Iepriekšējā Lapa"
-        description: |-
-          &7 Skatīt &e [number] &7 lapu
-      # Button that is used in multi-page GUIs which allows to go to next page.
+        description: "&7 Skatīt &e [number] &7 lapu"
       next:
         name: "&f&l Nākošā Lapa"
-        description: |-
-          &7 Skatīt &e [number] &7 lapu
-      # Button that allows to quit the current gui.
+        description: "&7 Skatīt &e [number] &7 lapu"
       quit:
         name: "&f&l Iziet"
-        description: |-
-          &7 Iziet no izvēlnes.
-      # Button that allows to save the changes.
+        description: "&7 Iziet no izvēlnes."
       save:
         name: "&f&l Saglabāt"
-        description: |-
-          &7 Saglabāt un atgriezties.
-      # Button that allows to cancel the changes.
+        description: "&7 Saglabāt un atgriezties."
       cancel:
         name: "&f&l Atcelt"
-        description: |-
-          &7 Atcelt un atgriezties.
+        description: "&7 Atcelt un atgriezties."
       search:
         name: "&f&l Meklēt"
-        description: |-
-          &7 Ievadi meklēšanas tekstu.
+        description: "&7 Ievadi meklēšanas tekstu."
         search: "&b Vērtība: [value]"
       manage_users:
         name: "&f&l Pārvaldīt Lietotāju Datus"
@@ -91,12 +69,10 @@ cauldron-witchery:
           &7 papildinājums
       manage_magic_sticks:
         name: "&f&l Pārvaldīt Burvju Nūjiņas"
-        description: |-
-          &7 Pārvaldīt burvju nūjiņas
+        description: "&7 Pārvaldīt burvju nūjiņas"
       manage_bundles:
         name: "&f&l Pārvaldīt Saišķus"
-        description: |-
-          &7 Pārvaldīt saišķus
+        description: "&7 Pārvaldīt saišķus"
       edit_settings:
         name: "&f&l Pārvaldīt Iestatījums"
         description: |-
@@ -104,8 +80,7 @@ cauldron-witchery:
           &7 iestatījumus.
       web_library:
         name: "&f&l Bibliotēka"
-        description: |-
-          &7 Skatīt publisko bibliotēku.
+        description: "&7 Skatīt publisko bibliotēku."
       import_database:
         name: "&f&l Ielādēt Datubāzi"
         description: |-
@@ -143,20 +118,17 @@ cauldron-witchery:
           &7 nūjiņas receptes.
       name:
         name: "&f&l Nosaukums"
-        description: |-
-          &7 Mainīt nosaukumu.
+        description: "&7 Mainīt nosaukumu."
         value: "&7 Šobrīd: &r [name]"
         no-value: "&7 Nosaukums nav uzstādīts."
       description:
         name: "&f&l Apraksts"
-        description: |-
-          &7 Mainīt aprakstu.
+        description: "&7 Mainīt aprakstu."
         value: "&7 Šobrīd:"
         no-value: "&7 Apraksts nav uzstādīts."
       stick:
         name: "&f&l Burvju Nūjiņa"
-        description: |-
-          &7 Burvju nūjiņa
+        description: "&7 Burvju nūjiņa"
       book:
         name: "&f&l Grāmata"
         description: |-
@@ -175,8 +147,7 @@ cauldron-witchery:
         none: "&7 Atļaujas nav uzstādītas."
       complexity:
         name: "&f&l Sarežģītība"
-        description: |-
-          &7 Mainīt sarežģītību.
+        description: "&7 Mainīt sarežģītību."
         value: "&7 Šobrīd: &r [number]"
       cost:
         name: "&f&l Cena"
@@ -186,8 +157,7 @@ cauldron-witchery:
         value: "&7 Šobrīd: &r $[number]"
       order:
         name: "&f&l Secības Numurs"
-        description: |-
-          &7 Mainīt secības numuru.
+        description: "&7 Mainīt secības numuru."
         value: "&7 Currently: &r [number]"
       add_recipe:
         name: "&f&l Pievienot Recepti"
@@ -267,8 +237,7 @@ cauldron-witchery:
           &7 burvju nūjiņu.
       remove_magic_stick:
         name: "&f&l Dzēst Burvju Nūjiņu"
-        description: |-
-          &7 Dzēst burvju nūjiņas.
+        description: "&7 Dzēst burvju nūjiņas."
         title: "&7 Izvēlētās Nūjiņas:"
         value: "&7 - [stick]"
       is_online:
@@ -278,8 +247,7 @@ cauldron-witchery:
           &7 šobrīd ir tiešsaitē.
       all_players:
         name: "&f&l Visi Spēlētāji"
-        description: |-
-          &7 Rādīt visus spēlētājus.
+        description: "&7 Rādīt visus spēlētājus."
       success_damage:
         name: "&f&l Nūjiņas Bojājumi"
         description: |-
@@ -384,13 +352,11 @@ cauldron-witchery:
           &7 priekšmetu.
       material:
         name: "&f&l [material]"
-        description: |-
-          &7 Materiāla ID: [id]
+        description: "&7 Materiāla ID: [id]"
         selected: "&2 Izvēlēts"
       entity:
         name: "&f&l [entity]"
-        description: |-
-          &7 Radības ID: [id]
+        description: "&7 Radības ID: [id]"
         selected: "&2 Izvēlēts"
       recipe:
         name: "&f&l Recepte: [value]"
@@ -491,9 +457,9 @@ cauldron-witchery:
         &e Labais klikšķis,
         &7 lai pirktu.
     descriptions:
-      # Text that is added for selected element.
       selected: "&2 Izvēlēts"
       recipe:
+        name: "&f [name]"
         book:
           lore: |-
             [no-book]
@@ -524,10 +490,10 @@ cauldron-witchery:
             [knowledge]
             [permissions]
           no-entity: "&c Nav Radības."
-        cauldron: "&7 Katls: [cauldron]"
-        leveled-cauldron: |-
-          &7 Katls: [cauldron]
-          &7 piepildīts [level] reizes
+        cauldron-level-0: "&7 Katls: tukšs [cauldron]"
+        cauldron-level-1: "&7 Katls: vienreiz pildīts [cauldron]"
+        cauldron-level-2: "&7 Katls: divreiz pildīts [cauldron]"
+        cauldron-level-3: "&7 Katls: pilns [cauldron]"
         knowledge: "&7 Pieredze: [number]"
         main-ingredient: "&7 Galvenais Ingredients: [item]"
         no-extra: "&7 Nav papildus ingredienti"
@@ -548,88 +514,62 @@ cauldron-witchery:
         permission-single: "&7 Nepieciešama: [permission]"
         permissions-title: "&7 Atļaujas:"
         permissions-element: "&7 - [permission]"
-      # This part generates description for the Library Entry
       library:
-        author: '&7 veidoja &e [author]'
-        version: '&7 Burvestību Katla Versija: &e [version]'
-        lang: '&7 Valoda: &e [lang]'
-        gamemode: '&7 Priekš &e [gamemode]'
+        author: "&7 veidoja &e [author]"
+        version: "&7 Burvestību Katla Versija: &e [version]"
+        lang: "&7 Valoda: &e [lang]"
+        gamemode: "&7 Priekš &e [gamemode]"
   conversations:
-    # Prefix for messages that are send from server.
     prefix: "&l&6 [BentoBox]: &r"
-    # List of strings that are valid for confirming input. (separated with ,)
-    confirm-string: "true, on, yes, confirm, y, valid, correct, jā, ja, apstiprinu, pareizi"
-    # List of strings that are valid for denying input. (separated with ,)
-    deny-string: "false, off, no, deny, n, invalid, incorrect, nē, ne, neapstiprinu, nepareizi"
-    # String that allows to cancel conversation. (can be only one)
-    cancel-string: "atcelt"
-    # List of strings that allows to exit conversation. (separated with ,)
-    exit-string: "cancel, exit, quit, atcelt, iziet"
-    # Message that is send to user when conversation is cancelled.
+    confirm-string: true, on, yes, confirm, y, valid, correct, jā, ja, apstiprinu,
+      pareizi
+    deny-string: false, off, no, deny, n, invalid, incorrect, nē, ne, neapstiprinu,
+      nepareizi
+    cancel-string: atcelt
+    exit-string: cancel, exit, quit, atcelt, iziet
     cancelled: "&c Saruna pārtraukta!"
-    # Message that appears when admin clicks on number editing button.
     input-number: "&e Lūdzu ieraksti skaitli sarakstē!"
-    # Message that appears when admin clicks on seconds editing button.
     input-seconds: "&e Lūdzu ieraksti sekunžu skaitu sarakstē!"
-    # Error message that is showed if user input a value that is not a number.
     numeric-only: "&c Šis `[value]` nav skaitlis!"
-    # Error message that is showed if user input a number that is smaller or larger that allowed.
-    not-valid-value: "&c Ierakstītais skaitlis [value] nav derīgs. Skaitlis nedrīkst būt mazāks par [min] un lielāks par [max]!"
-    # Message that confirms user data removing.
-    user-data-removed: "&a Visi lietotāju dati priekš [gamemode] ir dzēsti."
-    # Message that asks confirmation for user data removing.
-    confirm-user-data-deletion: "&e Lūdzu apstiprini sarakstē (jā), ka vēlies dzēst lietotāju datus par [gamemode]."
-    # Message that confirms user data removing.
-    all-data-removed: "&a Visi dati priekš [gamemode] ir dzēsti."
-    # Message that asks confirmation for user data removing.
-    confirm-all-data-deletion: "&e Lūdzu apstiprini sarakstē (jā), ka vēlies dzēst visus datus par [gamemode]."
-    # Message that asks user to write a name
-    write-name: "&e Lūdzu ieraksti sarakstē vārdu."
-    # Message that confirms new object creation.
-    new-object-created: "&a Jauns objekts priekš [gamemode] ir uztaisīts."
-    # Error message that sends that object cannot be created with a given name
-    object-already-exists: "&c Objekts ar &7 [id] &c jau eksistē. Izvēlies citu vārdu."
-    # Message that confirms name changing
-    name-changed: "&a Nosaukums veiksmīgi mainīts."
-    # Message that appears after clicking
-    write-description: "&e Lūdzu raksti jauno aprakstu sarakstē un 'iziet' jaunā rindā, lai beigtu."
-    # Message that appears after successful description change.
-    description-changed: "&a Apraksts vaiksmīgi mainīts."
-    # Message that appears when admin clicks on permission editing button.
-    write-permissions: "&e Lūdzu ieraksti nepieciešamās atļaujas sarakstē, katru savā rindā, and 'iziet' jaunā rindā, lai beigtu."
-    # Message that appears after successful permission updating.
-    permissions-changed: "&a Atļaujas veiksmīgi mainītas."
-    # Message that appears when user clicks on library installation.
-    start-downloading: "&a Sāk lejupielādēt Burvestību Katla Bibliotēku."
-    # Message that appears when writing multiline text.
-    written-text: "&a Ievadītais teksts:"
-    # Message that appears after importing library data into database.
-    confirm-data-replacement: "&e Lūdzu apstiprini (jā), ka vēlies dzēst esošos uzdevumus un aizstāt ar jauniem."
-    # Message that appears after successful data importing
-    new-challenges-imported: "&a Jaunie Uzdevumi ir veiksmīgi ielādēti priekš [gamemode]."
-    # Message that appears after admin clicks on database exporting button.
-    exported-file-name: "&e Lūdzu ieraksti eksportētā faila nosaukumu. (ieraksti 'atcelt', lai izietu)"
-    # Message that appears after successful database exporting to file.
-    database-export-completed: "&a Dati veiksmīgi eksportēti no [world]. Fails [file] ir izveidots."
-    # Message that appears if input file name is already taken.
-    file-name-exist: "&c Faila nosaukums '[id]' jau eksistē. Nevar pārrakstīt."
-    # Message that asks for search value input.
-    write-search: "&e Lūdzu ievadi meklēšanas vērtību. (vai 'atcelt', lai izietu)"
-    # Message that appears after updating search value.
-    search-updated: "&a Meklēšanas vērtība atjaunota."
-    # Message that confirms user data removing.
+    not-valid-value: "&c Ierakstītais skaitlis [value] nav derīgs. Skaitlis nedrīkst
+      būt mazāks par [min] un lielāks par [max]!"
     data-removed: "&a Izvēlētās burvju nūjiņas ir dzēstas no [gamemode]."
-    # Message that asks confirmation for user data removing.
-    confirm-deletion: "&e Lūdzu apstiprini, ka vēlies dzēst [number] burvju nūjiņas: [value]."
-    # Message that appears after clicking
+    confirm-deletion: "&e Lūdzu apstiprini, ka vēlies dzēst [number] burvju nūjiņas:
+      [value]."
+    user-data-removed: "&a Visi lietotāju dati priekš [gamemode] ir dzēsti."
+    confirm-user-data-deletion: "&e Lūdzu apstiprini sarakstē (jā), ka vēlies dzēst
+      lietotāju datus par [gamemode]."
+    all-data-removed: "&a Visi dati priekš [gamemode] ir dzēsti."
+    confirm-all-data-deletion: "&e Lūdzu apstiprini sarakstē (jā), ka vēlies dzēst
+      visus datus par [gamemode]."
+    write-name: "&e Lūdzu ieraksti sarakstē vārdu."
+    new-object-created: "&a Jauns objekts priekš [gamemode] ir uztaisīts."
+    object-already-exists: "&c Objekts ar &7 [id] &c jau eksistē. Izvēlies citu vārdu."
+    name-changed: "&a Nosaukums veiksmīgi mainīts."
+    write-description: "&e Lūdzu raksti jauno aprakstu sarakstē un 'iziet' jaunā rindā,
+      lai beigtu."
+    description-changed: "&a Apraksts vaiksmīgi mainīts."
+    write-permissions: "&e Lūdzu ieraksti nepieciešamās atļaujas sarakstē, katru savā
+      rindā, and 'iziet' jaunā rindā, lai beigtu."
+    permissions-changed: "&a Atļaujas veiksmīgi mainītas."
     write-book-name: "&e Lūdzu ieraksti grāmatas nosaukumu, vai 'atcelt', lai pārtrauktu."
-    # Message that appears after successful reward-text change.
     book-name-changed: "&a Grāmatas nosaukums veiksmīgi nomainīts."
-    # Message that appears after successful data importing
+    start-downloading: "&a Sāk lejupielādēt Burvestību Katla Bibliotēku."
+    written-text: "&a Ievadītais teksts:"
+    confirm-data-replacement: "&e Lūdzu apstiprini (jā), ka vēlies dzēst esošos uzdevumus
+      un aizstāt ar jauniem."
     new-data-imported: "&a Veiksmīgi ielādēti jauni dati priekš [gamemode]."
+    exported-file-name: "&e Lūdzu ieraksti eksportētā faila nosaukumu. (ieraksti 'atcelt',
+      lai izietu)"
+    database-export-completed: "&a Dati veiksmīgi eksportēti no [world]. Fails [file]
+      ir izveidots."
+    file-name-exist: "&c Faila nosaukums '[id]' jau eksistē. Nevar pārrakstīt."
+    write-search: "&e Lūdzu ievadi meklēšanas vērtību. (vai 'atcelt', lai izietu)"
+    search-updated: "&a Meklēšanas vērtība atjaunota."
     magic-stick-loaded: "&a Burvju nūjiņa [stick] ir ielādēta."
     books-reload: "&a Grāmatas pārlādētas."
     sticks-reload: "&a  Burvju nūjiņas pārlādētas."
+    new-challenges-imported: "&a Jaunie Uzdevumi ir veiksmīgi ielādēti priekš [gamemode]."
     no-recipes: "&c Neizdevās atrast nevienu recepti priekš &r [stick]"
   errors:
     no-player-data: "&c Nav saglabāti spēlētāju dati."
@@ -641,43 +581,32 @@ cauldron-witchery:
     no-load: "&c Neizdevās ielādēt [file]. Iemesls: [description]"
     no-file: "&c Neizdevās atrast [file]."
     not-a-gamemode-world: "&c Pasaule [world] nav Papildinājuma Spēles pasaule."
-    exist-magic-sticks: "&c Burvju nūjiņas jau eksistē. Jaunās nevar ielādēt pirms iepriekšējās nav dzēstas."
+    exist-magic-sticks: "&c Burvju nūjiņas jau eksistē. Jaunās nevar ielādēt pirms
+      iepriekšējās nav dzēstas."
     file-exist: "&c Fails [file] jau eksistē, izvēlies citu nosaukumu."
+    no-recipes: "&c Neizdevās atrast receptes priekš &r [stick]"
   messages:
-    # Message that appears if player has not a correct main ingredient in hand for magic stick.
-    incorrect-main-ingredient: "&c Hmm, kur ir galvenais ingredients... Kas tas vispār bija?"
-    # Message that appears if player is not using a correct cauldron.
+    incorrect-main-ingredient: "&c Hmm, kur ir galvenais ingredients... Kas tas vispār
+      bija?"
     incorrect-cauldron: "&c Hmm, laikam nav pareizais katla pildījums."
-    # Message that appears if player has not correct ingredients for recipes.
     incorrect-extra-ingredients: "&c Hmm, kaut kas trūkst... Jāpapēta recepti vēlreiz."
-    # Message that appears if player has not filled cauldron with a liquid enough.
     not-filled-cauldron: "&c Hmm, laikam katls ir pārāk tukšs. Vajag to papildināt..."
-    # Message that appears if cauldron is too hot. Requires extra cooling below it.
-    too-hot-cauldron: "&c Hmm, laikam katlu vajag atdzesēt. Varbūt palikt kaut ko aukstu zem tā?"
-    # Message that appears if cauldron is too cold. Requires extra heating below it.
-    too-cold-cauldron: "&c Hmm, laikam katlu vajag uzkarsēt. Varbūt palikt kaut ko karstu zem tā?"
-    # Message that appears if player has not enough main ingredient in offhand.
+    too-cold-cauldron: "&c Hmm, laikam katlu vajag uzkarsēt. Varbūt palikt kaut ko
+      karstu zem tā?"
+    too-hot-cauldron: "&c Hmm, laikam katlu vajag atdzesēt. Varbūt palikt kaut ko
+      aukstu zem tā?"
     missing-main-ingredient: "&c Hmm, laikam trūkst galvenais ingredients..."
-    # Message that appears if player has not enough experience.
     missing-knowledge: "&c Hmm, laikam man vajag vairāk pieredzi..."
-    # Message that appears if player has missing permissions for recipe or stick.
     missing-permissions: "&c Hmm, laikam man nav atļauju šai receptei."
-    # Message that appears if player has put too much ingredients in cauldron.
     too-much-ingredients: "&c Hmm, laikam ieliku par daudz ingredientus katlā..."
-    # Message that appears if player has missing extra ingredients.
     missing-extra-ingredients: "&c Hmmm, laikam nepieciešami vairāk papildus ingredienti..."
-    # Generic message that appears if something went wrong.
     something-went-wrong: "&4 Eksperiments nogāja greizi!!!"
-    # Message that appears at the end of successful recipe.
     it-worked: "&d Tas.... Tas... Tas nostrādāta!!!"
-    # Message that appears when player buys a magic stick
     purchased-stick: "&d Tu iegādājies &r [name] &r&d par [value]."
-    # Message that appears when player gets a stick for free (no economy provided).
     free-stick: "&d Tu iegādājies &r [name]."
-    # Message that appears when player does not have enough money.
     not-enough-money: "&c Tev pietrūkst līdzekļi, lai iegādātos &r [name]."
-    # Message that appears when something went wrong while withdrawing founds.
-    could-not-withdraw: "&c Kaut kas nogāja greizi cenšoties pārskaitīt līdzekļus. Kļūda: [value]"
+    could-not-withdraw: "&c Kaut kas nogāja greizi cenšoties pārskaitīt līdzekļus.
+      Kļūda: [value]"
 protection:
   flags:
     CAULDRON_WITCHERY_ISLAND_PROTECTION:
@@ -685,7 +614,7 @@ protection:
         &5 Pārslēdz, kuram ir
         &5 ļauts lietot maģiskās
         &5 nūjiņas uz šīs salas.
-      name: "Burvju Katlu Aizsardzība"
+      name: Burvju Katlu Aizsardzība
       hint: |-
         &c Tav nav atļaujas lietot burvju
         &c nūjiņas uz šīs salas.
