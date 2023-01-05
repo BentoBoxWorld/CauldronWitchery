@@ -73,7 +73,7 @@ public class MagicStickPanel extends CommonPanel
         if (this.magicSticks.isEmpty())
         {
             this.addon.logError("There are no magic sticks set up!");
-            Utils.sendMessage(this.user, this.user.getTranslation(Constants.ERRORS + "no-sticks",
+            Utils.sendMessage(this.user, this.user.getTranslation(Constants.ERRORS + "no-available-sticks",
                 Constants.PARAMETER_GAMEMODE, Utils.getGameMode(this.world)));
             return;
         }
