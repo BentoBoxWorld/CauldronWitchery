@@ -569,8 +569,6 @@ cauldron-witchery:
     magic-stick-loaded: "&a Burvju nūjiņa [stick] ir ielādēta."
     books-reload: "&a Grāmatas pārlādētas."
     sticks-reload: "&a  Burvju nūjiņas pārlādētas."
-    new-challenges-imported: "&a Jaunie Uzdevumi ir veiksmīgi ielādēti priekš [gamemode]."
-    no-recipes: "&c Neizdevās atrast nevienu recepti priekš &r [stick]"
   errors:
     no-player-data: "&c Nav saglabāti spēlētāju dati."
     no-library-entries: "&c Neizdevās atrast bibliotēkas ierakstu."
