@@ -459,7 +459,6 @@ cauldron-witchery:
     descriptions:
       selected: "&2 Izvēlēts"
       recipe:
-        name: "&f [name]"
         book:
           lore: |-
             [no-book]
@@ -490,10 +489,6 @@ cauldron-witchery:
             [knowledge]
             [permissions]
           no-entity: "&c Nav Radības."
-        cauldron-level-0: "&7 Katls: tukšs [cauldron]"
-        cauldron-level-1: "&7 Katls: vienreiz pildīts [cauldron]"
-        cauldron-level-2: "&7 Katls: divreiz pildīts [cauldron]"
-        cauldron-level-3: "&7 Katls: pilns [cauldron]"
         knowledge: "&7 Pieredze: [number]"
         main-ingredient: "&7 Galvenais Ingredients: [item]"
         no-extra: "&7 Nav papildus ingredienti"
@@ -569,8 +564,6 @@ cauldron-witchery:
     magic-stick-loaded: "&a Burvju nūjiņa [stick] ir ielādēta."
     books-reload: "&a Grāmatas pārlādētas."
     sticks-reload: "&a  Burvju nūjiņas pārlādētas."
-    new-challenges-imported: "&a Jaunie Uzdevumi ir veiksmīgi ielādēti priekš [gamemode]."
-    no-recipes: "&c Neizdevās atrast nevienu recepti priekš &r [stick]"
   errors:
     no-player-data: "&c Nav saglabāti spēlētāju dati."
     no-library-entries: "&c Neizdevās atrast bibliotēkas ierakstu."
@@ -584,7 +577,6 @@ cauldron-witchery:
     exist-magic-sticks: "&c Burvju nūjiņas jau eksistē. Jaunās nevar ielādēt pirms
       iepriekšējās nav dzēstas."
     file-exist: "&c Fails [file] jau eksistē, izvēlies citu nosaukumu."
-    no-recipes: "&c Neizdevās atrast receptes priekš &r [stick]"
   messages:
     incorrect-main-ingredient: "&c Hmm, kur ir galvenais ingredients... Kas tas vispār
       bija?"
