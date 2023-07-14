@@ -40,7 +40,9 @@ public class RecipesPanel extends CommonPanel
         super(parentPanel);
 
         this.magicStick = magicStick;
-        this.recipes = magicStick.getRecipeList();
+        this.recipes = magicStick.getRecipeList().stream().
+            filter(Recipe::isValid).
+            collect(Collectors.toList());
         this.recipes.sort(Comparator.comparingInt(Recipe::getOrder).thenComparing(
             (o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(
                 o1.getRecipeName(this.user),

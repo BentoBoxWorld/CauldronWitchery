@@ -95,7 +95,7 @@ public class RecipeProcessingTask implements Runnable
         StringBuilder lastErrorMessage = new StringBuilder();
 
         List<Recipe> recipeList = this.magicStick.getRecipeList().stream().
-            filter(recipe -> recipe.getMainIngredient() != null).
+            filter(Recipe::isValid).
             filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand)).
             collect(Collectors.toList());
 

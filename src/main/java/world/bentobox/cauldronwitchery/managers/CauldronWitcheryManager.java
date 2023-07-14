@@ -444,7 +444,10 @@ public class CauldronWitcheryManager
             filter(magicStickObject -> magicStickObject.getBookName().equalsIgnoreCase(bookName)).
             findFirst().
             map(MagicStickObject::getRecipeList).
-            orElse(Collections.emptyList());
+            orElse(Collections.emptyList()).
+            stream().
+            filter(Recipe::isValid).
+            toList();
 
         ConfigurationSection recipeSection = dataSection.getConfigurationSection("recipe");
 
