@@ -8,16 +8,18 @@ package world.bentobox.cauldronwitchery.database.object;
 
 
 import com.google.gson.annotations.Expose;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.DataObject;
 import world.bentobox.bentobox.database.objects.Table;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.database.object.recipe.Recipe;
-import world.bentobox.cauldronwitchery.utils.Utils;
 
 
 /**
@@ -64,6 +66,11 @@ public class MagicStickObject implements DataObject
             itemMeta.setLore(Arrays.stream(Util.translateColorCodes(this.getDescription()).split("\n")).toList());
             // Update meta.
             itemStack.setItemMeta(itemMeta);
+            // Set persistent data.
+            itemMeta.getPersistentDataContainer().set(
+                MagicStickObject.MAGIC_STICK_KEY,
+                PersistentDataType.STRING,
+                this.uniqueId);
         }
 
         return itemStack;
@@ -358,4 +365,16 @@ public class MagicStickObject implements DataObject
      */
     @Expose
     private int order;
+
+
+// ---------------------------------------------------------------------
+// Section: Constants
+// ---------------------------------------------------------------------
+
+
+    /**
+     * Namespace key for Magic Stick Key
+     */
+    private static final NamespacedKey MAGIC_STICK_KEY =
+        new NamespacedKey(BentoBox.getInstance(), "magic-stick");
 }
