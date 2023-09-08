@@ -60,7 +60,8 @@ public class CauldronClickListener extends FlagListener implements Listener
 
         if (!event.hasItem() ||
             event.getHand() == null ||
-            !event.getHand().equals(EquipmentSlot.HAND))
+            !(event.getHand().equals(EquipmentSlot.HAND) ||
+                event.getHand().equals(EquipmentSlot.OFF_HAND)))
         {
             // Return if event is not produced with item or player hand is null
             return;
@@ -76,7 +77,7 @@ public class CauldronClickListener extends FlagListener implements Listener
             return;
         }
 
-        if (!this.addon.getAddonManager().isMagicStick(event.getItem(), user))
+        if (!this.addon.getAddonManager().isMagicStick(event.getPlayer().getInventory().getItemInMainHand(), user))
         {
             // Return if event item is not a magic stick.
             return;
@@ -87,6 +88,13 @@ public class CauldronClickListener extends FlagListener implements Listener
 
         // Cancel event is cancelled.
         event.setCancelled(true);
+
+        if (event.getHand().equals(EquipmentSlot.OFF_HAND))
+        {
+            // If event is produced with off-hand, return as action is processed in HAND click.
+            // Just cancel to prevent block placement.
+            return;
+        }
 
         // Now check the island.
         Optional<Island> islandOptional = this.addon.getIslands().getIslandAt(block.getLocation());
