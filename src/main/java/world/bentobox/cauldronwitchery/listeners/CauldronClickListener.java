@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 import world.bentobox.bentobox.api.flags.FlagListener;
 import world.bentobox.bentobox.api.user.User;
@@ -77,7 +78,9 @@ public class CauldronClickListener extends FlagListener implements Listener
             return;
         }
 
-        if (!this.addon.getAddonManager().isMagicStick(event.getPlayer().getInventory().getItemInMainHand(), user))
+        ItemStack magicStick = event.getPlayer().getInventory().getItemInMainHand();
+
+        if (!this.addon.getAddonManager().isMagicStick(magicStick, user))
         {
             // Return if event item is not a magic stick.
             return;
@@ -124,7 +127,7 @@ public class CauldronClickListener extends FlagListener implements Listener
             () -> new RecipeProcessingTask(this.addon,
                 user,
                 block,
-                this.addon.getAddonManager().getMagicStick(event.getItem(), user),
+                this.addon.getAddonManager().getMagicStick(magicStick, user),
                 nearbyEntities).run());
     }
 
