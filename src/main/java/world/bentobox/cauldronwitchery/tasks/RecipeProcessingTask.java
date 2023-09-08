@@ -19,12 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.scheduler.BukkitTask;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -484,7 +479,7 @@ public class RecipeProcessingTask implements Runnable
         // Clone cauldron items.
         List<ItemStack> clonedList = this.cauldronItems.stream().
             map(ItemStack::clone).
-            toList();
+            collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
 
         for (ItemStack extra : extraIngredients)
         {
