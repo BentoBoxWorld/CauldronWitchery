@@ -44,9 +44,10 @@ public class CauldronClickListener extends FlagListener implements Listener
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     private void onCauldronClick(PlayerInteractEvent event)
     {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK ||
+            event.getPlayer().isSneaking())
         {
-            // Return if action is not right-click.
+            // Return if action is not right-click or player is sneaking.
             return;
         }
 
