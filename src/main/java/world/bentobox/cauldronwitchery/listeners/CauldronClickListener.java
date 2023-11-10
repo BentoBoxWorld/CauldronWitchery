@@ -78,6 +78,12 @@ public class CauldronClickListener extends FlagListener implements Listener
             return;
         }
 
+        if (!this.addon.getPlugin().getIWM().inWorld(user.getWorld()))
+        {
+            // Not a gamemode world. CauldronWitchery does not operate there.
+            return;
+        }
+
         ItemStack magicStick = event.getPlayer().getInventory().getItemInMainHand();
 
         if (!this.addon.getAddonManager().isMagicStick(magicStick, user))
