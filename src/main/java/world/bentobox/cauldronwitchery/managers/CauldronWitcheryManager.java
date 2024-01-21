@@ -202,7 +202,9 @@ public class CauldronWitcheryManager
     public boolean isMagicStick(ItemStack item, User user)
     {
         // Search an item from magic stick item cache.
-        return this.magicStickDataCache.values().stream().
+        return this.magicStickDataCache.values().
+            stream().
+            filter(key -> key.getUniqueId().startsWith(Utils.getGameMode(user.getWorld()).toLowerCase())).
             anyMatch(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item));
     }
 
@@ -218,6 +220,7 @@ public class CauldronWitcheryManager
     public MagicStickObject getMagicStick(ItemStack item, User user)
     {
         return this.magicStickDataCache.values().stream().
+            filter(key -> key.getUniqueId().startsWith(Utils.getGameMode(user.getWorld()).toLowerCase())).
             filter(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item)).
             findFirst().
             orElse(null);
@@ -444,7 +447,10 @@ public class CauldronWitcheryManager
             filter(magicStickObject -> magicStickObject.getBookName().equalsIgnoreCase(bookName)).
             findFirst().
             map(MagicStickObject::getRecipeList).
-            orElse(Collections.emptyList());
+            orElse(Collections.emptyList()).
+            stream().
+            filter(Recipe::isValid).
+            toList();
 
         ConfigurationSection recipeSection = dataSection.getConfigurationSection("recipe");
 

@@ -100,6 +100,17 @@ public class ItemRecipe extends Recipe
 
 
     /**
+     * Returns true if item stack is not null.
+     * @return If item stack is valid.
+     */
+    @Override
+    public boolean isValid()
+    {
+        return super.isValid() && this.itemStack != null;
+    }
+
+
+    /**
      * Stores the ItemStack.
      */
     @Expose

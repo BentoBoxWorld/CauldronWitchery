@@ -49,6 +49,12 @@ public class ItemsInsideCauldronListener implements Listener
             return;
         }
 
+        if (!this.addon.getPlugin().getIWM().inWorld(event.getEntity().getWorld()))
+        {
+            // Not a gamemode world. CauldronWitchery does not operate there.
+            return;
+        }
+
         // Dropped items inside lava cauldrons should not burn.
         if (EntityType.DROPPED_ITEM.equals(event.getEntityType()) &&
             (EntityDamageEvent.DamageCause.LAVA.equals(event.getCause()) ||
@@ -75,6 +81,12 @@ public class ItemsInsideCauldronListener implements Listener
         if (!this.addon.getSettings().isMixInCauldron())
         {
             // Mixing in cauldron disabled.
+            return;
+        }
+
+        if (!this.addon.getPlugin().getIWM().inWorld(event.getEntity().getWorld()))
+        {
+            // Not a gamemode world. CauldronWitchery does not operate there.
             return;
         }
 

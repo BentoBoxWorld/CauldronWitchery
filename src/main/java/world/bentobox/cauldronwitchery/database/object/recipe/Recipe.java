@@ -335,6 +335,16 @@ public abstract class Recipe
     }
 
 
+    /**
+     * This method returns true if recipe is valid.
+     * @return {@code true} if recipe is valid, otherwise {@code false}.
+     */
+    public boolean isValid()
+    {
+        return this.mainIngredient != null;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Enum
 // ---------------------------------------------------------------------
