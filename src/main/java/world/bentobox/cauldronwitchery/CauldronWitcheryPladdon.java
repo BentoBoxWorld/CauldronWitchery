@@ -13,9 +13,13 @@ import world.bentobox.bentobox.api.addons.Pladdon;
 
 public class CauldronWitcheryPladdon extends Pladdon
 {
+    private Addon addon;
     @Override
     public Addon getAddon()
     {
-        return new CauldronWitcheryAddon();
+        if (addon == null) {
+            addon = new CauldronWitcheryAddon();
+        }
+        return addon;
     }
 }
