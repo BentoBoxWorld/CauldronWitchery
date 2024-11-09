@@ -126,7 +126,7 @@ public class CauldronClickListener extends FlagListener implements Listener
 
         Collection<Entity> nearbyEntities =
             block.getWorld().getNearbyEntities(block.getBoundingBox(),
-                entity -> EntityType.DROPPED_ITEM.equals(entity.getType()));
+                        entity -> EntityType.ITEM.equals(entity.getType()));
 
         // Run the recipe processing task in next tick.
         Bukkit.getScheduler().runTaskAsynchronously(this.addon.getPlugin(),
