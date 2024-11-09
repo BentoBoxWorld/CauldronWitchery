@@ -1,7 +1,7 @@
 name: CauldronWitchery
 main: world.bentobox.cauldronwitchery.CauldronWitcheryAddon
 version: ${version}${build.number}
-api-version: 1.17
+api-version: 2.7.1
 repository: 'BentoBoxWorld/CauldronWitchery'
 metrics: true
 
