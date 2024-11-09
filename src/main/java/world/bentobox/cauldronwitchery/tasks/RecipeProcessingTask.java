@@ -735,14 +735,14 @@ public class RecipeProcessingTask implements Runnable
             else if (this.counter < 50)
             {
                 // All next ticks spawn witch particles
-                this.block.getWorld().spawnParticle(Particle.SPELL_WITCH,
+                this.block.getWorld().spawnParticle(Particle.WITCH,
                     this.center, 5, 0.10D, 0.2D, 0.10D, 2);
             }
             else if (this.counter < 70)
             {
                 if (this.counter % 6 == 0)
                 {
-                    this.block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE,
+                    this.block.getWorld().spawnParticle(Particle.EXPLOSION,
                         this.center, 5, 0.10D, 0.2D, 0.10D, 2);
 
                     this.block.getWorld().playSound(this.block.getLocation(),
@@ -844,7 +844,7 @@ public class RecipeProcessingTask implements Runnable
             else if (this.counter < 50)
             {
                 // All next ticks spawn witch particles
-                this.block.getWorld().spawnParticle(Particle.SPELL_WITCH,
+                this.block.getWorld().spawnParticle(Particle.WITCH,
                     this.center, 5, 0.10D, 0.2D, 0.10D, 2);
             }
             else if (this.counter < 70)
@@ -861,7 +861,7 @@ public class RecipeProcessingTask implements Runnable
                     0.5f,
                     0.5f);
                 // All next ticks spawn witch particles
-                this.block.getWorld().spawnParticle(Particle.SPELL,
+                this.block.getWorld().spawnParticle(Particle.ENCHANT,
                     this.center, 5, 0.10D, 0.2D, 0.10D, 2);
             }
             else
