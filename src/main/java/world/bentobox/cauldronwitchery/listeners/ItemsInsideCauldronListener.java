@@ -49,8 +49,14 @@ public class ItemsInsideCauldronListener implements Listener
             return;
         }
 
+        if (!this.addon.getPlugin().getIWM().inWorld(event.getEntity().getWorld()))
+        {
+            // Not a gamemode world. CauldronWitchery does not operate there.
+            return;
+        }
+
         // Dropped items inside lava cauldrons should not burn.
-        if (EntityType.DROPPED_ITEM.equals(event.getEntityType()) &&
+        if (EntityType.ITEM.equals(event.getEntityType()) &&
             (EntityDamageEvent.DamageCause.LAVA.equals(event.getCause()) ||
                 EntityDamageEvent.DamageCause.FIRE_TICK.equals(event.getCause())))
         {
@@ -78,8 +84,14 @@ public class ItemsInsideCauldronListener implements Listener
             return;
         }
 
+        if (!this.addon.getPlugin().getIWM().inWorld(event.getEntity().getWorld()))
+        {
+            // Not a gamemode world. CauldronWitchery does not operate there.
+            return;
+        }
+
         // Dropped items inside cauldrons should not despawn.
-        if (EntityType.DROPPED_ITEM.equals(event.getEntityType()))
+        if (EntityType.ITEM.equals(event.getEntityType()))
         {
             Block block = event.getEntity().getLocation().getBlock();
 

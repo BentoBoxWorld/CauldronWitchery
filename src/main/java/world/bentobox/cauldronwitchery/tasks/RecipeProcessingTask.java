@@ -21,9 +21,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.user.User;
@@ -92,7 +90,7 @@ public class RecipeProcessingTask implements Runnable
         StringBuilder lastErrorMessage = new StringBuilder();
 
         List<Recipe> recipeList = this.magicStick.getRecipeList().stream().
-            filter(recipe -> recipe.getMainIngredient() != null).
+            filter(Recipe::isValid).
             filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand)).
             collect(Collectors.toList());
 
@@ -233,9 +231,9 @@ public class RecipeProcessingTask implements Runnable
     {
         BlockData blockData = this.block.getBlockData();
 
-        if (blockData instanceof Levelled)
+        if (blockData instanceof Levelled level)
         {
-            if (recipe.getCauldronLevel() > ((Levelled) blockData).getLevel())
+            if (recipe.getCauldronLevel() > level.getLevel())
             {
                 // Recipe cannot be fulfilled.
                 errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "not-filled-cauldron"));
@@ -481,7 +479,7 @@ public class RecipeProcessingTask implements Runnable
         // Clone cauldron items.
         List<ItemStack> clonedList = this.cauldronItems.stream().
             map(ItemStack::clone).
-            collect(Collectors.toList());
+            collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
 
         for (ItemStack extra : extraIngredients)
         {
@@ -543,7 +541,8 @@ public class RecipeProcessingTask implements Runnable
                 {
                     // Apply level change
                     levelled.setLevel(level);
-                    this.block.setBlockData(levelled);
+                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                        () ->  this.block.setBlockData(levelled));
                 }
             }
             else
@@ -607,7 +606,7 @@ public class RecipeProcessingTask implements Runnable
                 List<ItemStack> itemsInInventory = Arrays.stream(inventory.getContents()).
                     filter(Objects::nonNull).
                     filter(ingredient::isSimilar).
-                    collect(Collectors.toList());
+                    toList();
 
                 int amount = ingredient.getAmount();
 
@@ -736,14 +735,14 @@ public class RecipeProcessingTask implements Runnable
             else if (this.counter < 50)
             {
                 // All next ticks spawn witch particles
-                this.block.getWorld().spawnParticle(Particle.SPELL_WITCH,
+                this.block.getWorld().spawnParticle(Particle.WITCH,
                     this.center, 5, 0.10D, 0.2D, 0.10D, 2);
             }
             else if (this.counter < 70)
             {
                 if (this.counter % 6 == 0)
                 {
-                    this.block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE,
+                    this.block.getWorld().spawnParticle(Particle.EXPLOSION,
                         this.center, 5, 0.10D, 0.2D, 0.10D, 2);
 
                     this.block.getWorld().playSound(this.block.getLocation(),
@@ -845,7 +844,7 @@ public class RecipeProcessingTask implements Runnable
             else if (this.counter < 50)
             {
                 // All next ticks spawn witch particles
-                this.block.getWorld().spawnParticle(Particle.SPELL_WITCH,
+                this.block.getWorld().spawnParticle(Particle.WITCH,
                     this.center, 5, 0.10D, 0.2D, 0.10D, 2);
             }
             else if (this.counter < 70)
@@ -862,7 +861,7 @@ public class RecipeProcessingTask implements Runnable
                     0.5f,
                     0.5f);
                 // All next ticks spawn witch particles
-                this.block.getWorld().spawnParticle(Particle.SPELL,
+                this.block.getWorld().spawnParticle(Particle.ENCHANT,
                     this.center, 5, 0.10D, 0.2D, 0.10D, 2);
             }
             else

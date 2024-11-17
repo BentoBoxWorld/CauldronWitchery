@@ -1,7 +1,7 @@
 name: BentoBox-CauldronWitchery
 main: world.bentobox.cauldronwitchery.CauldronWitcheryPladdon
 version: ${project.version}${build.number}
-api-version: "1.17"
+api-version: "1.21"
 
 authors: [BONNe]
 contributors: ["The BentoBoxWorld Community"]

@@ -101,6 +101,17 @@ public class EntityRecipe extends Recipe
 
 
     /**
+     * Returns true if entity type is not null.
+     * @return If entity type is valid.
+     */
+    @Override
+    public boolean isValid()
+    {
+        return super.isValid() && this.entityType != null;
+    }
+
+
+    /**
      * Stores the EntityType.
      */
     @Expose

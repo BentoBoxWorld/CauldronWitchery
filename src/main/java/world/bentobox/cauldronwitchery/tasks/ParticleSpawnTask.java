@@ -79,15 +79,15 @@ public class ParticleSpawnTask implements Runnable
             {
                 if (type == Material.WATER_CAULDRON)
                 {
-                    world.spawnParticle(Particle.WATER_SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
+                    world.spawnParticle(Particle.SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
                 }
                 else if (type == Material.POWDER_SNOW_CAULDRON)
                 {
-                    world.spawnParticle(Particle.WATER_SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
+                    world.spawnParticle(Particle.SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
                 }
                 else if (type == Material.LAVA_CAULDRON)
                 {
-                    world.spawnParticle(Particle.DRIP_LAVA, center, 12, 0.20D, 0.0D, 0.20D);
+                    world.spawnParticle(Particle.DRIPPING_LAVA, center, 12, 0.20D, 0.0D, 0.20D);
                 }
             }
             else if (type == Material.POWDER_SNOW_CAULDRON || this.isIceBelow(block))
@@ -105,7 +105,7 @@ public class ParticleSpawnTask implements Runnable
                 x = this.random.nextBoolean() ? x : -x;
                 z = this.random.nextBoolean() ? z : -z;
 
-                world.spawnParticle(Particle.SPELL_MOB,
+                world.spawnParticle(Particle.ENCHANT,
                     center.add(x, 0, z),
                     0,
                     0,
@@ -116,7 +116,7 @@ public class ParticleSpawnTask implements Runnable
                 x = this.random.nextBoolean() ? x : -x;
                 z = this.random.nextBoolean() ? z : -z;
 
-                world.spawnParticle(Particle.SPELL_MOB,
+                world.spawnParticle(Particle.ENCHANT,
                     center.add(x, 0, z),
                     0,
                     0,
