@@ -25,6 +25,10 @@ magic-sticks:
       # Mob recipe allows to summon any living entity.
       # Entity list can be found here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
       - mob: SHEEP
+        # The unique ID of this recipe in the gamemode. It is used for statistics and the
+        # %[gamemode]_cauldronwitchery_recipes_used_<id>% placeholder.
+        # If the id is not present, it is generated from the outcome, e.g. "sheep".
+        # id: sheep
         # The custom name of this recipe.
         # It can be an actual name or a link to the locale string.
         # If the name is not present, then it will use MOB translation text.

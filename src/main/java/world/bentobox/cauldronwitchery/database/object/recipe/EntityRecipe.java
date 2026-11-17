@@ -84,6 +84,13 @@ public class EntityRecipe extends Recipe
      * @return Icon.
      */
     @Override
+    public String getDefaultRecipeId()
+    {
+        return this.entityType == null ? "entity" : this.entityType.getKey().getKey();
+    }
+
+
+    @Override
     public ItemStack getIcon()
     {
         return this.entityType == null ? new ItemStack(Material.BARRIER) : PanelUtils.getEntityHead(this.entityType);

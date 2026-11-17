@@ -8,10 +8,14 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.jar.JarFile;
 
 import world.bentobox.bentobox.api.addons.Addon;
+import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.configuration.Config;
 import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.api.flags.clicklisteners.CycleClick;
@@ -21,6 +25,7 @@ import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.commands.WitcheryAdminCommand;
 import world.bentobox.cauldronwitchery.commands.WitcheryPlayerCommand;
 import world.bentobox.cauldronwitchery.configs.Settings;
+import world.bentobox.cauldronwitchery.database.object.MagicStickObject;
 import world.bentobox.cauldronwitchery.listeners.CauldronClickListener;
 import world.bentobox.cauldronwitchery.listeners.ItemsInsideCauldronListener;
 import world.bentobox.cauldronwitchery.managers.CauldronWitcheryImportManager;
@@ -105,6 +110,8 @@ public class CauldronWitcheryAddon extends Addon
 						new WitcheryAdminCommand(this, command));
 					gameModeAddon.getPlayerCommand().ifPresent(command ->
 						new WitcheryPlayerCommand(this, command));
+
+					this.registerPlaceholders(gameModeAddon);
 				}
 
 				worldList.add(gameModeAddon.getOverWorld());
@@ -213,6 +220,92 @@ public class CauldronWitcheryAddon extends Addon
 		{
 			this.particleTask.cancel();
 		}
+	}
+
+
+	/**
+	 * This method registers placeholders into given GameMode addon.
+	 * Placeholders are available as {@code %[gamemode]_cauldronwitchery_<placeholder>%}.
+	 *
+	 * @param gameModeAddon GameMode addon where placeholders must be registered.
+	 */
+	private void registerPlaceholders(GameModeAddon gameModeAddon)
+	{
+		if (this.getPlugin().getPlaceholdersManager() == null)
+		{
+			return;
+		}
+
+		final String gameMode = gameModeAddon.getDescription().getName();
+		this.placeholderGameModes.put(gameMode.toLowerCase(Locale.ENGLISH), gameModeAddon);
+
+		this.getPlugin().getPlaceholdersManager().registerPlaceholder(gameModeAddon,
+			PLACEHOLDER_PREFIX + "sticks",
+			"Number of magic sticks the player has purchased",
+			user -> user == null ? "0" :
+				String.valueOf(this.manager.getPlayerData(user.getUniqueId(), gameMode).getSticksPurchased()));
+
+		this.getPlugin().getPlaceholdersManager().registerPlaceholder(gameModeAddon,
+			PLACEHOLDER_PREFIX + "recipes_used",
+			"Number of recipes the player has successfully used",
+			user -> user == null ? "0" :
+				String.valueOf(this.manager.getPlayerData(user.getUniqueId(), gameMode).getRecipesUsed()));
+
+		this.getPlugin().getPlaceholdersManager().registerPlaceholder(gameModeAddon,
+			PLACEHOLDER_PREFIX + "summons",
+			"Number of successful entity summons by the player",
+			user -> user == null ? "0" :
+				String.valueOf(this.manager.getPlayerData(user.getUniqueId(), gameMode).getSummons()));
+
+		this.manager.getRecipeIds(gameMode).forEach(recipeId ->
+			this.registerRecipePlaceholder(gameModeAddon, recipeId));
+	}
+
+
+	/**
+	 * This method registers per-recipe placeholders for all recipes in given magic stick.
+	 *
+	 * @param magicStick Magic stick which recipe placeholders must be registered.
+	 */
+	public void registerRecipePlaceholders(MagicStickObject magicStick)
+	{
+		GameModeAddon gameModeAddon = this.placeholderGameModes.get(
+			CauldronWitcheryManager.getGameModePrefix(magicStick.getUniqueId()));
+
+		if (gameModeAddon != null)
+		{
+			magicStick.getRecipeList().forEach(recipe ->
+				this.registerRecipePlaceholder(gameModeAddon, recipe.getRecipeId()));
+		}
+	}
+
+
+	/**
+	 * This method registers placeholder that returns how many times player used given recipe.
+	 *
+	 * @param gameModeAddon GameMode addon.
+	 * @param recipeId Recipe id.
+	 */
+	private void registerRecipePlaceholder(GameModeAddon gameModeAddon, String recipeId)
+	{
+		if (recipeId == null || recipeId.isBlank())
+		{
+			return;
+		}
+
+		final String gameMode = gameModeAddon.getDescription().getName();
+		final String placeholder = PLACEHOLDER_PREFIX + "recipes_used_" + recipeId;
+
+		if (this.getPlugin().getPlaceholdersManager().isPlaceholder(gameModeAddon, placeholder))
+		{
+			return;
+		}
+
+		this.getPlugin().getPlaceholdersManager().registerPlaceholder(gameModeAddon,
+			placeholder,
+			"Number of times the player has successfully used recipe " + recipeId,
+			user -> user == null ? "0" :
+				String.valueOf(this.manager.getPlayerData(user.getUniqueId(), gameMode).getRecipeUsage(recipeId)));
 	}
 
 
@@ -360,6 +453,16 @@ public class CauldronWitcheryAddon extends Addon
 	 * VaultHook that process economy.
 	 */
 	private VaultHook vaultHook;
+
+	/**
+	 * GameModes (lower case name) where placeholders are registered.
+	 */
+	private final Map<String, GameModeAddon> placeholderGameModes = new HashMap<>();
+
+	/**
+	 * Prefix for all placeholders.
+	 */
+	private static final String PLACEHOLDER_PREFIX = "cauldronwitchery_";
 
 
 // ---------------------------------------------------------------------

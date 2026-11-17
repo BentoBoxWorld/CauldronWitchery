@@ -643,6 +643,14 @@ public class RecipeProcessingTask implements Runnable
         {
             this.produceRecipe(itemStackRecipe);
         }
+
+        // Record statistics. Make sure the recipe has an id before it is counted.
+        if (recipe.getRecipeId().isBlank() && this.addon.getAddonManager().assignRecipeIds(this.magicStick))
+        {
+            this.addon.getAddonManager().saveMagicStick(this.magicStick);
+        }
+
+        this.addon.getAddonManager().recordRecipeUse(this.user, this.block.getWorld(), recipe);
     }
 
 

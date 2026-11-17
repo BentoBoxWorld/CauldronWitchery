@@ -83,6 +83,13 @@ public class BookRecipe extends Recipe
      * @return Icon.
      */
     @Override
+    public String getDefaultRecipeId()
+    {
+        return this.bookName == null || this.bookName.isBlank() ? "book" : this.bookName;
+    }
+
+
+    @Override
     public ItemStack getIcon()
     {
         return new ItemStack(Material.KNOWLEDGE_BOOK);

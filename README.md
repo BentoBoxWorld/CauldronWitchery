@@ -34,9 +34,24 @@ If you like this addon but something is missing or is not working as you want, y
 You can also create magic sticks and recipes using template file. To import template file you need to use admin panel.
 
 
+## Placeholders
+
+CauldronWitchery registers [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) placeholders for every GameMode it hooks into. Replace `[gamemode]` with the lower-case GameMode name, e.g. `bskyblock`.
+
+| Placeholder | Description |
+|---|---|
+| `%[gamemode]_cauldronwitchery_sticks%` | Number of magic sticks the player has purchased |
+| `%[gamemode]_cauldronwitchery_recipes_used%` | Number of recipes the player has successfully used |
+| `%[gamemode]_cauldronwitchery_recipes_used_<recipe_id>%` | Number of times the player has successfully used a specific recipe |
+| `%[gamemode]_cauldronwitchery_summons%` | Number of successful mob summons |
+
+Recipe IDs are unique per GameMode. They can be set with the `id` key in `template.yml`; otherwise they are generated from the recipe outcome (e.g. `sheep`, `diamond`, or the book name), with `_2`, `_3`, ... added if the same outcome is used by more than one recipe. Use `/bbox dump-placeholders` to list all registered placeholders.
+
 ## Compatibility
 
-- [x] BentoBox - 1.21.0 version
+- [x] BentoBox - 3.23.7 or later
+- [x] Paper - 26.3
+- [x] Java - 25
 
 
 ## Information
