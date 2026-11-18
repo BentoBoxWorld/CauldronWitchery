@@ -42,7 +42,7 @@ jobs:
       # Exchanges the GitHub OIDC token for a short-lived SonarQube Cloud token, exported as SONAR_TOKEN.
       - name: SonarQube authentication
         if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: SonarSource/sonarqube-auth-action@v1.2
+        uses: SonarSource/sonarqube-auth-action@b372e2c2930aadfcc4f4399446da1e12772709ad # v1.2
         id: auth
       # The Maven scanner reads SONAR_TOKEN and the sonar.* properties in pom.xml.
       - name: SonarQube scan
