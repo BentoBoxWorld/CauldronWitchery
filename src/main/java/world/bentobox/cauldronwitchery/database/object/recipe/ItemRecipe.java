@@ -93,6 +93,13 @@ public class ItemRecipe extends Recipe
      * @return Icon.
      */
     @Override
+    public String getDefaultRecipeId()
+    {
+        return this.itemStack == null ? "item" : this.itemStack.getType().getKey().getKey();
+    }
+
+
+    @Override
     public ItemStack getIcon()
     {
         return this.itemStack == null ? new ItemStack(Material.BARRIER) : this.itemStack.clone();

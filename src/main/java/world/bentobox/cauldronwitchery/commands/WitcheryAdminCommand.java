@@ -168,7 +168,7 @@ public class WitcheryAdminCommand extends CompositeCommand
             }
             else
             {
-                target.getWorld().dropItemNaturally(target.getLocation(), object.getMagicStick());
+                Utils.giveItem(target, object.getMagicStick());
             }
 
             return true;
@@ -288,7 +288,7 @@ public class WitcheryAdminCommand extends CompositeCommand
             }
             else if (user.isPlayer() && user.getLocation() != null)
             {
-                this.getWorld().dropItemNaturally(user.getLocation(), itemStack);
+                Utils.giveItem(user, itemStack);
             }
 
             return true;

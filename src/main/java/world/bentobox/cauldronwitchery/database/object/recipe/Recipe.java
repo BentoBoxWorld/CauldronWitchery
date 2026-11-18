@@ -312,11 +312,44 @@ public abstract class Recipe
     public abstract ItemStack getIcon();
 
     /**
+     * Gets the stable recipe id. It is used to identify recipe in player statistics and
+     * placeholders. Can be blank, if recipe id is not assigned yet.
+     *
+     * @return the recipe id
+     */
+    public String getRecipeId()
+    {
+        return this.recipeId == null ? "" : this.recipeId;
+    }
+
+
+    /**
+     * Sets recipe id.
+     *
+     * @param recipeId the recipe id
+     */
+    public void setRecipeId(String recipeId)
+    {
+        this.recipeId = recipeId;
+    }
+
+
+    /**
+     * This method returns default id for the recipe, based on its outcome. It is used when recipe does not have
+     * an id assigned.
+     *
+     * @return Default recipe id.
+     */
+    public abstract String getDefaultRecipeId();
+
+
+    /**
      * This method populates clone with items from current object.
      * @param clone Clone object that must be populated.
      */
     protected void populateClone(Recipe clone)
     {
+        clone.setRecipeId(this.getRecipeId());
         clone.setRecipeDisplayName(this.getRecipeDisplayName());
         clone.setCauldronType(this.getCauldronType());
         clone.setCauldronLevel(this.getCauldronLevel());
@@ -374,6 +407,12 @@ public abstract class Recipe
 // Section: Variables
 // ---------------------------------------------------------------------
 
+
+    /**
+     * Stores stable recipe id that is used in statistics and placeholders.
+     */
+    @Expose
+    private String recipeId = "";
 
     /**
      * Stores recipe name

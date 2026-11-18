@@ -32,18 +32,25 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>17</java.version>
+        <java.version>25</java.version>
+        <!-- Non-minecraft related dependencies -->
+        <junit.version>5.10.2</junit.version>
+        <mockito.version>5.20.0</mockito.version>
+        <mock-bukkit.version>4.119.0</mock-bukkit.version>
         <!-- More visible way how to change dependency versions -->
-        <spigot.version>1.21.3-R0.1-SNAPSHOT</spigot.version>
-        <bentobox.version>2.7.1-SNAPSHOT</bentobox.version>
-        <level.version>2.7.0</level.version>
+        <paper.version>26.3.build.231-stable</paper.version>
+        <bentobox.version>3.23.7</bentobox.version>
         <vault.version>1.7</vault.version>
         <panelutils.version>1.2.0</panelutils.version>
         <!-- Revision variable removes warning about dynamic version -->
         <revision>${build.version}-SNAPSHOT</revision>
         <!-- This allows to change between versions and snapshots. -->
-        <build.version>2.1.0</build.version>
+        <build.version>2.2.0</build.version>
         <build.number>-LOCAL</build.number>
+        <!-- SonarQube Cloud -->
+        <sonar.projectKey>BentoBoxWorld_CauldronWitchery</sonar.projectKey>
+        <sonar.organization>bentobox-world</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <profiles>
@@ -56,7 +63,7 @@
             </activation>
             <properties>
                 <!-- Override only if necessary -->
-                <build.number>-#${env.BUILD_NUMBER}</build.number>
+                <build.number>-b${env.BUILD_NUMBER}</build.number>
                 <!-- GIT_BRANCH -->
             </properties>
         </profile>
@@ -84,33 +91,43 @@
         </repository>
     </distributionManagement>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>apache.snapshots</id>
-            <url>https://repository.apache.org/snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <repositories>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
-        </repository>
+        <!-- BentoBox releases -->
         <repository>
             <id>bentoboxworld</id>
             <url>https://repo.codemc.org/repository/bentoboxworld/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
+        <!-- BentoBox snapshots (Gradle publishes here, note .io vs .org) -->
+        <repository>
+            <id>bentoboxworld-snapshots</id>
+            <url>https://repo.codemc.io/repository/bentoboxworld/</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+        <!-- Paper API -->
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+        <!-- General Maven public mirror (VaultAPI, PanelUtils) -->
         <repository>
             <id>codemc-repo</id>
             <url>https://repo.codemc.org/repository/maven-public/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
     </repositories>
 
     <dependencies>
+        <!-- Paper API -->
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>${spigot.version}</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -135,10 +152,51 @@
             <artifactId>VaultAPI</artifactId>
             <version>${vault.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- MockBukkit -->
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v26.3</artifactId>
+            <version>${mock-bukkit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Mockito -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <finalName>${project.name}-${revision}${build.number}</finalName>
+
         <defaultGoal>clean package</defaultGoal>
         <resources>
             <resource>
@@ -168,16 +226,40 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.14.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java.version}</release>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
+                <version>3.5.4</version>
+                <configuration>
+                    <argLine>
+                        ${argLine}
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                        --add-opens java.base/java.math=ALL-UNNAMED
+                        --add-opens java.base/java.io=ALL-UNNAMED
+                        --add-opens java.base/java.util=ALL-UNNAMED
+                        --add-opens java.base/java.util.stream=ALL-UNNAMED
+                        --add-opens java.base/java.text=ALL-UNNAMED
+                        --add-opens java.base/java.util.regex=ALL-UNNAMED
+                        --add-opens java.base/java.nio.channels.spi=ALL-UNNAMED
+                        --add-opens java.base/sun.nio.ch=ALL-UNNAMED
+                        --add-opens java.base/java.net=ALL-UNNAMED
+                        --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+                        --add-opens java.base/sun.nio.fs=ALL-UNNAMED
+                        --add-opens java.base/sun.nio.cs=ALL-UNNAMED
+                        --add-opens java.base/java.nio.file=ALL-UNNAMED
+                        --add-opens java.base/java.nio.charset=ALL-UNNAMED
+                        --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+                        --add-opens java.logging/java.util.logging=ALL-UNNAMED
+                        --add-opens java.base/java.lang.ref=ALL-UNNAMED
+                        --add-opens java.base/java.util.jar=ALL-UNNAMED
+                        --add-opens java.base/java.util.zip=ALL-UNNAMED
+                    </argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -187,7 +269,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.3.0</version>
                 <configuration>
                     <show>public</show>
                     <failOnError>false</failOnError>
@@ -197,6 +279,7 @@
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
+                        <phase>install</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -219,12 +302,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
+                <version>3.1.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.1-SNAPSHOT</version>
+                <version>3.6.2</version>
                 <configuration>
                     <minimizeJar>true</minimizeJar>
                     <artifactSet>
@@ -261,9 +344,13 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version>
+                <version>0.8.15</version>
                 <configuration>
                     <append>true</append>
+                    <excludes>
+                        <!-- Prevents the Material is too large to mock error -->
+                        <exclude>org/bukkit/Material*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
