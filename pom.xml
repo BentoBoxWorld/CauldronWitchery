@@ -47,6 +47,10 @@
         <!-- This allows to change between versions and snapshots. -->
         <build.version>2.2.0</build.version>
         <build.number>-LOCAL</build.number>
+        <!-- SonarQube Cloud -->
+        <sonar.projectKey>BentoBoxWorld_CauldronWitchery</sonar.projectKey>
+        <sonar.organization>bentobox-world</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <profiles>
