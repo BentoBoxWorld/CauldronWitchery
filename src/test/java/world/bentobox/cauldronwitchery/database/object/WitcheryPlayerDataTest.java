@@ -8,15 +8,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
-class PlayerDataObjectTest
+class WitcheryPlayerDataTest
 {
-    private PlayerDataObject data;
+    private WitcheryPlayerData data;
 
 
     @BeforeEach
     void setUp()
     {
-        this.data = new PlayerDataObject();
+        this.data = new WitcheryPlayerData();
     }
 
 

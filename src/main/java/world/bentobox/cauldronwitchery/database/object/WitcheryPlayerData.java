@@ -14,7 +14,7 @@ import world.bentobox.bentobox.database.objects.Table;
  * Unique id is built as {@code <gamemode>_<player uuid>}.
  */
 @Table(name = "WitcheryPlayerData")
-public class PlayerDataObject implements DataObject
+public class WitcheryPlayerData implements DataObject
 {
     @Override
     public String getUniqueId()
