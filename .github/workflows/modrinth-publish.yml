@@ -1,0 +1,80 @@
+name: Publish to Modrinth
+
+# Triggers when you publish a GitHub Release
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish (e.g. 2.2.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # CauldronWitchery is not on Modrinth yet. Every step is skipped until these
+    # secrets are added (Settings → Secrets and variables → Actions):
+    #   MODRINTH_TOKEN      — personal access token from https://modrinth.com/settings/pats
+    #                         (scope: "Create versions")
+    #   MODRINTH_PROJECT_ID — the Modrinth project ID ("Copy ID" on the project page)
+    env:
+      MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
+
+    steps:
+      - name: Check Modrinth configuration
+        if: ${{ env.MODRINTH_PROJECT_ID == '' }}
+        run: echo "::warning::MODRINTH_PROJECT_ID not set; skipping Modrinth"
+
+      # 1. Check out the repository at the release tag
+      - name: Checkout repository
+        if: ${{ env.MODRINTH_PROJECT_ID != '' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      # 2. Set up Java 25
+      - name: Set up Java 25
+        if: ${{ env.MODRINTH_PROJECT_ID != '' }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      # 3. Cache Maven dependencies to speed up builds
+      - name: Cache Maven packages
+        if: ${{ env.MODRINTH_PROJECT_ID != '' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      # 4. Build the JAR
+      #    GIT_BRANCH=origin/master activates the Maven 'master' profile which
+      #    produces a clean version number (e.g. 2.2.0) without -SNAPSHOT/-LOCAL.
+      - name: Build with Maven
+        if: ${{ env.MODRINTH_PROJECT_ID != '' }}
+        run: mvn -B clean package -DskipTests
+        env:
+          GIT_BRANCH: origin/master
+
+      # 5. Upload the JAR to Modrinth
+      - name: Publish to Modrinth
+        if: ${{ env.MODRINTH_PROJECT_ID != '' }}
+        uses: cloudnode-pro/modrinth-publish@v2
+        with:
+          token: ${{ secrets.MODRINTH_TOKEN }}
+          project: ${{ secrets.MODRINTH_PROJECT_ID }}
+          version: ${{ github.event.release.tag_name || inputs.tag }}
+          changelog: ${{ github.event.release.body }}
+          loaders: |-
+            paper
+            purpur
+          # Minecraft versions this release supports.
+          game-versions: |-
+            26.3
+          files: target/CauldronWitchery-${{ github.event.release.tag_name || inputs.tag }}.jar
