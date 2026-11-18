@@ -258,6 +258,7 @@ public class CauldronWitcheryImportManager
                 }
 
                 // Reads the display name if present.
+                recipe.setRecipeId((String) hashMap.getOrDefault("id", ""));
                 recipe.setRecipeDisplayName((String) hashMap.getOrDefault("name", ""));
 
                 recipe.setCauldronType(matchMaterial((String) hashMap.get("cauldron"), Material.WATER_CAULDRON));

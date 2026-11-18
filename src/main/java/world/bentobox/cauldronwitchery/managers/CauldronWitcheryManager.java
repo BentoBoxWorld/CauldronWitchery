@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -27,6 +28,7 @@ import world.bentobox.bentobox.database.Database;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
 import world.bentobox.cauldronwitchery.database.object.MagicStickObject;
+import world.bentobox.cauldronwitchery.database.object.PlayerDataObject;
 import world.bentobox.cauldronwitchery.database.object.recipe.BookRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.EntityRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.ItemRecipe;
@@ -51,6 +53,9 @@ public class CauldronWitcheryManager
 
         this.magicStickDatabase = new Database<>(addon, MagicStickObject.class);
         this.magicStickDataCache = new HashMap<>();
+
+        this.playerDatabase = new Database<>(addon, PlayerDataObject.class);
+        this.playerDataCache = new ConcurrentHashMap<>();
 
         this.translatedBooks = new HashMap<>();
     }
@@ -78,7 +83,9 @@ public class CauldronWitcheryManager
      */
     public void saveMagicStick(MagicStickObject magicStickObject)
     {
+        this.assignRecipeIds(magicStickObject);
         this.magicStickDatabase.saveObjectAsync(magicStickObject);
+        this.addon.registerRecipePlaceholders(magicStickObject);
     }
 
 
@@ -96,6 +103,8 @@ public class CauldronWitcheryManager
         this.translatedBooks.clear();
         this.addon.log("Loading magic sticks from database...");
         this.magicStickDatabase.loadObjects().forEach(this::loadMagicStick);
+        this.assignMissingRecipeIds();
+        this.playerDataCache.clear();
         this.addon.log("Loading book translations...");
         this.loadBookTranslations();
         this.addon.log("Done");
@@ -119,6 +128,7 @@ public class CauldronWitcheryManager
         this.magicStickDataCache.clear();
         this.addon.log("Loading magic sticks from database...");
         this.magicStickDatabase.loadObjects().forEach(this::loadMagicStick);
+        this.assignMissingRecipeIds();
     }
 
 
@@ -281,8 +291,229 @@ public class CauldronWitcheryManager
 
 
 // ---------------------------------------------------------------------
+// Section: Recipe ids
+// ---------------------------------------------------------------------
+
+
+    /**
+     * Returns the GameMode prefix of given magic stick id. Magic stick ids are built as
+     * {@code <gamemode>_<id>}.
+     *
+     * @param stickId Magic stick unique id.
+     * @return GameMode prefix in lower case.
+     */
+    public static String getGameModePrefix(String stickId)
+    {
+        int index = stickId.indexOf('_');
+        return (index < 0 ? stickId : stickId.substring(0, index)).toLowerCase(Locale.ENGLISH);
+    }
+
+
+    /**
+     * Converts given text into a placeholder-friendly recipe id.
+     *
+     * @param text the text
+     * @return sanitized recipe id.
+     */
+    public static String sanitizeRecipeId(String text)
+    {
+        String id = text == null ? "" : text.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9_]", "_");
+        return id.isBlank() ? "recipe" : id;
+    }
+
+
+    /**
+     * Assigns recipe ids to all cached magic sticks that have recipes without id and saves changed sticks.
+     * Existing ids are always kept, so recipe ids are stable once assigned.
+     */
+    private void assignMissingRecipeIds()
+    {
+        this.magicStickDataCache.values().stream().
+            sorted(Comparator.comparingInt(MagicStickObject::getOrder).
+                thenComparing(MagicStickObject::getUniqueId)).
+            filter(this::assignRecipeIds).
+            forEach(this.magicStickDatabase::saveObjectAsync);
+    }
+
+
+    /**
+     * Assigns ids for recipes in given magic stick that does not have one yet. Recipe ids are unique inside
+     * single GameMode.
+     *
+     * @param magicStick the magic stick
+     * @return {@code true} if any recipe id was assigned, {@code false} otherwise.
+     */
+    public boolean assignRecipeIds(MagicStickObject magicStick)
+    {
+        return assignRecipeIds(magicStick, this.magicStickDataCache.values());
+    }
+
+
+    /**
+     * Assigns ids for recipes in given magic stick that does not have one yet. Ids that are used by other
+     * magic sticks in the same GameMode are avoided by adding {@code _2}, {@code _3}, ... suffix.
+     *
+     * @param magicStick the magic stick
+     * @param allSticks All known magic sticks (may include given magic stick).
+     * @return {@code true} if any recipe id was assigned, {@code false} otherwise.
+     */
+    public static boolean assignRecipeIds(MagicStickObject magicStick, Collection<MagicStickObject> allSticks)
+    {
+        if (magicStick.getRecipeList().stream().allMatch(recipe -> !recipe.getRecipeId().isBlank()))
+        {
+            return false;
+        }
+
+        String prefix = getGameModePrefix(magicStick.getUniqueId());
+
+        // Collect all ids that are already used in this gamemode.
+        Set<String> usedIds = new HashSet<>();
+
+        allSticks.stream().
+            filter(stick -> !stick.getUniqueId().equals(magicStick.getUniqueId())).
+            filter(stick -> getGameModePrefix(stick.getUniqueId()).equals(prefix)).
+            flatMap(stick -> stick.getRecipeList().stream()).
+            map(Recipe::getRecipeId).
+            filter(id -> !id.isBlank()).
+            forEach(usedIds::add);
+
+        magicStick.getRecipeList().stream().
+            map(Recipe::getRecipeId).
+            filter(id -> !id.isBlank()).
+            forEach(usedIds::add);
+
+        for (Recipe recipe : magicStick.getRecipeList())
+        {
+            if (recipe.getRecipeId().isBlank())
+            {
+                String base = sanitizeRecipeId(recipe.getDefaultRecipeId());
+                String id = base;
+                int counter = 2;
+
+                while (usedIds.contains(id))
+                {
+                    id = base + "_" + counter++;
+                }
+
+                recipe.setRecipeId(id);
+                usedIds.add(id);
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Returns all recipe ids for given GameMode.
+     *
+     * @param gameMode GameMode name.
+     * @return Set of recipe ids.
+     */
+    public Set<String> getRecipeIds(String gameMode)
+    {
+        String prefix = gameMode.toLowerCase(Locale.ENGLISH);
+
+        return this.magicStickDataCache.values().stream().
+            filter(stick -> getGameModePrefix(stick.getUniqueId()).equals(prefix)).
+            flatMap(stick -> stick.getRecipeList().stream()).
+            map(Recipe::getRecipeId).
+            filter(id -> !id.isBlank()).
+            collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+
+// ---------------------------------------------------------------------
 // Section: User sections
 // ---------------------------------------------------------------------
+
+
+    /**
+     * Returns player data object for given player in given GameMode. Creates new object if it does not exist.
+     *
+     * @param playerId Player UUID.
+     * @param gameMode GameMode name.
+     * @return PlayerDataObject.
+     */
+    public PlayerDataObject getPlayerData(UUID playerId, String gameMode)
+    {
+        String uniqueId = gameMode.toLowerCase(Locale.ENGLISH) + "_" + playerId;
+
+        return this.playerDataCache.computeIfAbsent(uniqueId, id -> {
+            PlayerDataObject data = this.playerDatabase.objectExists(id) ? this.playerDatabase.loadObject(id) : null;
+
+            if (data == null)
+            {
+                data = new PlayerDataObject();
+                data.setUniqueId(id);
+            }
+
+            return data;
+        });
+    }
+
+
+    /**
+     * Returns player data object for given user in the GameMode of the user's world.
+     *
+     * @param user User.
+     * @param world World that is used to detect GameMode.
+     * @return PlayerDataObject or null if world is not a GameMode world.
+     */
+    @Nullable
+    private PlayerDataObject getPlayerData(User user, World world)
+    {
+        String gameMode = world == null ? null : Utils.getGameMode(world);
+
+        if (user == null || user.getUniqueId() == null || gameMode == null)
+        {
+            return null;
+        }
+
+        return this.getPlayerData(user.getUniqueId(), gameMode);
+    }
+
+
+    /**
+     * Records magic stick purchase for the user.
+     *
+     * @param user User who purchased magic stick.
+     */
+    public void recordStickPurchase(User user)
+    {
+        PlayerDataObject data = this.getPlayerData(user, user.getWorld());
+
+        if (data != null)
+        {
+            data.addStickPurchase();
+            this.playerDatabase.saveObjectAsync(data);
+        }
+    }
+
+
+    /**
+     * Records successful recipe usage for the user.
+     *
+     * @param user User who used recipe.
+     * @param world World where recipe was used.
+     * @param recipe Recipe that was used.
+     */
+    public void recordRecipeUse(User user, World world, Recipe recipe)
+    {
+        PlayerDataObject data = this.getPlayerData(user, world);
+
+        if (data != null)
+        {
+            data.addRecipeUsage(recipe.getRecipeId());
+
+            if (recipe instanceof EntityRecipe)
+            {
+                data.addSummon();
+            }
+
+            this.playerDatabase.saveObjectAsync(data);
+        }
+    }
 
 
     /**
@@ -291,7 +522,14 @@ public class CauldronWitcheryManager
      */
     public void wipePlayers(String gameMode)
     {
-        // TODO: wipe data for players.
+        String prefix = gameMode.toLowerCase(Locale.ENGLISH) + "_";
+
+        this.playerDataCache.keySet().removeIf(id -> id.startsWith(prefix));
+
+        this.playerDatabase.loadObjects().stream().
+            map(PlayerDataObject::getUniqueId).
+            filter(id -> id.startsWith(prefix)).
+            forEach(this.playerDatabase::deleteID);
     }
 
 
@@ -644,6 +882,7 @@ public class CauldronWitcheryManager
                 if (withdraw.transactionSuccess())
                 {
                     user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+                    this.recordStickPurchase(user);
 
                     String name = magicStick.getFriendlyName().isBlank() ?
                         Utils.prettifyObject(magicStick.getMagicStick(), user) :
@@ -674,6 +913,7 @@ public class CauldronWitcheryManager
             if (user.getLocation() != null)
             {
                 user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+                this.recordStickPurchase(user);
 
                 String name = magicStick.getFriendlyName().isBlank() ?
                     Utils.prettifyObject(magicStick.getMagicStick(), user) :
@@ -733,6 +973,16 @@ public class CauldronWitcheryManager
      * Variable stores database of magic sticks data objects.
      */
     private final Database<MagicStickObject> magicStickDatabase;
+
+    /**
+     * Variable stores database of player data objects.
+     */
+    private final Database<PlayerDataObject> playerDatabase;
+
+    /**
+     * Variable stores loaded player data objects.
+     */
+    private final Map<String, PlayerDataObject> playerDataCache;
 
     /**
      * Variable stores and links locales with translated book config.
