@@ -881,7 +881,7 @@ public class CauldronWitcheryManager
 
                 if (withdraw.transactionSuccess())
                 {
-                    user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+                    Utils.giveItem(user, magicStick.getMagicStick());
                     this.recordStickPurchase(user);
 
                     String name = magicStick.getFriendlyName().isBlank() ?
@@ -912,7 +912,7 @@ public class CauldronWitcheryManager
         {
             if (user.getLocation() != null)
             {
-                user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+                Utils.giveItem(user, magicStick.getMagicStick());
                 this.recordStickPurchase(user);
 
                 String name = magicStick.getFriendlyName().isBlank() ?

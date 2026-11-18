@@ -280,6 +280,27 @@ public class Utils
 
 
     /**
+     * Gives item to the user. Item is added to the user inventory, and anything that does not fit is dropped
+     * at the user location.
+     *
+     * @param user User who receives the item.
+     * @param itemStack Item that must be given.
+     */
+    public static void giveItem(User user, ItemStack itemStack)
+    {
+        Player player = user.getPlayer();
+
+        if (player == null)
+        {
+            return;
+        }
+
+        player.getInventory().addItem(itemStack).values().forEach(leftover ->
+            player.getWorld().dropItemNaturally(player.getLocation(), leftover));
+    }
+
+
+    /**
      * Sanitizes the provided input. It replaces spaces and hyphens with underscores and lower cases the input.
      * This code also removes all color codes from the input.
      * @param input input to sanitize
