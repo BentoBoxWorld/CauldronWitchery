@@ -19,6 +19,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.eclipse.jdt.annotation.Nullable;
 import java.time.Duration;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.BentoBox;
@@ -277,6 +278,48 @@ public class Utils
         return currentValue;
     }
 
+
+
+    /**
+     * Converts pre-1.20.5 item NBT syntax that BentoBox can no longer parse into item component syntax.
+     * Currently handles {@code tipped_arrow{CustomPotionColor:123}} which becomes
+     * {@code tipped_arrow[potion_contents={custom_color:123}]}.
+     *
+     * @param text Text to migrate.
+     * @return Migrated text.
+     */
+    public static String migrateLegacyItemSyntax(String text)
+    {
+        return LEGACY_POTION_COLOR.matcher(text).replaceAll("$1[potion_contents={custom_color:$2}]");
+    }
+
+
+    /**
+     * Matches legacy {@code item{CustomPotionColor:123}} syntax.
+     */
+    private static final Pattern LEGACY_POTION_COLOR =
+        Pattern.compile("(?i)\\b(potion|splash_potion|lingering_potion|tipped_arrow)\\{CustomPotionColor:(-?\\d+)\\}");
+
+
+    /**
+     * Gives item to the user. Item is added to the user inventory, and anything that does not fit is dropped
+     * at the user location.
+     *
+     * @param user User who receives the item.
+     * @param itemStack Item that must be given.
+     */
+    public static void giveItem(User user, ItemStack itemStack)
+    {
+        Player player = user.getPlayer();
+
+        if (player == null)
+        {
+            return;
+        }
+
+        player.getInventory().addItem(itemStack).values().forEach(leftover ->
+            player.getWorld().dropItemNaturally(player.getLocation(), leftover));
+    }
 
 
     /**

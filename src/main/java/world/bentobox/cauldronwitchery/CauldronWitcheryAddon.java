@@ -7,6 +7,9 @@ import org.bukkit.World;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +34,7 @@ import world.bentobox.cauldronwitchery.listeners.ItemsInsideCauldronListener;
 import world.bentobox.cauldronwitchery.managers.CauldronWitcheryImportManager;
 import world.bentobox.cauldronwitchery.managers.CauldronWitcheryManager;
 import world.bentobox.cauldronwitchery.tasks.ParticleSpawnTask;
+import world.bentobox.cauldronwitchery.utils.Utils;
 
 
 public class CauldronWitcheryAddon extends Addon
@@ -55,6 +59,8 @@ public class CauldronWitcheryAddon extends Addon
 		// Save Panels
 		this.saveResource("panels/recipe_panel.yml", false);
 		this.saveResource("panels/stick_panel.yml",false);
+		// Update panels saved by older versions.
+		this.migratePanels();
 	}
 
 
@@ -333,6 +339,40 @@ public class CauldronWitcheryAddon extends Addon
 			// Disable
 			this.logError("CauldronWitchery settings could not load! Addon disabled.");
 			this.setState(State.DISABLED);
+		}
+	}
+
+
+	/**
+	 * Rewrites item syntax that no longer parses in panel files saved by older addon versions.
+	 * Panel files are never overwritten by {@link #saveResource(String, boolean)}, so old copies stay forever.
+	 */
+	private void migratePanels()
+	{
+		File[] panels = new File(this.getDataFolder(), "panels").listFiles((dir, name) -> name.endsWith(".yml"));
+
+		if (panels == null)
+		{
+			return;
+		}
+
+		for (File panel : panels)
+		{
+			try
+			{
+				String text = Files.readString(panel.toPath(), StandardCharsets.UTF_8);
+				String migrated = Utils.migrateLegacyItemSyntax(text);
+
+				if (!migrated.equals(text))
+				{
+					Files.writeString(panel.toPath(), migrated, StandardCharsets.UTF_8);
+					this.log("Updated old item syntax in panels/" + panel.getName());
+				}
+			}
+			catch (IOException e)
+			{
+				this.logError("Could not update panels/" + panel.getName() + ": " + e.getMessage());
+			}
 		}
 	}
 

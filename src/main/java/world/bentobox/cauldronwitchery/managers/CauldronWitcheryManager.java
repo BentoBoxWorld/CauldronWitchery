@@ -28,7 +28,7 @@ import world.bentobox.bentobox.database.Database;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
 import world.bentobox.cauldronwitchery.database.object.MagicStickObject;
-import world.bentobox.cauldronwitchery.database.object.PlayerDataObject;
+import world.bentobox.cauldronwitchery.database.object.WitcheryPlayerData;
 import world.bentobox.cauldronwitchery.database.object.recipe.BookRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.EntityRecipe;
 import world.bentobox.cauldronwitchery.database.object.recipe.ItemRecipe;
@@ -54,7 +54,7 @@ public class CauldronWitcheryManager
         this.magicStickDatabase = new Database<>(addon, MagicStickObject.class);
         this.magicStickDataCache = new HashMap<>();
 
-        this.playerDatabase = new Database<>(addon, PlayerDataObject.class);
+        this.playerDatabase = new Database<>(addon, WitcheryPlayerData.class);
         this.playerDataCache = new ConcurrentHashMap<>();
 
         this.translatedBooks = new HashMap<>();
@@ -433,18 +433,18 @@ public class CauldronWitcheryManager
      *
      * @param playerId Player UUID.
      * @param gameMode GameMode name.
-     * @return PlayerDataObject.
+     * @return WitcheryPlayerData.
      */
-    public PlayerDataObject getPlayerData(UUID playerId, String gameMode)
+    public WitcheryPlayerData getPlayerData(UUID playerId, String gameMode)
     {
         String uniqueId = gameMode.toLowerCase(Locale.ENGLISH) + "_" + playerId;
 
         return this.playerDataCache.computeIfAbsent(uniqueId, id -> {
-            PlayerDataObject data = this.playerDatabase.objectExists(id) ? this.playerDatabase.loadObject(id) : null;
+            WitcheryPlayerData data = this.playerDatabase.objectExists(id) ? this.playerDatabase.loadObject(id) : null;
 
             if (data == null)
             {
-                data = new PlayerDataObject();
+                data = new WitcheryPlayerData();
                 data.setUniqueId(id);
             }
 
@@ -458,10 +458,10 @@ public class CauldronWitcheryManager
      *
      * @param user User.
      * @param world World that is used to detect GameMode.
-     * @return PlayerDataObject or null if world is not a GameMode world.
+     * @return WitcheryPlayerData or null if world is not a GameMode world.
      */
     @Nullable
-    private PlayerDataObject getPlayerData(User user, World world)
+    private WitcheryPlayerData getPlayerData(User user, World world)
     {
         String gameMode = world == null ? null : Utils.getGameMode(world);
 
@@ -481,7 +481,7 @@ public class CauldronWitcheryManager
      */
     public void recordStickPurchase(User user)
     {
-        PlayerDataObject data = this.getPlayerData(user, user.getWorld());
+        WitcheryPlayerData data = this.getPlayerData(user, user.getWorld());
 
         if (data != null)
         {
@@ -500,7 +500,7 @@ public class CauldronWitcheryManager
      */
     public void recordRecipeUse(User user, World world, Recipe recipe)
     {
-        PlayerDataObject data = this.getPlayerData(user, world);
+        WitcheryPlayerData data = this.getPlayerData(user, world);
 
         if (data != null)
         {
@@ -527,7 +527,7 @@ public class CauldronWitcheryManager
         this.playerDataCache.keySet().removeIf(id -> id.startsWith(prefix));
 
         this.playerDatabase.loadObjects().stream().
-            map(PlayerDataObject::getUniqueId).
+            map(WitcheryPlayerData::getUniqueId).
             filter(id -> id.startsWith(prefix)).
             forEach(this.playerDatabase::deleteID);
     }
@@ -881,7 +881,7 @@ public class CauldronWitcheryManager
 
                 if (withdraw.transactionSuccess())
                 {
-                    user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+                    Utils.giveItem(user, magicStick.getMagicStick());
                     this.recordStickPurchase(user);
 
                     String name = magicStick.getFriendlyName().isBlank() ?
@@ -912,7 +912,7 @@ public class CauldronWitcheryManager
         {
             if (user.getLocation() != null)
             {
-                user.getWorld().dropItemNaturally(user.getLocation(), magicStick.getMagicStick());
+                Utils.giveItem(user, magicStick.getMagicStick());
                 this.recordStickPurchase(user);
 
                 String name = magicStick.getFriendlyName().isBlank() ?
@@ -977,12 +977,12 @@ public class CauldronWitcheryManager
     /**
      * Variable stores database of player data objects.
      */
-    private final Database<PlayerDataObject> playerDatabase;
+    private final Database<WitcheryPlayerData> playerDatabase;
 
     /**
      * Variable stores loaded player data objects.
      */
-    private final Map<String, PlayerDataObject> playerDataCache;
+    private final Map<String, WitcheryPlayerData> playerDataCache;
 
     /**
      * Variable stores and links locales with translated book config.
