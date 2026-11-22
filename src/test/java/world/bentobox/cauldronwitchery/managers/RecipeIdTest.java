@@ -150,6 +150,6 @@ class RecipeIdTest
     {
         Recipe recipe = new ItemRecipe(new ItemStack(Material.DIAMOND));
         recipe.setRecipeId("shiny");
-        assertEquals("shiny", recipe.clone().getRecipeId());
+        assertEquals("shiny", recipe.copy().getRecipeId());
     }
 }

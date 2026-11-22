@@ -58,11 +58,11 @@ public class ItemRecipe extends Recipe
 
 
     @Override
-    public Recipe clone()
+    public Recipe copy()
     {
         ItemRecipe recipe = new ItemRecipe();
         recipe.setMainIngredient(this.itemStack == null ? null : this.itemStack.clone());
-        this.populateClone(recipe);
+        this.populateCopy(recipe);
         return recipe;
     }
 

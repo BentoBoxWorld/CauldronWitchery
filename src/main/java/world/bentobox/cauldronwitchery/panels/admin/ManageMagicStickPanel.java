@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
@@ -171,7 +171,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
                     };
 
                     // This function checks if generator with a given ID already exist.
-                    Function<String, Boolean> validationFunction = magicStick ->
+                    Predicate<String> validationFunction = magicStick ->
                         this.manager.getMagicStickById(gameModePrefix + Utils.sanitizeInput(magicStick)) == null;
 
                     // Call a conversation API to get input string.

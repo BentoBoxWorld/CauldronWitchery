@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.panels.PanelItem;
@@ -187,7 +187,7 @@ public class AdminPanel extends CommonPanel
                     };
 
                     // This function checks if file can be created.
-                    Function<String, Boolean> validationFunction = fileName ->
+                    Predicate<String> validationFunction = fileName ->
                     {
                         String sanitizedName = Utils.sanitizeInput(fileName);
                         return !new File(this.addon.getDataFolder(),

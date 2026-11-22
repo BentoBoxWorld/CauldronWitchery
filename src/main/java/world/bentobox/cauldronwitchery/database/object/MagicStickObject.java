@@ -148,8 +148,8 @@ public class MagicStickObject implements DataObject
         object.setMagicStick(this.magicStick.clone());
         object.setBookName(this.bookName);
         object.setRecipeList(this.recipeList.stream().
-            map(Recipe::clone).
-            collect(Collectors.toList()));
+            map(Recipe::copy).
+            collect(Collectors.toCollection(ArrayList::new)));
 
         object.setFriendlyName(this.friendlyName);
         object.setDescription(this.description);

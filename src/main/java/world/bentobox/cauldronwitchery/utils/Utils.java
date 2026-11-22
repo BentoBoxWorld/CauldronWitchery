@@ -14,13 +14,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.eclipse.jdt.annotation.Nullable;
 import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
@@ -34,6 +33,21 @@ import world.bentobox.bentobox.util.Util;
  */
 public class Utils
 {
+    private static final String TYPE_PLACEHOLDER = "[type]";
+    private static final String META_PLACEHOLDER = "[meta]";
+    private static final String GENERIC_REFERENCE = "generic";
+    private static final String META_REFERENCE = "meta.";
+    private static final String NAME_SUFFIX = ".name";
+    private static final String DESCRIPTION_SUFFIX = ".description";
+    private static final String STRONG_POTION_PREFIX = "STRONG_";
+    private static final String LONG_POTION_PREFIX = "LONG_";
+
+
+    private Utils()
+    {
+        // Utility class.
+    }
+
     /**
      * This method checks if 2 given item stacks are similar without durability check.
      * @param input First item.
@@ -125,7 +139,7 @@ public class Utils
             List<String> permissions = user.getEffectivePermissions().stream().
                 map(PermissionAttachmentInfo::getPermission).
                 filter(permission -> permission.startsWith(permPrefix)).
-                collect(Collectors.toList());
+                toList();
 
             for (String permission : permissions)
             {
@@ -465,7 +479,7 @@ public class Utils
         //   environments:
         //     [environment]:
         //       name: [name]
-        String translation = user.getTranslationOrNothing(Constants.ENVIRONMENTS + object.name().toLowerCase() + ".name");
+        String translation = user.getTranslationOrNothing(Constants.ENVIRONMENTS + object.name().toLowerCase() + NAME_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -498,9 +512,7 @@ public class Utils
             return translation;
         }
 
-        // Lang Utils do not have Environment :(
-        //LangUtilsHook.getEnvrionmentName(object, user);
-
+        // Lang Utils do not have Environment, so fall through to prettify text.
         // Nothing was found. Use just a prettify text function.
         return Util.prettifyText(object.name());
     }
@@ -519,7 +531,7 @@ public class Utils
         //   environments:
         //     [environment]:
         //       description: [text]
-        String translation = user.getTranslationOrNothing(Constants.ENVIRONMENTS + object.name().toLowerCase() + ".description");
+        String translation = user.getTranslationOrNothing(Constants.ENVIRONMENTS + object.name().toLowerCase() + DESCRIPTION_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -551,7 +563,7 @@ public class Utils
         //   materials:
         //     [material]:
         //       name: [name]
-        String translation = user.getTranslationOrNothing(Constants.MATERIALS + object.name().toLowerCase() + ".name");
+        String translation = user.getTranslationOrNothing(Constants.MATERIALS + object.name().toLowerCase() + NAME_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -608,7 +620,7 @@ public class Utils
         //   materials:
         //     [material]:
         //       description: [text]
-        String translation = user.getTranslationOrNothing(Constants.MATERIALS + object.name().toLowerCase() + ".description");
+        String translation = user.getTranslationOrNothing(Constants.MATERIALS + object.name().toLowerCase() + DESCRIPTION_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -640,7 +652,7 @@ public class Utils
         //   entities:
         //     [entity]:
         //       name: [name]
-        String translation = user.getTranslationOrNothing(Constants.ENTITIES + object.name().toLowerCase() + ".name");
+        String translation = user.getTranslationOrNothing(Constants.ENTITIES + object.name().toLowerCase() + NAME_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -697,7 +709,7 @@ public class Utils
         //   entities:
         //     [entity]:
         //       description: [text]
-        String translation = user.getTranslationOrNothing(Constants.ENTITIES + object.name().toLowerCase() + ".description");
+        String translation = user.getTranslationOrNothing(Constants.ENTITIES + object.name().toLowerCase() + DESCRIPTION_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -729,7 +741,7 @@ public class Utils
         //   statistics:
         //     [statistic]:
         //       name: [name]
-        String translation = user.getTranslationOrNothing(Constants.STATISTICS + object.name().toLowerCase() + ".name");
+        String translation = user.getTranslationOrNothing(Constants.STATISTICS + object.name().toLowerCase() + NAME_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -762,8 +774,7 @@ public class Utils
             return translation;
         }
 
-        // Use Lang Utils Hook to translate material
-        //return LangUtilsHook.getStatisticName(object, user);
+        // Lang Utils do not have Statistic, so fall through to prettify text.
         return Util.prettifyText(object.name());
     }
 
@@ -787,7 +798,7 @@ public class Utils
         //   statistics:
         //     [statistic]:
         //       description: [text]
-        String translation = user.getTranslationOrNothing(Constants.STATISTICS + object.name().toLowerCase() + ".description");
+        String translation = user.getTranslationOrNothing(Constants.STATISTICS + object.name().toLowerCase() + DESCRIPTION_SUFFIX);
 
         if (!translation.isEmpty())
         {
@@ -822,22 +833,16 @@ public class Utils
         //       potion-type: ...
         //       ...
         //     generic: [amount] [name] [meta]
-        String translation;
-        switch (object.getType())
+        String translation = switch (object.getType())
         {
-            case POTION, SPLASH_POTION, LINGERING_POTION, TIPPED_ARROW -> {
-                // Get Potion Meta
-                translation = prettifyObject(object, (PotionMeta) object.getItemMeta(), user);
-            }
-            case PLAYER_HEAD, PLAYER_WALL_HEAD -> {
-                translation = prettifyObject(object, (SkullMeta) object.getItemMeta(), user);
-            }
-            case ENCHANTED_BOOK -> {
-                translation = prettifyObject(object, (EnchantmentStorageMeta) object.getItemMeta(), user);
-            }
-            case WRITTEN_BOOK, WRITABLE_BOOK -> {
-                translation = prettifyObject(object, (BookMeta) object.getItemMeta(), user);
-            }
+            case POTION, SPLASH_POTION, LINGERING_POTION, TIPPED_ARROW ->
+                prettifyObject(object, (PotionMeta) object.getItemMeta(), user);
+            case PLAYER_HEAD, PLAYER_WALL_HEAD ->
+                prettifyObject(object, (SkullMeta) object.getItemMeta(), user);
+            case ENCHANTED_BOOK ->
+                prettifyObject(object, (EnchantmentStorageMeta) object.getItemMeta(), user);
+            case WRITTEN_BOOK, WRITABLE_BOOK ->
+                prettifyObject(object, (BookMeta) object.getItemMeta(), user);
             case LEATHER_BOOTS,LEATHER_CHESTPLATE,LEATHER_HELMET,LEATHER_LEGGINGS,LEATHER_HORSE_ARMOR,
                 TRIDENT,CROSSBOW,CHAINMAIL_HELMET,CHAINMAIL_CHESTPLATE,CHAINMAIL_LEGGINGS,CHAINMAIL_BOOTS,IRON_HELMET,
                 IRON_CHESTPLATE,IRON_LEGGINGS,IRON_BOOTS,DIAMOND_HELMET,DIAMOND_CHESTPLATE,DIAMOND_LEGGINGS,DIAMOND_BOOTS,
@@ -846,12 +851,10 @@ public class Utils
                 STONE_SWORD,STONE_SHOVEL,STONE_PICKAXE,STONE_AXE,STONE_HOE,GOLDEN_SWORD,GOLDEN_SHOVEL,GOLDEN_PICKAXE,
                 GOLDEN_AXE,GOLDEN_HOE,IRON_SWORD,IRON_SHOVEL,IRON_PICKAXE,IRON_AXE,IRON_HOE,DIAMOND_SWORD,DIAMOND_SHOVEL,
                 DIAMOND_PICKAXE,DIAMOND_AXE,DIAMOND_HOE,NETHERITE_SWORD,NETHERITE_SHOVEL,NETHERITE_PICKAXE,NETHERITE_AXE,
-                NETHERITE_HOE,TURTLE_HELMET,SHEARS,SHIELD,FLINT_AND_STEEL,BOW -> {
-                translation = prettifyObject(object, object.getItemMeta(), user);
-            }
-            default ->
-                translation = "";
-        }
+                NETHERITE_HOE,TURTLE_HELMET,SHEARS,SHIELD,FLINT_AND_STEEL,BOW ->
+                prettifyObject(object, object.getItemMeta(), user);
+            default -> "";
+        };
 
         if (!translation.isEmpty())
         {
@@ -957,39 +960,55 @@ public class Utils
         Material itemType = item.getType();
 
         final String itemReference = Constants.ITEM_STACKS + itemType.name().toLowerCase() + ".";
-        final String metaReference = Constants.ITEM_STACKS + "meta.";
+        final String metaReference = Constants.ITEM_STACKS + META_REFERENCE;
 
-        PotionData potionData = potionMeta.getBasePotionData();
+        PotionType potionType = potionMeta.getBasePotionType();
+
+        if (potionType == null)
+        {
+            return prettifyObject(itemType, user);
+        }
+
+        // Upgraded and extended variants are separate potion types prefixed with STRONG_ and LONG_.
+        String potionTypeName = potionType.name();
+        boolean isUpgraded = potionTypeName.startsWith(STRONG_POTION_PREFIX);
+        boolean isExtended = potionTypeName.startsWith(LONG_POTION_PREFIX);
+        String baseTypeName = potionTypeName.
+            replaceFirst("^(" + STRONG_POTION_PREFIX + "|" + LONG_POTION_PREFIX + ")", "").
+            toLowerCase(Locale.ENGLISH);
 
         // Check custom translation for potions.
-        String type = user.getTranslationOrNothing(itemReference + potionData.getType().name().toLowerCase());
+        String type = user.getTranslationOrNothing(itemReference + baseTypeName);
 
         if (type.isEmpty())
         {
             // Check potion types translation.
-            type = prettifyObject(potionData.getType().getEffectType(), user);
+            type = potionType.getPotionEffects().stream().
+                findFirst().
+                map(effect -> prettifyObject(effect.getType(), user)).
+                orElse("");
         }
 
-        String upgraded = user.getTranslationOrNothing(metaReference + "upgraded");
-        String extended = user.getTranslationOrNothing(metaReference + "extended");
+        String upgraded = isUpgraded ? user.getTranslationOrNothing(metaReference + "upgraded") : "";
+        String extended = isExtended ? user.getTranslationOrNothing(metaReference + "extended") : "";
 
         // Get item specific translation.
         String specific = user.getTranslationOrNothing(itemReference + "name",
-            "[type]", type,
-            "[upgraded]", (potionData.isUpgraded() ? upgraded : ""),
-            "[extended]", (potionData.isExtended() ? extended : ""));
+            TYPE_PLACEHOLDER, type,
+            "[upgraded]", upgraded,
+            "[extended]", extended);
 
         if (specific.isEmpty())
         {
             // Use generic translation.
             String meta = user.getTranslationOrNothing(metaReference + "potion-meta",
-                "[type]", type,
-                "[upgraded]", (potionData.isUpgraded() ? upgraded : ""),
-                "[extended]", (potionData.isExtended() ? extended : ""));
+                TYPE_PLACEHOLDER, type,
+                "[upgraded]", upgraded,
+                "[extended]", extended);
 
-            specific = user.getTranslationOrNothing(Constants.ITEM_STACKS + "generic",
-                "[type]", prettifyObject(itemType, user),
-                "[meta]", meta);
+            specific = user.getTranslationOrNothing(Constants.ITEM_STACKS + GENERIC_REFERENCE,
+                TYPE_PLACEHOLDER, prettifyObject(itemType, user),
+                META_PLACEHOLDER, meta);
         }
 
         return specific;
@@ -1012,14 +1031,14 @@ public class Utils
         }
 
         Material itemType = item.getType();
-        final String metaReference = Constants.ITEM_STACKS + "meta.";
+        final String metaReference = Constants.ITEM_STACKS + META_REFERENCE;
 
         String meta = user.getTranslationOrNothing(metaReference + "skull-meta",
             "[player-name]", skullMeta.getDisplayName());
 
-        return user.getTranslationOrNothing(Constants.ITEM_STACKS + "generic",
-            "[type]", prettifyObject(itemType, user),
-            "[meta]", meta);
+        return user.getTranslationOrNothing(Constants.ITEM_STACKS + GENERIC_REFERENCE,
+            TYPE_PLACEHOLDER, prettifyObject(itemType, user),
+            META_PLACEHOLDER, meta);
     }
 
 
@@ -1043,7 +1062,7 @@ public class Utils
         itemMeta.getEnchants().forEach((enchantment, level) -> {
             builder.append("\n");
             builder.append(user.getTranslationOrNothing(Constants.ITEM_STACKS + "meta.enchant-meta",
-                "[type]", prettifyObject(enchantment, user),
+                TYPE_PLACEHOLDER, prettifyObject(enchantment, user),
                 "[level]", String.valueOf(level)));
         });
 
@@ -1052,14 +1071,14 @@ public class Utils
         final String itemReference = Constants.ITEM_STACKS + itemType.name().toLowerCase() + ".";
 
         String translation = user.getTranslationOrNothing(itemReference + "name",
-            "[type]", prettifyObject(itemType, user),
+            TYPE_PLACEHOLDER, prettifyObject(itemType, user),
             "[enchant]", builder.toString());
 
         if (translation.isEmpty())
         {
-            translation = user.getTranslationOrNothing(Constants.ITEM_STACKS + "generic",
-                "[type]", prettifyObject(itemType, user),
-                "[meta]", builder.toString());
+            translation = user.getTranslationOrNothing(Constants.ITEM_STACKS + GENERIC_REFERENCE,
+                TYPE_PLACEHOLDER, prettifyObject(itemType, user),
+                META_PLACEHOLDER, builder.toString());
         }
 
         return translation;
@@ -1086,7 +1105,7 @@ public class Utils
         enchantmentMeta.getEnchants().forEach((enchantment, level) -> {
             builder.append("\n");
             builder.append(user.getTranslationOrNothing(Constants.ITEM_STACKS + "meta.enchant-meta",
-                "[type]", prettifyObject(enchantment, user),
+                TYPE_PLACEHOLDER, prettifyObject(enchantment, user),
                 "[level]", String.valueOf(level)));
         });
 
@@ -1095,14 +1114,14 @@ public class Utils
         final String itemReference = Constants.ITEM_STACKS + itemType.name().toLowerCase() + ".";
 
         String translation = user.getTranslationOrNothing(itemReference + "name",
-            "[type]", prettifyObject(itemType, user),
+            TYPE_PLACEHOLDER, prettifyObject(itemType, user),
             "[enchant]", builder.toString());
 
         if (translation.isEmpty())
         {
-            translation = user.getTranslationOrNothing(Constants.ITEM_STACKS + "generic",
-                "[type]", prettifyObject(itemType, user),
-                "[meta]", builder.toString());
+            translation = user.getTranslationOrNothing(Constants.ITEM_STACKS + GENERIC_REFERENCE,
+                TYPE_PLACEHOLDER, prettifyObject(itemType, user),
+                META_PLACEHOLDER, builder.toString());
         }
 
         return translation;
@@ -1125,15 +1144,15 @@ public class Utils
         }
 
         Material itemType = item.getType();
-        final String metaReference = Constants.ITEM_STACKS + "meta.";
+        final String metaReference = Constants.ITEM_STACKS + META_REFERENCE;
 
         String meta = user.getTranslationOrNothing(metaReference + "book-meta",
             "[title]", bookMeta.getTitle(),
             "[author]", bookMeta.getAuthor());
 
-        return user.getTranslationOrNothing(Constants.ITEM_STACKS + "generic",
-            "[type]", prettifyObject(itemType, user),
-            "[meta]", meta);
+        return user.getTranslationOrNothing(Constants.ITEM_STACKS + GENERIC_REFERENCE,
+            TYPE_PLACEHOLDER, prettifyObject(itemType, user),
+            META_PLACEHOLDER, meta);
     }
 
 

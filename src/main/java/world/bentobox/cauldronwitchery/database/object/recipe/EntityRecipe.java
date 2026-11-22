@@ -98,11 +98,11 @@ public class EntityRecipe extends Recipe
 
 
     @Override
-    public Recipe clone()
+    public Recipe copy()
     {
         EntityRecipe recipe = new EntityRecipe();
         recipe.setEntityType(this.entityType);
-        this.populateClone(recipe);
+        this.populateCopy(recipe);
         return recipe;
     }
 
