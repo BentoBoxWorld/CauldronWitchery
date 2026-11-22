@@ -30,8 +30,10 @@ class UtilsMigrateItemSyntaxTest
     void testMultipleLines()
     {
         String text = "a: tipped_arrow{CustomPotionColor:1}\nb: tipped_arrow{CustomPotionColor:2}\n";
-        assertEquals("a: tipped_arrow[potion_contents={custom_color:1}]\n" +
-                "b: tipped_arrow[potion_contents={custom_color:2}]\n",
+        assertEquals("""
+                a: tipped_arrow[potion_contents={custom_color:1}]
+                b: tipped_arrow[potion_contents={custom_color:2}]
+                """,
             Utils.migrateLegacyItemSyntax(text));
     }
 

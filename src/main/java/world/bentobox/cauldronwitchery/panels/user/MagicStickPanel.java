@@ -25,7 +25,6 @@ import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.cauldronwitchery.CauldronWitcheryAddon;
 import world.bentobox.cauldronwitchery.database.object.MagicStickObject;
-import world.bentobox.cauldronwitchery.database.object.recipe.Recipe;
 import world.bentobox.cauldronwitchery.panels.CommonPanel;
 import world.bentobox.cauldronwitchery.utils.Constants;
 import world.bentobox.cauldronwitchery.utils.Utils;
@@ -36,6 +35,10 @@ import world.bentobox.cauldronwitchery.utils.Utils;
  */
 public class MagicStickPanel extends CommonPanel
 {
+    private static final String STICK_TYPE = "STICK";
+    private static final String RECIPES_ACTION = "RECIPES";
+
+
     private MagicStickPanel(CauldronWitcheryAddon addon,
         World world,
         User user,
@@ -87,7 +90,7 @@ public class MagicStickPanel extends CommonPanel
         panelBuilder.world(this.user.getWorld());
 
         // Register button builders
-        panelBuilder.registerTypeBuilder("STICK", this::createStickButton);
+        panelBuilder.registerTypeBuilder(STICK_TYPE, this::createStickButton);
 
         // Register next and previous builders
         panelBuilder.registerTypeBuilder("NEXT", this::createNextButton);
@@ -128,7 +131,7 @@ public class MagicStickPanel extends CommonPanel
         }
         else
         {
-            int index = this.stickIndex * slot.amountMap().getOrDefault("STICK", 1) + slot.slot();
+            int index = this.stickIndex * slot.amountMap().getOrDefault(STICK_TYPE, 1) + slot.slot();
 
             if (index >= this.magicSticks.size())
             {
@@ -140,6 +143,25 @@ public class MagicStickPanel extends CommonPanel
         }
 
         return this.createStickButton(template, magicStick);
+    }
+
+
+    /**
+     * Runs template action for the magic stick button.
+     *
+     * @param actionType Action type from the panel template.
+     * @param magicStick Magic stick that was clicked.
+     */
+    private void runStickAction(String actionType, MagicStickObject magicStick)
+    {
+        if ("PURCHASE".equalsIgnoreCase(actionType))
+        {
+            this.manager.purchaseStick(this.user, magicStick);
+        }
+        else if (RECIPES_ACTION.equalsIgnoreCase(actionType))
+        {
+            RecipesPanel.open(this, magicStick);
+        }
     }
 
 
@@ -164,8 +186,8 @@ public class MagicStickPanel extends CommonPanel
 
         if (template.description() != null && !template.description().isBlank())
         {
-            // TODO: adding parameters could be useful.
-            builder.description(this.user.getTranslation(this.world, template.description()));
+            builder.description(this.user.getTranslation(this.world, template.description(),
+                Constants.PARAMETER_NAME, magicStick.getFriendlyName()));
         }
         else
         {
@@ -174,21 +196,9 @@ public class MagicStickPanel extends CommonPanel
 
         // Add Click handler
         builder.clickHandler((panel, user, clickType, i) -> {
-            for (ItemTemplateRecord.ActionRecords action : template.actions())
-            {
-                if (clickType == action.clickType())
-                {
-                    switch (action.actionType().toUpperCase())
-                    {
-                        case "PURCHASE":
-                            this.manager.purchaseStick(this.user, magicStick);
-                            break;
-                        case "RECIPES":
-                            RecipesPanel.open(this, magicStick);
-                            break;
-                    }
-                }
-            }
+            template.actions().stream().
+                filter(action -> clickType == action.clickType()).
+                forEach(action -> this.runStickAction(action.actionType(), magicStick));
 
             return true;
         });
@@ -196,7 +206,7 @@ public class MagicStickPanel extends CommonPanel
         // Collect tooltips.
         List<String> tooltips = template.actions().stream().
             filter(action -> action.tooltip() != null).
-            filter(action -> this.manager.canPurchase(magicStick, this.user) || "RECIPES".equalsIgnoreCase(action.actionType())).
+            filter(action -> this.manager.canPurchase(magicStick, this.user) || RECIPES_ACTION.equalsIgnoreCase(action.actionType())).
             map(action -> this.user.getTranslation(this.world, action.tooltip())).
             filter(text -> !text.isBlank()).
             collect(Collectors.toCollection(() -> new ArrayList<>(template.actions().size())));
@@ -219,8 +229,8 @@ public class MagicStickPanel extends CommonPanel
     {
         int size = this.magicSticks.size();
 
-        if (size <= slot.amountMap().getOrDefault("STICK", 1) ||
-            1.0 * size / slot.amountMap().getOrDefault("STICK", 1) <= this.stickIndex + 1)
+        if (size <= slot.amountMap().getOrDefault(STICK_TYPE, 1) ||
+            1.0 * size / slot.amountMap().getOrDefault(STICK_TYPE, 1) <= this.stickIndex + 1)
         {
             // There are no next elements
             return null;

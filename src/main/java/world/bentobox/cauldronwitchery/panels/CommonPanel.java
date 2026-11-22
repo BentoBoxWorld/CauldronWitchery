@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
@@ -33,6 +34,20 @@ import world.bentobox.cauldronwitchery.utils.Utils;
  */
 public abstract class CommonPanel
 {
+    private static final String RECIPE_REFERENCE = Constants.DESCRIPTIONS + "recipe.";
+    private static final String CAULDRON_PLACEHOLDER = "[cauldron]";
+    private static final String KNOWLEDGE_PLACEHOLDER = "[knowledge]";
+    private static final String INGREDIENT_PLACEHOLDER = "[ingredient]";
+    private static final String EXTRA_PLACEHOLDER = "[extra]";
+    private static final String TEMPERATURE_PLACEHOLDER = "[temperature]";
+    private static final String PERMISSIONS_PLACEHOLDER = "[permissions]";
+
+    /**
+     * Matches blank lines, which are removed from generated descriptions.
+     */
+    private static final Pattern EMPTY_LINES = Pattern.compile("(?m)^[ \\t]*\\r?\\n");
+
+
     /**
      * This is default constructor for all classes that extends CommonPanel.
      *
@@ -108,11 +123,11 @@ public abstract class CommonPanel
      */
     protected String generateRecipeDescription(BookRecipe recipe, User target)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
-        String bookName = !recipe.getBookName().isBlank() ?
-            "" :
-            this.user.getTranslation(reference + "book.no-book");
+        String bookName = recipe.getBookName().isBlank() ?
+            this.user.getTranslation(reference + "book.no-book") :
+            "";
 
         String cauldron = this.generateCauldronText(recipe);
         String knowledge = this.generateKnowledgeText(recipe);
@@ -123,16 +138,16 @@ public abstract class CommonPanel
 
         String returnString = this.user.getTranslationOrNothing(reference + "book.lore",
             "[no-book]", bookName,
-            "[cauldron]", cauldron,
-            "[knowledge]", knowledge,
-            "[ingredient]", mainIngredient,
-            "[extra]", extraItems,
-            "[temperature]", temperature,
-            "[permissions]", permissions);
+            CAULDRON_PLACEHOLDER, cauldron,
+            KNOWLEDGE_PLACEHOLDER, knowledge,
+            INGREDIENT_PLACEHOLDER, mainIngredient,
+            EXTRA_PLACEHOLDER, extraItems,
+            TEMPERATURE_PLACEHOLDER, temperature,
+            PERMISSIONS_PLACEHOLDER, permissions);
 
         // Remove empty lines and returns as a list.
 
-        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+        return EMPTY_LINES.matcher(returnString).replaceAll("");
     }
 
 
@@ -144,7 +159,7 @@ public abstract class CommonPanel
      */
     protected String generateRecipeDescription(ItemRecipe recipe, User target)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         String itemName = recipe.getItemStack() != null ? "" :
             this.user.getTranslation(reference + "item.no-item");
@@ -158,16 +173,16 @@ public abstract class CommonPanel
 
         String returnString = this.user.getTranslationOrNothing(reference + "item.lore",
             "[no-item]", itemName,
-            "[cauldron]", cauldron,
-            "[knowledge]", knowledge,
-            "[ingredient]", mainIngredient,
-            "[extra]", extraItems,
-            "[temperature]", temperature,
-            "[permissions]", permissions);
+            CAULDRON_PLACEHOLDER, cauldron,
+            KNOWLEDGE_PLACEHOLDER, knowledge,
+            INGREDIENT_PLACEHOLDER, mainIngredient,
+            EXTRA_PLACEHOLDER, extraItems,
+            TEMPERATURE_PLACEHOLDER, temperature,
+            PERMISSIONS_PLACEHOLDER, permissions);
 
         // Remove empty lines and returns as a list.
 
-        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+        return EMPTY_LINES.matcher(returnString).replaceAll("");
     }
 
 
@@ -179,7 +194,7 @@ public abstract class CommonPanel
      */
     protected String generateRecipeDescription(EntityRecipe recipe, User target)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         String entityName = recipe.getEntityType() != null ?
             "" :
@@ -194,16 +209,16 @@ public abstract class CommonPanel
 
         String returnString = this.user.getTranslationOrNothing(reference + "entity.lore",
             "[no-entity]", entityName,
-            "[cauldron]", cauldron,
-            "[knowledge]", knowledge,
-            "[ingredient]", mainIngredient,
-            "[extra]", extraItems,
-            "[temperature]", temperature,
-            "[permissions]", permissions);
+            CAULDRON_PLACEHOLDER, cauldron,
+            KNOWLEDGE_PLACEHOLDER, knowledge,
+            INGREDIENT_PLACEHOLDER, mainIngredient,
+            EXTRA_PLACEHOLDER, extraItems,
+            TEMPERATURE_PLACEHOLDER, temperature,
+            PERMISSIONS_PLACEHOLDER, permissions);
 
         // Remove empty lines and returns as a list.
 
-        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+        return EMPTY_LINES.matcher(returnString).replaceAll("");
     }
 
 
@@ -293,9 +308,9 @@ public abstract class CommonPanel
         String returnString = this.user.getTranslation(reference + "lore",
             "[description]", magicStick.getDescription(),
             "[cost]", costString,
-            "[permissions]", permissions);
+            PERMISSIONS_PLACEHOLDER, permissions);
 
-        return returnString.replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+        return EMPTY_LINES.matcher(returnString).replaceAll("");
     }
 
 
@@ -320,7 +335,7 @@ public abstract class CommonPanel
      */
     private String generateCauldronText(Recipe recipe)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         int level = switch (recipe.getCauldronType()) {
             case LAVA_CAULDRON -> 3;
@@ -329,7 +344,7 @@ public abstract class CommonPanel
         };
 
         return this.user.getTranslation(reference + "cauldron-level-" + level,
-            "[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), this.user));
+            CAULDRON_PLACEHOLDER, Utils.prettifyObject(recipe.getCauldronType(), this.user));
     }
 
 
@@ -340,7 +355,7 @@ public abstract class CommonPanel
      */
     private String generateKnowledgeText(Recipe recipe)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         return recipe.getExperience() == 0 ? "" :
             this.user.getTranslation(reference + "knowledge",
@@ -355,7 +370,7 @@ public abstract class CommonPanel
      */
     private String generateMainIngredientText(Recipe recipe)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         return this.user.getTranslation(reference + "main-ingredient",
             "[count]", String.valueOf(recipe.getMainIngredient().getAmount()),
@@ -370,7 +385,7 @@ public abstract class CommonPanel
      */
     private String generateExtraIngredientText(Recipe recipe)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         StringBuilder extraItems = new StringBuilder();
 
@@ -401,7 +416,7 @@ public abstract class CommonPanel
      */
     private String generateTemperatureText(Recipe recipe)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         return this.user.getTranslation(reference + "temperature-" +
             recipe.getTemperature().name().toLowerCase());
@@ -416,7 +431,7 @@ public abstract class CommonPanel
      */
     private String generatePermissionText(Recipe recipe, User target)
     {
-        final String reference = Constants.DESCRIPTIONS + "recipe.";
+        final String reference = RECIPE_REFERENCE;
 
         String permissions;
 
