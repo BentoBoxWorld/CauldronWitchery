@@ -349,7 +349,7 @@ public class MagicStickObject implements DataObject
     /**
      * Allows to set complexity of the stick usage.
      * Larger complexity, bigger chance for it to fail.
-     * TODO: Requires for MASTERY_SKILL feature
+     * Reserved for the planned MASTERY_SKILL feature.
      */
     @Expose
     private float complexity;

@@ -16,7 +16,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
@@ -42,6 +41,9 @@ import world.bentobox.cauldronwitchery.utils.Utils;
  */
 public class CauldronWitcheryImportManager
 {
+    private static final String DESCRIPTION = "description";
+    private static final String JSON_EXTENSION = ".json";
+
     /**
      * Import recipes from file or link.
      * @param addon CauldronWitchery addon.
@@ -190,17 +192,17 @@ public class CauldronWitcheryImportManager
                 magicStick.setFriendlyName(section.getString("name"));
             }
 
-            if (section.contains("description"))
+            if (section.contains(DESCRIPTION))
             {
-                if (section.isString("description"))
+                if (section.isString(DESCRIPTION))
                 {
-                    magicStick.setDescription(section.getString("description"));
+                    magicStick.setDescription(section.getString(DESCRIPTION));
                 }
-                else if (section.isList("description"))
+                else if (section.isList(DESCRIPTION))
                 {
                     StringBuilder builder = new StringBuilder();
 
-                    section.getStringList("description").forEach(line -> {
+                    section.getStringList(DESCRIPTION).forEach(line -> {
                         builder.append(line);
                         builder.append("\n");
                     });
@@ -220,7 +222,7 @@ public class CauldronWitcheryImportManager
             this.addon.getAddonManager().saveMagicStick(magicStick);
             this.addon.getAddonManager().loadMagicStick(magicStick, true, null);
         }
-        catch (Exception ignored)
+        catch (Exception _)
         {
             return 0;
         }
@@ -425,7 +427,7 @@ public class CauldronWitcheryImportManager
     public void generateDatabaseFile(User user, World world, String fileName)
     {
         File defaultFile = new File(this.addon.getDataFolder(),
-            fileName.endsWith(".json") ? fileName : fileName + ".json");
+            fileName.endsWith(JSON_EXTENSION) ? fileName : fileName + JSON_EXTENSION);
 
         if (defaultFile.exists())
         {
@@ -460,7 +462,7 @@ public class CauldronWitcheryImportManager
 
                         return clone;
                     }).
-                    collect(Collectors.toList());
+                    toList();
 
                 DefaultDataHolder defaultDataHolder = new DefaultDataHolder();
                 defaultDataHolder.setMagicStickList(challengeList);
@@ -597,7 +599,7 @@ public class CauldronWitcheryImportManager
             {
                 return EntityType.valueOf(text.toUpperCase());
             }
-            catch (Exception e)
+            catch (Exception _)
             {
                 return null;
             }
@@ -638,7 +640,7 @@ public class CauldronWitcheryImportManager
         {
             return Recipe.Temperature.valueOf(text.toUpperCase());
         }
-        catch (Exception e)
+        catch (Exception _)
         {
             return defaultValue;
         }
@@ -698,9 +700,9 @@ public class CauldronWitcheryImportManager
          */
         DefaultDataHolder loadObject(String fileName)
         {
-            if (!fileName.endsWith(".json"))
+            if (!fileName.endsWith(JSON_EXTENSION))
             {
-                fileName = fileName + ".json";
+                fileName = fileName + JSON_EXTENSION;
             }
 
             File defaultFile = new File(this.addon.getDataFolder(), fileName);
@@ -713,7 +715,7 @@ public class CauldronWitcheryImportManager
 
                 return object;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException _)
             {
                 this.addon.logError("Could not load file '" + defaultFile.getName() + "': File not found.");
             }

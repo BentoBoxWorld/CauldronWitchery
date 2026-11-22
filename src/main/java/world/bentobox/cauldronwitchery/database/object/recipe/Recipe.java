@@ -471,14 +471,14 @@ public abstract class Recipe
 
     /**
      * Stores the reward points for using this recipe.
-     * TODO: Requires for MASTERY_SKILL feature
+     * Reserved for the planned MASTERY_SKILL feature.
      */
     @Expose
     private int rewardPoints;
 
     /**
      * Complexity level for recipe.
-     * TODO: Requires for MASTERY_SKILL feature
+     * Reserved for the planned MASTERY_SKILL feature.
      */
     @Expose
     private float complexity;
