@@ -10,7 +10,6 @@ package world.bentobox.cauldronwitchery.tasks;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.entity.Entity;
@@ -67,9 +66,9 @@ public class RecipeProcessingTask implements Runnable
             cauldronEntities.
                 stream().
                 // Filter is not necessary, but just in case.
-                filter(entity -> entity instanceof Item).
+                filter(Item.class::isInstance).
                 map(entity -> ((Item) entity).getItemStack()).
-                collect(Collectors.toList()));
+                toList());
     }
 
 
@@ -83,16 +82,56 @@ public class RecipeProcessingTask implements Runnable
         ItemStack itemInOffHand = Objects.requireNonNull(this.user.getInventory()).getItemInOffHand();
         ItemStack itemInMainHand = Objects.requireNonNull(this.user.getInventory()).getItemInMainHand();
 
-        // Filter available recipes, based on cauldron type, item in main offhand and recipes that contains
-        // at least 1 of the ingredient type.
-
         // This list will contain last error message for the failure.
         StringBuilder lastErrorMessage = new StringBuilder();
 
+        // Filter available recipes, based on cauldron type, item in main offhand and recipes that contains
+        // at least 1 of the ingredient type.
+        List<Recipe> recipeList = this.findCandidateRecipes(itemInOffHand, lastErrorMessage);
+
+        // Select any recipe that matches outcome.
+        Optional<Recipe> recipeOptional;
+
+        if (this.missingPermissions(this.magicStick.getPermissions()))
+        {
+            lastErrorMessage = new StringBuilder();
+            lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "missing-permissions"));
+
+            // Set empty as recipe fails.
+            recipeOptional = Optional.empty();
+        }
+        else
+        {
+            // Find any from remaining.
+            recipeOptional = recipeList.stream().findAny();
+        }
+
+        if (recipeOptional.isPresent() &&
+            this.didMagicWorked(recipeOptional.get(), itemInOffHand, lastErrorMessage))
+        {
+            this.onSuccess(recipeOptional.get(), itemInOffHand, itemInMainHand);
+        }
+        else
+        {
+            this.onFailure(itemInOffHand, itemInMainHand, lastErrorMessage.toString());
+        }
+    }
+
+
+    /**
+     * Filters magic stick recipes down to those that match the offhand item, cauldron type and contain
+     * at least one of each extra ingredient. Error messages for every failed filter step are appended.
+     *
+     * @param itemInOffHand Item in player offhand.
+     * @param lastErrorMessage Collector for error messages.
+     * @return Mutable list of candidate recipes.
+     */
+    private List<Recipe> findCandidateRecipes(ItemStack itemInOffHand, StringBuilder lastErrorMessage)
+    {
         List<Recipe> recipeList = this.magicStick.getRecipeList().stream().
             filter(Recipe::isValid).
             filter(recipe -> recipe.getMainIngredient().isSimilar(itemInOffHand)).
-            collect(Collectors.toList());
+            collect(Collectors.toCollection(ArrayList::new));
 
         if (recipeList.isEmpty())
         {
@@ -123,99 +162,92 @@ public class RecipeProcessingTask implements Runnable
             lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "incorrect-extra-ingredients"));
         }
 
-        // Select any recipe that matches outcome.
-        Optional<Recipe> recipeOptional;
+        return recipeList;
+    }
 
-        if (this.missingPermissions(this.magicStick.getPermissions()))
+
+    /**
+     * Processes successful recipe: consumes requirements, damages stick, clears cauldron and plays effects.
+     */
+    private void onSuccess(Recipe recipe, ItemStack itemInOffHand, ItemStack itemInMainHand)
+    {
+        // Fulfill requirements
+        this.fulFillRecipe(recipe, itemInOffHand);
+
+        // Damage magic stick
+        this.damageMagicStick(itemInMainHand, this.addon.getSettings().getSuccessDamageAmount());
+
+        // Remove items that are inside cauldron
+        if (this.addon.getSettings().isMixInCauldron() && this.addon.getSettings().isRemoveLeftOvers())
         {
-            lastErrorMessage = new StringBuilder();
-            lastErrorMessage.append(this.user.getTranslation(Constants.MESSAGES + "missing-permissions"));
+            // Remove all cauldron items.
+            Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                () -> this.cauldronEntities.forEach(Entity::remove));
+        }
 
-            // Set empty as recipe fails.
-            recipeOptional = Optional.empty();
+        // Run consumer.
+        Bukkit.getScheduler().runTaskTimer(this.addon.getPlugin(),
+            new SuccessConsumer(this.block, this.user),
+            0,
+            1);
+    }
+
+
+    /**
+     * Processes failed recipe: removes items if configured, damages stick, consumes one main ingredient
+     * and plays error effects.
+     */
+    private void onFailure(ItemStack itemInOffHand, ItemStack itemInMainHand, String lastErrorMessage)
+    {
+        // Remove items that are inside cauldron
+        if (this.addon.getSettings().isMixInCauldron() && this.addon.getSettings().isRemoveOnFail())
+        {
+            // Remove all cauldron items on fail.
+            Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                () -> this.cauldronEntities.forEach(Entity::remove));
+        }
+
+        // Damage magic stick
+        this.damageMagicStick(itemInMainHand, this.addon.getSettings().getErrorDamageAmount());
+
+        // Reduce main ingredient count by 1 on fail.
+        itemInOffHand.setAmount(itemInOffHand.getAmount() - 1);
+
+        // Check which message should be sent.
+        String errorMessage = this.addon.getSettings().isCorrectErrorMessage() ?
+            lastErrorMessage :
+            this.user.getTranslation(Constants.MESSAGES + "something-went-wrong");
+
+        // Run task every tick.
+        Bukkit.getScheduler().runTaskTimer(this.addon.getPlugin(),
+            new ErrorConsumer(this.block, this.user, errorMessage, this.addon.getSettings().isErrorDestroyCauldron()),
+            0,
+            1);
+    }
+
+
+    /**
+     * Applies damage to the magic stick. Items that cannot be damaged lose one from their stack instead.
+     *
+     * @param magicStick Magic stick item.
+     * @param damage Damage amount; nothing happens if it is not positive.
+     */
+    private void damageMagicStick(ItemStack magicStick, int damage)
+    {
+        if (damage <= 0)
+        {
+            return;
+        }
+
+        if (magicStick.getItemMeta() instanceof Damageable damageable)
+        {
+            damageable.setDamage(damage);
+            magicStick.setItemMeta(damageable);
         }
         else
         {
-            // Find any from remaining.
-            recipeOptional = recipeList.stream().findAny();
-        }
-
-        if (recipeOptional.isPresent() &&
-            this.didMagicWorked(recipeOptional.get(), itemInOffHand, lastErrorMessage))
-        {
-            // Fulfill requirements
-            this.fulFillRecipe(recipeOptional.get(), itemInOffHand);
-
-            // Damage magic stick
-            if (this.addon.getSettings().getSuccessDamageAmount() > 0)
-            {
-                if (itemInMainHand.getItemMeta() instanceof Damageable damageable)
-                {
-                    damageable.setDamage(this.addon.getSettings().getSuccessDamageAmount());
-                    itemInMainHand.setItemMeta(damageable);
-                }
-                else
-                {
-                    // Remove item.
-                    itemInMainHand.setAmount(itemInMainHand.getAmount() - 1);
-                }
-            }
-
-            // Remove items that are inside cauldron
-            if (this.addon.getSettings().isMixInCauldron())
-            {
-                if (this.addon.getSettings().isRemoveLeftOvers())
-                {
-                    // Remove all cauldron items.
-                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
-                        () -> this.cauldronEntities.forEach(Entity::remove));
-                }
-            }
-
-            // Run consumer.
-            Bukkit.getScheduler().runTaskTimer(this.addon.getPlugin(),
-                new SuccessConsumer(this.block, this.user),
-                0,
-                1);
-        }
-        else
-        {
-            // Remove items that are inside cauldron
-            if (this.addon.getSettings().isMixInCauldron() && this.addon.getSettings().isRemoveOnFail())
-            {
-                // Remove all cauldron items on fail.
-                Bukkit.getScheduler().runTask(this.addon.getPlugin(),
-                    () -> this.cauldronEntities.forEach(Entity::remove));
-            }
-
-            // Damage magic stick
-            if (this.addon.getSettings().getErrorDamageAmount() > 0)
-            {
-                if (itemInMainHand.getItemMeta() instanceof Damageable damageable)
-                {
-                    damageable.setDamage(this.addon.getSettings().getErrorDamageAmount());
-                    itemInMainHand.setItemMeta(damageable);
-                }
-                else
-                {
-                    // Remove item.
-                    itemInMainHand.setAmount(itemInMainHand.getAmount() - 1);
-                }
-            }
-
-            // Reduce main ingredient count by 1 on fail.
-            itemInOffHand.setAmount(itemInOffHand.getAmount() - 1);
-
-            // Check which message should be sent.
-            String errorMessage = this.addon.getSettings().isCorrectErrorMessage() ?
-                lastErrorMessage.toString() :
-                this.user.getTranslation(Constants.MESSAGES + "something-went-wrong");
-
-            // Run task every tick.
-            Bukkit.getScheduler().runTaskTimer(this.addon.getPlugin(),
-                new ErrorConsumer(this.block, this.user, errorMessage, this.addon.getSettings().isErrorDestroyCauldron()),
-                0,
-                1);
+            // Remove item.
+            magicStick.setAmount(magicStick.getAmount() - 1);
         }
     }
 
@@ -229,116 +261,21 @@ public class RecipeProcessingTask implements Runnable
      */
     private boolean didMagicWorked(Recipe recipe, ItemStack mainIngredient, StringBuilder errorMessages)
     {
-        BlockData blockData = this.block.getBlockData();
-
-        if (blockData instanceof Levelled level)
+        if (this.block.getBlockData() instanceof Levelled level && recipe.getCauldronLevel() > level.getLevel())
         {
-            if (recipe.getCauldronLevel() > level.getLevel())
-            {
-                // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "not-filled-cauldron"));
-                return false;
-            }
+            // Recipe cannot be fulfilled.
+            errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "not-filled-cauldron"));
+            return false;
         }
 
         // Check cauldron temperature based on block below.
-        if (recipe.getTemperature() == Recipe.Temperature.COOL)
+        String temperatureError = this.getTemperatureError(recipe.getTemperature());
+
+        if (temperatureError != null)
         {
-            Material type = this.block.getRelative(BlockFace.DOWN).getType();
-
-            if (type != Material.ICE &&
-                type != Material.PACKED_ICE &&
-                type != Material.BLUE_ICE &&
-                type != Material.FROSTED_ICE &&
-                type != Material.SNOW_BLOCK &&
-                type != Material.POWDER_SNOW)
-            {
-                // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-hot-cauldron"));
-                return false;
-            }
-        }
-        else if (recipe.getTemperature() == Recipe.Temperature.HEAT)
-        {
-            Block relative = this.block.getRelative(BlockFace.DOWN);
-            Material type = relative.getType();
-
-            boolean heat = false;
-
-            if (type == Material.CAMPFIRE ||
-                type == Material.SOUL_CAMPFIRE ||
-                type == Material.FURNACE ||
-                type == Material.BLAST_FURNACE ||
-                type == Material.SMOKER ||
-                type.name().contains("CANDLE"))
-            {
-                if (relative.getBlockData() instanceof Lightable data)
-                {
-                    heat = data.isLit();
-                }
-            }
-            else if (type == Material.FIRE ||
-                type == Material.LAVA ||
-                type == Material.LAVA_CAULDRON)
-            {
-                heat = true;
-            }
-
-            if (!heat)
-            {
-                // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-cold-cauldron"));
-                return false;
-            }
-        }
-        else
-        {
-            Block relative = this.block.getRelative(BlockFace.DOWN);
-            Material type = relative.getType();
-
-            boolean heat = false;
-            boolean cool = false;
-
-            if (type == Material.CAMPFIRE ||
-                type == Material.SOUL_CAMPFIRE ||
-                type == Material.FURNACE ||
-                type == Material.BLAST_FURNACE ||
-                type == Material.SMOKER ||
-                type.name().contains("CANDLE"))
-            {
-                if (relative.getBlockData() instanceof Lightable data)
-                {
-                    heat = data.isLit();
-                }
-            }
-            else if (type == Material.FIRE ||
-                type == Material.LAVA ||
-                type == Material.LAVA_CAULDRON)
-            {
-                heat = true;
-            }
-            else if (type == Material.ICE ||
-                type == Material.PACKED_ICE ||
-                type == Material.BLUE_ICE ||
-                type == Material.FROSTED_ICE ||
-                type == Material.SNOW_BLOCK ||
-                type == Material.POWDER_SNOW)
-            {
-                cool = true;
-            }
-
-            if (heat)
-            {
-                // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-hot-cauldron"));
-                return false;
-            }
-            else if (cool)
-            {
-                // Recipe cannot be fulfilled.
-                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-cold-cauldron"));
-                return false;
-            }
+            // Recipe cannot be fulfilled.
+            errorMessages.append(this.user.getTranslation(Constants.MESSAGES + temperatureError));
+            return false;
         }
 
         if (recipe.getMainIngredient().getAmount() > mainIngredient.getAmount())
@@ -362,16 +299,16 @@ public class RecipeProcessingTask implements Runnable
             return false;
         }
 
-        if (this.addon.getSettings().isMixInCauldron() && this.addon.getSettings().isExactExtraCount())
+        boolean exactCount = this.addon.getSettings().isMixInCauldron() && this.addon.getSettings().isExactExtraCount();
+
+        if (exactCount && !this.exactIngredients(recipe.getExtraIngredients()))
         {
-            if (!this.exactIngredients(recipe.getExtraIngredients()))
-            {
-                // Requires exact items but something was wrong.
-                errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-much-ingredients"));
-                return false;
-            }
+            // Requires exact items but something was wrong.
+            errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "too-much-ingredients"));
+            return false;
         }
-        else if (this.missingIngredients(recipe.getExtraIngredients()))
+
+        if (!exactCount && this.missingIngredients(recipe.getExtraIngredients()))
         {
             // Missing ingredients.
             errorMessages.append(this.user.getTranslation(Constants.MESSAGES + "missing-extra-ingredients"));
@@ -380,6 +317,76 @@ public class RecipeProcessingTask implements Runnable
 
         // Return true.
         return true;
+    }
+
+
+    /**
+     * Checks whether the block below the cauldron provides the temperature that recipe requires.
+     *
+     * @param temperature Required temperature.
+     * @return Message key suffix for the temperature error, or null if temperature is correct.
+     */
+    private String getTemperatureError(Recipe.Temperature temperature)
+    {
+        Block relative = this.block.getRelative(BlockFace.DOWN);
+
+        boolean heat = isHeatSource(relative);
+        boolean cool = isCoolSource(relative.getType());
+
+        return switch (temperature)
+        {
+            case COOL -> cool ? null : "too-hot-cauldron";
+            case HEAT -> heat ? null : "too-cold-cauldron";
+            default -> {
+                if (heat)
+                {
+                    yield "too-hot-cauldron";
+                }
+
+                yield cool ? "too-cold-cauldron" : null;
+            }
+        };
+    }
+
+
+    /**
+     * Returns if given block is an active heat source.
+     * @param block Block below cauldron.
+     * @return {@code true} if block provides heat.
+     */
+    private static boolean isHeatSource(Block block)
+    {
+        Material type = block.getType();
+
+        if (type == Material.CAMPFIRE ||
+            type == Material.SOUL_CAMPFIRE ||
+            type == Material.FURNACE ||
+            type == Material.BLAST_FURNACE ||
+            type == Material.SMOKER ||
+            type.name().contains("CANDLE"))
+        {
+            return block.getBlockData() instanceof Lightable data && data.isLit();
+        }
+
+        return type == Material.FIRE ||
+            type == Material.LAVA ||
+            type == Material.LAVA_CAULDRON;
+    }
+
+
+    /**
+     * Returns if given material is a cold source.
+     * @param type Material below cauldron.
+     * @return {@code true} if material provides cold.
+     */
+    private static boolean isCoolSource(Material type)
+    {
+        return type == Material.ICE ||
+            type == Material.PACKED_ICE ||
+            type == Material.BLUE_ICE ||
+            type == Material.FROSTED_ICE ||
+            type == Material.SNOW_BLOCK ||
+            type == Material.POWDER_SNOW;
     }
 
 
@@ -439,33 +446,36 @@ public class RecipeProcessingTask implements Runnable
         {
             return false;
         }
-        else if (amount <= 0)
+
+        if (amount <= 0)
         {
             return true;
         }
-        else
-        {
-            if (this.addon.getSettings().isMixInCauldron())
-            {
-                // Check dropped items in cauldron.
 
-                for (ItemStack dropped : this.cauldronItems)
+        if (!this.addon.getSettings().isMixInCauldron())
+        {
+            // Check player inventory.
+            return Objects.requireNonNull(this.user.getInventory()).
+                containsAtLeast(item, amount);
+        }
+
+        // Check dropped items in cauldron.
+        int remaining = amount;
+
+        for (ItemStack dropped : this.cauldronItems)
+        {
+            if (item.isSimilar(dropped))
+            {
+                remaining -= dropped.getAmount();
+
+                if (remaining <= 0)
                 {
-                    if (item.isSimilar(dropped) && (amount -= dropped.getAmount()) <= 0)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
-            else
-            {
-                // Check player inventory.
-                return Objects.requireNonNull(this.user.getInventory()).
-                    containsAtLeast(item, amount);
-            }
-
-            return false;
         }
+
+        return false;
     }
 
 
@@ -521,127 +531,30 @@ public class RecipeProcessingTask implements Runnable
         Utils.setTotalExperience(this.user.getPlayer(), experience);
 
         // Empty the cauldron
-        if (recipe.getCauldronType() == Material.WATER_CAULDRON ||
-            recipe.getCauldronType() == Material.POWDER_SNOW_CAULDRON ||
-            recipe.getCauldronType() == Material.LAVA_CAULDRON)
-        {
-            BlockData blockData = this.block.getBlockData();
-
-            if (blockData instanceof Levelled levelled)
-            {
-                int level = levelled.getLevel() - recipe.getCauldronLevel();
-
-                if (level <= 0)
-                {
-                    // Empty cauldron type.
-                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
-                        () -> this.block.setType(Material.CAULDRON));
-                }
-                else
-                {
-                    // Apply level change
-                    levelled.setLevel(level);
-                    Bukkit.getScheduler().runTask(this.addon.getPlugin(),
-                        () ->  this.block.setBlockData(levelled));
-                }
-            }
-            else
-            {
-                // Empty cauldron type.
-                Bukkit.getScheduler().runTask(this.addon.getPlugin(),
-                    () -> this.block.setType(Material.CAULDRON));
-            }
-        }
+        this.emptyCauldron(recipe);
 
         // Remove items.
-        if (this.addon.getSettings().isMixInCauldron())
-        {
-            // Check only if remove left-overs are disabled. Otherwise, items will be removed
-            // at the end.
-            if (!this.addon.getSettings().isRemoveLeftOvers())
-            {
-                // Remove extra ingredients from player inventory.
-                recipe.getExtraIngredients().forEach(ingredient -> {
-                    int amount = ingredient.getAmount();
-
-                    for (Entity entity : this.cauldronEntities)
-                    {
-                        if (entity instanceof Item itemEntity)
-                        {
-                            if (amount > 0)
-                            {
-                                ItemStack itemStack = itemEntity.getItemStack();
-
-                                if (ingredient.isSimilar(itemStack))
-                                {
-                                    // Remove either the full amount or the remaining amount
-                                    if (itemStack.getAmount() > amount)
-                                    {
-                                        itemStack.setAmount(itemStack.getAmount() - amount);
-                                        // Update entity item stack.
-                                        itemEntity.setItemStack(itemStack);
-                                        amount = 0;
-                                    }
-                                    else
-                                    {
-                                        amount -= itemStack.getAmount();
-
-                                        // Remove all cauldron items on fail.
-                                        Bukkit.getScheduler().runTask(this.addon.getPlugin(),
-                                            itemEntity::remove);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-        else
+        if (!this.addon.getSettings().isMixInCauldron())
         {
             // Remove extra ingredients from player inventory.
-            recipe.getExtraIngredients().forEach(ingredient -> {
-                PlayerInventory inventory = Objects.requireNonNull(this.user.getInventory());
-
-                List<ItemStack> itemsInInventory = Arrays.stream(inventory.getContents()).
-                    filter(Objects::nonNull).
-                    filter(ingredient::isSimilar).
-                    toList();
-
-                int amount = ingredient.getAmount();
-
-                for (ItemStack itemStack : itemsInInventory)
-                {
-                    if (amount > 0)
-                    {
-                        // Remove either the full amount or the remaining amount
-                        if (itemStack.getAmount() >= amount)
-                        {
-                            itemStack.setAmount(itemStack.getAmount() - amount);
-                            amount = 0;
-                        }
-                        else
-                        {
-                            amount -= itemStack.getAmount();
-                            itemStack.setAmount(0);
-                        }
-                    }
-                }
-            });
+            recipe.getExtraIngredients().forEach(this::removeFromInventory);
+        }
+        else if (!this.addon.getSettings().isRemoveLeftOvers())
+        {
+            // Remove only used items, if left-overs are kept. Otherwise, all items will be removed
+            // at the end.
+            recipe.getExtraIngredients().forEach(this::removeFromCauldron);
         }
 
         // Produce outcome.
-        if (recipe instanceof BookRecipe bookRecipe)
+        switch (recipe)
         {
-            this.produceRecipe(bookRecipe);
-        }
-        else if (recipe instanceof EntityRecipe entityRecipe)
-        {
-            this.produceRecipe(entityRecipe);
-        }
-        else if (recipe instanceof ItemRecipe itemStackRecipe)
-        {
-            this.produceRecipe(itemStackRecipe);
+            case BookRecipe bookRecipe -> this.produceRecipe(bookRecipe);
+            case EntityRecipe entityRecipe -> this.produceRecipe(entityRecipe);
+            case ItemRecipe itemStackRecipe -> this.produceRecipe(itemStackRecipe);
+            default -> {
+                // Unknown recipe types produce nothing.
+            }
         }
 
         // Record statistics. Make sure the recipe has an id before it is counted.
@@ -651,6 +564,110 @@ public class RecipeProcessingTask implements Runnable
         }
 
         this.addon.getAddonManager().recordRecipeUse(this.user, this.block.getWorld(), recipe);
+    }
+
+
+    /**
+     * Lowers cauldron level by the amount recipe consumes, or empties it.
+     * @param recipe Recipe that is fulfilled.
+     */
+    private void emptyCauldron(Recipe recipe)
+    {
+        if (recipe.getCauldronType() != Material.WATER_CAULDRON &&
+            recipe.getCauldronType() != Material.POWDER_SNOW_CAULDRON &&
+            recipe.getCauldronType() != Material.LAVA_CAULDRON)
+        {
+            return;
+        }
+
+        if (this.block.getBlockData() instanceof Levelled levelled &&
+            levelled.getLevel() - recipe.getCauldronLevel() > 0)
+        {
+            // Apply level change
+            levelled.setLevel(levelled.getLevel() - recipe.getCauldronLevel());
+            Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                () -> this.block.setBlockData(levelled));
+        }
+        else
+        {
+            // Empty cauldron type.
+            Bukkit.getScheduler().runTask(this.addon.getPlugin(),
+                () -> this.block.setType(Material.CAULDRON));
+        }
+    }
+
+
+    /**
+     * Removes given ingredient amount from items dropped inside the cauldron.
+     * @param ingredient Ingredient that must be removed.
+     */
+    private void removeFromCauldron(ItemStack ingredient)
+    {
+        int amount = ingredient.getAmount();
+
+        for (Entity entity : this.cauldronEntities)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            if (entity instanceof Item itemEntity && ingredient.isSimilar(itemEntity.getItemStack()))
+            {
+                ItemStack itemStack = itemEntity.getItemStack();
+
+                // Remove either the full amount or the remaining amount
+                if (itemStack.getAmount() > amount)
+                {
+                    itemStack.setAmount(itemStack.getAmount() - amount);
+                    // Update entity item stack.
+                    itemEntity.setItemStack(itemStack);
+                    amount = 0;
+                }
+                else
+                {
+                    amount -= itemStack.getAmount();
+                    Bukkit.getScheduler().runTask(this.addon.getPlugin(), itemEntity::remove);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Removes given ingredient amount from player inventory.
+     * @param ingredient Ingredient that must be removed.
+     */
+    private void removeFromInventory(ItemStack ingredient)
+    {
+        PlayerInventory inventory = Objects.requireNonNull(this.user.getInventory());
+
+        List<ItemStack> itemsInInventory = Arrays.stream(inventory.getContents()).
+            filter(Objects::nonNull).
+            filter(ingredient::isSimilar).
+            toList();
+
+        int amount = ingredient.getAmount();
+
+        for (ItemStack itemStack : itemsInInventory)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            // Remove either the full amount or the remaining amount
+            if (itemStack.getAmount() >= amount)
+            {
+                itemStack.setAmount(itemStack.getAmount() - amount);
+                amount = 0;
+            }
+            else
+            {
+                amount -= itemStack.getAmount();
+                itemStack.setAmount(0);
+            }
+        }
     }
 
 

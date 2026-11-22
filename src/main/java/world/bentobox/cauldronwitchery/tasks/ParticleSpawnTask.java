@@ -64,72 +64,91 @@ public class ParticleSpawnTask implements Runnable
         for (Iterator<Block> blockIterator = this.blockSet.iterator(); blockIterator.hasNext(); )
         {
             Block block = blockIterator.next();
-            World world = block.getWorld();
-            Material type = block.getType();
 
             if (!block.getType().name().contains("CAULDRON"))
             {
                 // Remove block from iterator, as it is not cauldron.
                 blockIterator.remove();
+                continue;
             }
 
-            Location center = block.getLocation().add(0.5D, 0.9D, 0.5D);
+            this.spawnCauldronEffects(block);
+        }
+    }
 
-            if (type == Material.LAVA_CAULDRON || this.isHeatBelow(block))
+
+    /**
+     * Spawns particles and sounds for a single cauldron, based on its contents and the block below it.
+     * @param block Cauldron block.
+     */
+    private void spawnCauldronEffects(Block block)
+    {
+        World world = block.getWorld();
+        Material type = block.getType();
+        Location center = block.getLocation().add(0.5D, 0.9D, 0.5D);
+
+        if (type == Material.LAVA_CAULDRON || this.isHeatBelow(block))
+        {
+            this.spawnHeatParticles(world, type, center);
+        }
+        else if (type == Material.POWDER_SNOW_CAULDRON || this.isIceBelow(block))
+        {
+            if (type == Material.WATER_CAULDRON || type == Material.POWDER_SNOW_CAULDRON)
             {
-                if (type == Material.WATER_CAULDRON)
-                {
-                    world.spawnParticle(Particle.SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
-                }
-                else if (type == Material.POWDER_SNOW_CAULDRON)
-                {
-                    world.spawnParticle(Particle.SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
-                }
-                else if (type == Material.LAVA_CAULDRON)
-                {
-                    world.spawnParticle(Particle.DRIPPING_LAVA, center, 12, 0.20D, 0.0D, 0.20D);
-                }
+                world.spawnParticle(Particle.SNOWFLAKE, center, 12, 0.20D, 0.0D, 0.20D, 0.01);
             }
-            else if (type == Material.POWDER_SNOW_CAULDRON || this.isIceBelow(block))
-            {
-                if (type == Material.WATER_CAULDRON || type == Material.POWDER_SNOW_CAULDRON)
-                {
-                    world.spawnParticle(Particle.SNOWFLAKE, center, 12, 0.20D, 0.0D, 0.20D, 0.01);
-                }
+        }
+        else
+        {
+            this.spawnEnchantParticles(world, center);
+        }
+
+        if (this.runCounter % 40 == 1)
+        {
+            // Play sound lava poping
+            world.playSound(center, Sound.BLOCK_LAVA_POP, 0.5f, 0.5f);
+        }
+    }
+
+
+    /**
+     * Spawns particles for a heated cauldron.
+     */
+    private void spawnHeatParticles(World world, Material type, Location center)
+    {
+        switch (type)
+        {
+            case WATER_CAULDRON, POWDER_SNOW_CAULDRON ->
+                world.spawnParticle(Particle.SPLASH, center, 12, 0.20D, 0.0D, 0.20D);
+            case LAVA_CAULDRON ->
+                world.spawnParticle(Particle.DRIPPING_LAVA, center, 12, 0.20D, 0.0D, 0.20D);
+            default -> {
+                // Empty cauldrons do not spawn heat particles.
             }
-            else
-            {
-                double x = this.runCounter % 3 == 0 ? 0 : this.random.nextFloat() * 0.4;
-                double z = this.runCounter % 3 == 1 ? 0 : this.random.nextFloat() * 0.4;
+        }
+    }
 
-                x = this.random.nextBoolean() ? x : -x;
-                z = this.random.nextBoolean() ? z : -z;
 
-                world.spawnParticle(Particle.ENCHANT,
-                    center.add(x, 0, z),
-                    0,
-                    0,
-                    127,
-                    0,
-                    127);
+    /**
+     * Spawns two enchant particles around the cauldron center.
+     */
+    private void spawnEnchantParticles(World world, Location center)
+    {
+        double x = this.runCounter % 3 == 0 ? 0 : this.random.nextFloat() * 0.4;
+        double z = this.runCounter % 3 == 1 ? 0 : this.random.nextFloat() * 0.4;
 
-                x = this.random.nextBoolean() ? x : -x;
-                z = this.random.nextBoolean() ? z : -z;
+        for (int i = 0; i < 2; i++)
+        {
+            x = this.random.nextBoolean() ? x : -x;
+            z = this.random.nextBoolean() ? z : -z;
 
-                world.spawnParticle(Particle.ENCHANT,
-                    center.add(x, 0, z),
-                    0,
-                    0,
-                    127,
-                    0,
-                    127);
-            }
-
-            if (this.runCounter % 40 == 1)
-            {
-                // Play sound lava poping
-                world.playSound(center, Sound.BLOCK_LAVA_POP, 0.5f, 0.5f);
-            }
+            world.spawnParticle(Particle.ENCHANT,
+                center.add(x, 0, z),
+                0,
+                0,
+                127,
+                0,
+                127);
         }
     }
 
@@ -169,21 +188,12 @@ public class ParticleSpawnTask implements Runnable
             type == Material.SMOKER ||
             type.name().contains("CANDLE"))
         {
-            if (relative.getBlockData() instanceof Lightable data)
-            {
-                return data.isLit();
-            }
-            else
-            {
-                return false;
-            }
+            return relative.getBlockData() instanceof Lightable data && data.isLit();
         }
-        else
-        {
-            return type == Material.FIRE ||
-                type == Material.LAVA ||
-                type == Material.LAVA_CAULDRON;
-        }
+
+        return type == Material.FIRE ||
+            type == Material.LAVA ||
+            type == Material.LAVA_CAULDRON;
     }
 
 
