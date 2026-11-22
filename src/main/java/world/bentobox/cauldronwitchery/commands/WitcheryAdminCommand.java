@@ -37,11 +37,17 @@ public class WitcheryAdminCommand extends CompositeCommand
     }
 
 
+    /**
+     * Permission required by all admin commands.
+     */
+    private static final String ADMIN_PERMISSION = "admin.witchery";
+
+
     @Override
     public void setup()
     {
         this.setOnlyPlayer(true);
-        this.setPermission("admin.witchery");
+        this.setPermission(ADMIN_PERMISSION);
         this.setParametersHelp(Constants.ADMIN_COMMANDS + "main.parameters");
         this.setDescription(Constants.ADMIN_COMMANDS + "main.description");
 
@@ -88,7 +94,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         public void setup()
         {
             this.setOnlyPlayer(true);
-            this.setPermission("admin.witchery");
+            this.setPermission(ADMIN_PERMISSION);
 
             new GenerateMagicStickCommand(this.getAddon(), this);
             new CraftBookCommand(this.getAddon(), this);
@@ -119,7 +125,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         public void setup()
         {
             this.setOnlyPlayer(false);
-            this.setPermission("admin.witchery");
+            this.setPermission(ADMIN_PERMISSION);
             this.setParametersHelp(Constants.ADMIN_COMMANDS + "give.parameters");
             this.setDescription(Constants.ADMIN_COMMANDS + "give.description");
         }
@@ -128,49 +134,47 @@ public class WitcheryAdminCommand extends CompositeCommand
         @Override
         public boolean execute(User user, String s, List<String> list)
         {
-            if (list.isEmpty() || list.size() > 2)
-            {
-                this.showHelp(this, user);
-                return true;
-            }
-
             String gamemode = Utils.getGameMode(this.getWorld());
 
-            MagicStickObject object;
+            if (list.isEmpty() || list.size() > 2 || gamemode == null)
+            {
+                this.showHelp(this, user);
+                return false;
+            }
+
+            // Stick id is always the last argument; optional player name comes before it.
+            String stickId = list.getLast();
+
+            MagicStickObject object = this.<CauldronWitcheryAddon>getAddon().
+                getAddonManager().getMagicStickById(gamemode.toLowerCase() + "_" + stickId);
+
             User target;
 
             if (list.size() == 1)
             {
-                object = this.<CauldronWitcheryAddon>getAddon().
-                    getAddonManager().getMagicStickById(gamemode.toLowerCase() + "_" + list.get(0));
                 target = user;
             }
             else
             {
-                object = this.<CauldronWitcheryAddon>getAddon().
-                    getAddonManager().getMagicStickById(gamemode.toLowerCase() + "_" + list.get(1));
-
-                UUID uuid = Util.getUUID(list.get(0));
-
+                UUID uuid = Util.getUUID(list.getFirst());
                 target = uuid == null ? null : User.getInstance(uuid);
             }
-
 
             if (object == null)
             {
                 Utils.sendMessage(user, user.getTranslation(Constants.ERRORS + "no-magic-stick",
-                    "[id]", list.size() == 1 ? list.get(0) : list.get(1),
-                    "[gamemode]", Utils.getGameMode(this.getWorld())));
-            }
-            else if (target == null || !target.isPlayer() || target.getLocation() == null)
-            {
-                Utils.sendMessage(user, user.getTranslation(Constants.ERRORS + "player-not-found"));
-            }
-            else
-            {
-                Utils.giveItem(target, object.getMagicStick());
+                    "[id]", stickId,
+                    "[gamemode]", gamemode));
+                return false;
             }
 
+            if (target == null || !target.isPlayer())
+            {
+                Utils.sendMessage(user, user.getTranslation(Constants.ERRORS + "player-not-found"));
+                return false;
+            }
+
+            Utils.giveItem(target, object.getMagicStick());
             return true;
         }
 
@@ -185,23 +189,25 @@ public class WitcheryAdminCommand extends CompositeCommand
             List<String> returnList;
             final int size = args.size();
 
-            if (size == 4 || size == 5)
+            String gameModeName = Utils.getGameMode(this.getWorld());
+
+            if ((size == 4 || size == 5) && gameModeName != null)
             {
-                String gamemode = Utils.getGameMode(this.getWorld()).toLowerCase() + "_";
+                String gamemode = gameModeName.toLowerCase() + "_";
 
                 returnList = this.<CauldronWitcheryAddon>getAddon().getAddonManager().
                     getAllMagicSticks(this.getWorld()).
                     stream().
                     map(MagicStickObject::getUniqueId).
                     map(name -> name.replaceFirst(gamemode, "")).
-                    collect(Collectors.toList());
+                    collect(Collectors.toCollection(ArrayList::new));
 
                 if (size == 4)
                 {
                     // Add all players to the first list.
                     returnList.addAll(Bukkit.getOnlinePlayers().stream().
                         map(Player::getName).
-                        collect(Collectors.toList()));
+                        toList());
                 }
             }
             else
@@ -229,7 +235,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         public void setup()
         {
             this.setOnlyPlayer(true);
-            this.setPermission("admin.witchery");
+            this.setPermission(ADMIN_PERMISSION);
             this.setParametersHelp(Constants.ADMIN_COMMANDS + "book.parameters");
             this.setDescription(Constants.ADMIN_COMMANDS + "book.description");
         }
@@ -241,7 +247,7 @@ public class WitcheryAdminCommand extends CompositeCommand
             if (list.size() != 2)
             {
                 this.showHelp(this, user);
-                return true;
+                return false;
             }
 
             User target;
@@ -259,7 +265,7 @@ public class WitcheryAdminCommand extends CompositeCommand
                 else
                 {
                     this.showHelp(this, user);
-                    return true;
+                    return false;
                 }
             }
             else if (list.get(0).length() == 32)
@@ -275,7 +281,7 @@ public class WitcheryAdminCommand extends CompositeCommand
             else
             {
                 this.showHelp(this, user);
-                return true;
+                return false;
             }
 
             ItemStack itemStack =
@@ -285,12 +291,10 @@ public class WitcheryAdminCommand extends CompositeCommand
             {
                 Utils.sendMessage(user, user.getTranslation(Constants.ERRORS + "no-magic-book",
                     "[book]", list.get(1)));
-            }
-            else if (user.isPlayer() && user.getLocation() != null)
-            {
-                Utils.giveItem(user, itemStack);
+                return false;
             }
 
+            Utils.giveItem(user, itemStack);
             return true;
         }
 
@@ -302,26 +306,17 @@ public class WitcheryAdminCommand extends CompositeCommand
 
             String lastString = args.get(args.size() - 1);
 
-            List<String> returnList;
-            final int size = args.size();
-
-            if (size == 1)
+            List<String> returnList = switch (args.size())
             {
-                returnList = this.getPlugin().getPlayers().getPlayers().stream().
+                case 1 -> this.getPlugin().getPlayers().getPlayers().stream().
                     map(Players::getPlayerName).
                     filter(playerName -> playerName.toLowerCase().startsWith(args.get(0).toLowerCase())).
-                    collect(Collectors.toList());
-            }
-            else if (size == 2)
-            {
-                returnList = this.<CauldronWitcheryAddon>getAddon().getAddonManager().getAllBookNames().stream().
+                    toList();
+                case 2 -> this.<CauldronWitcheryAddon>getAddon().getAddonManager().getAllBookNames().stream().
                     filter(bookName -> bookName.toLowerCase().startsWith(args.get(1).toLowerCase())).
-                    collect(Collectors.toList());
-            }
-            else
-            {
-                returnList = Collections.emptyList();
-            }
+                    toList();
+                default -> Collections.emptyList();
+            };
 
             return Optional.of(Util.tabLimit(returnList, lastString));
         }
@@ -343,7 +338,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         public void setup()
         {
             this.setOnlyPlayer(true);
-            this.setPermission("admin.witchery");
+            this.setPermission(ADMIN_PERMISSION);
 
             new ReloadMagicStickCommand(this.getAddon(), this);
             new ReloadBookCommand(this.getAddon(), this);
@@ -374,7 +369,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         public void setup()
         {
             this.setOnlyPlayer(true);
-            this.setPermission("admin.witchery");
+            this.setPermission(ADMIN_PERMISSION);
             this.setParametersHelp(Constants.ADMIN_COMMANDS + "reload-sticks.parameters");
             this.setDescription(Constants.ADMIN_COMMANDS + "reload-sticks.description");
         }
@@ -405,7 +400,7 @@ public class WitcheryAdminCommand extends CompositeCommand
         public void setup()
         {
             this.setOnlyPlayer(true);
-            this.setPermission("admin.witchery");
+            this.setPermission(ADMIN_PERMISSION);
 
             this.setParametersHelp(Constants.ADMIN_COMMANDS + "reload-books.parameters");
             this.setDescription(Constants.ADMIN_COMMANDS + "reload-books.description");

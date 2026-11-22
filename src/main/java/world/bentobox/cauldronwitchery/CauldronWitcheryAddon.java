@@ -94,7 +94,7 @@ public class CauldronWitcheryAddon extends Addon
 		this.importManager = new CauldronWitcheryImportManager(this);
 
 		// Init flag.
-		CauldronWitcheryAddon.CAULDRON_WITCHERY_ISLAND_PROTECTION =
+		this.islandProtectionFlag =
 			new Flag.Builder("CAULDRON_WITCHERY_ISLAND_PROTECTION", Material.DIAMOND_PICKAXE).
 				type(Flag.Type.PROTECTION).
 				defaultRank(this.settings.getDefaultFlagPermission()).
@@ -105,36 +105,10 @@ public class CauldronWitcheryAddon extends Addon
 
 		List<World> worldList = new ArrayList<>();
 
-		this.getPlugin().getAddonsManager().getGameModeAddons().forEach(gameModeAddon -> {
-			if (!this.settings.getDisabledGameModes().contains(gameModeAddon.getDescription().getName()))
-			{
-				if (gameModeAddon.isEnabled())
-				{
-					CAULDRON_WITCHERY_ISLAND_PROTECTION.addGameModeAddon(gameModeAddon);
-
-					gameModeAddon.getAdminCommand().ifPresent(command ->
-						new WitcheryAdminCommand(this, command));
-					gameModeAddon.getPlayerCommand().ifPresent(command ->
-						new WitcheryPlayerCommand(this, command));
-
-					this.registerPlaceholders(gameModeAddon);
-				}
-
-				worldList.add(gameModeAddon.getOverWorld());
-
-				if (gameModeAddon.getWorldSettings().isNetherGenerate())
-				{
-					worldList.add(gameModeAddon.getNetherWorld());
-				}
-
-				if (gameModeAddon.getWorldSettings().isEndGenerate())
-				{
-					worldList.add(gameModeAddon.getEndWorld());
-				}
-
-				this.hooked = true;
-			}
-		});
+		this.getPlugin().getAddonsManager().getGameModeAddons().stream().
+			filter(gameModeAddon ->
+				!this.settings.getDisabledGameModes().contains(gameModeAddon.getDescription().getName())).
+			forEach(gameModeAddon -> this.hookGameMode(gameModeAddon, worldList));
 
 		if (this.hooked)
 		{
@@ -150,16 +124,50 @@ public class CauldronWitcheryAddon extends Addon
 			this.registerListener(new ItemsInsideCauldronListener(this));
 
 			// Register Flags
-			this.registerFlag(CAULDRON_WITCHERY_ISLAND_PROTECTION);
-
-			// Register Request Handlers
-//			this.registerRequestHandler(REQUEST_HANDLER);
+			this.registerFlag(this.islandProtectionFlag);
 		}
 		else
 		{
 			this.logError("CauldronWitchery could not hook into any GameMode so will not do anything!");
 			this.setState(State.DISABLED);
 		}
+	}
+
+
+	/**
+	 * Hooks this addon into given game mode: registers commands, placeholders and flag (if game mode is enabled)
+	 * and collects its worlds for particle spawning.
+	 *
+	 * @param gameModeAddon Game mode to hook into.
+	 * @param worldList List that collects worlds where the addon operates.
+	 */
+	private void hookGameMode(GameModeAddon gameModeAddon, List<World> worldList)
+	{
+		if (gameModeAddon.isEnabled())
+		{
+			this.islandProtectionFlag.addGameModeAddon(gameModeAddon);
+
+			gameModeAddon.getAdminCommand().ifPresent(command ->
+				new WitcheryAdminCommand(this, command));
+			gameModeAddon.getPlayerCommand().ifPresent(command ->
+				new WitcheryPlayerCommand(this, command));
+
+			this.registerPlaceholders(gameModeAddon);
+		}
+
+		worldList.add(gameModeAddon.getOverWorld());
+
+		if (gameModeAddon.getWorldSettings().isNetherGenerate())
+		{
+			worldList.add(gameModeAddon.getNetherWorld());
+		}
+
+		if (gameModeAddon.getWorldSettings().isEndGenerate())
+		{
+			worldList.add(gameModeAddon.getEndWorld());
+		}
+
+		this.hooked = true;
 	}
 
 
@@ -512,5 +520,16 @@ public class CauldronWitcheryAddon extends Addon
 	/**
 	 * This flag allows to define which users can summon mobs using magic.
 	 */
-	public static Flag CAULDRON_WITCHERY_ISLAND_PROTECTION;
+	private Flag islandProtectionFlag;
+
+
+	/**
+	 * Gets the island protection flag that defines which users can use cauldron magic.
+	 *
+	 * @return the island protection flag
+	 */
+	public Flag getIslandProtectionFlag()
+	{
+		return this.islandProtectionFlag;
+	}
 }

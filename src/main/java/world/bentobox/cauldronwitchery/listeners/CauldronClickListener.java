@@ -111,7 +111,7 @@ public class CauldronClickListener extends FlagListener implements Listener
         if (!this.checkIsland(event,
             event.getPlayer(),
             block.getLocation(),
-            CauldronWitcheryAddon.CAULDRON_WITCHERY_ISLAND_PROTECTION))
+            this.addon.getIslandProtectionFlag()))
         {
             // Check protection flag for island.
             return;
