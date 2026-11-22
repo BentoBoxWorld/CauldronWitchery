@@ -241,7 +241,7 @@ public class EditRecipePanel extends CommonPanel
                     false,
                     SingleEntitySelector.Mode.ALIVE,
                     (status, entity) -> {
-                        if (status)
+                        if (Boolean.TRUE.equals(status))
                         {
                             recipe.setEntityType(entity);
                         }
@@ -387,7 +387,7 @@ public class EditRecipePanel extends CommonPanel
                     ItemSelector.open(this.user,
                         this.recipe.getExtraIngredients(),
                         (status, value) -> {
-                            if (status)
+                            if (Boolean.TRUE.equals(status))
                             {
                                 this.recipe.setExtraIngredients(value);
                             }
@@ -452,7 +452,7 @@ public class EditRecipePanel extends CommonPanel
                         SingleBlockSelector.Mode.BLOCKS,
                         validBlocks,
                         (status, block) -> {
-                            if (status)
+                            if (Boolean.TRUE.equals(status))
                             {
                                 this.recipe.setCauldronType(block);
                             }

@@ -182,7 +182,7 @@ public class RecipesPanel extends CommonPanel
         {
             ItemStack clone = template.icon().clone();
 
-            if ((Boolean) template.dataMap().getOrDefault("indexing", false))
+            if (Boolean.TRUE.equals(template.dataMap().get("indexing")))
             {
                 clone.setAmount(nextPageIndex);
             }
@@ -247,7 +247,7 @@ public class RecipesPanel extends CommonPanel
         {
             ItemStack clone = template.icon().clone();
 
-            if ((Boolean) template.dataMap().getOrDefault("indexing", false))
+            if (Boolean.TRUE.equals(template.dataMap().get("indexing")))
             {
                 clone.setAmount(previousPageIndex);
             }

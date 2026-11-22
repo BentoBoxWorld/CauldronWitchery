@@ -171,24 +171,28 @@ public record ItemSelector(User user, List<ItemStack> itemStacks, BiConsumer<Boo
 		@Override
 		public void setGlow(boolean glow)
 		{
+			// Item display is fixed to the real item stack.
 		}
 
 
 		@Override
 		public void setDescription(List<String> description)
 		{
+			// Item display is fixed to the real item stack.
 		}
 
 
 		@Override
 		public void setName(String name)
 		{
+			// Item display is fixed to the real item stack.
 		}
 
 
 		@Override
 		public void setHead(ItemStack itemStack)
 		{
+			// Item display is fixed to the real item stack.
 		}
 	}
 
@@ -201,12 +205,14 @@ public record ItemSelector(User user, List<ItemStack> itemStacks, BiConsumer<Boo
 		@Override
 		public void setup()
 		{
+			// Nothing to set up.
 		}
 
 
 		@Override
 		public void onInventoryClose(InventoryCloseEvent inventoryCloseEvent)
 		{
+			// Nothing to clean up.
 		}
 
 

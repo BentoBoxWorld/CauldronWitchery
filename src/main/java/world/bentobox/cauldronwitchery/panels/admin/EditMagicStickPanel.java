@@ -674,14 +674,14 @@ public class EditMagicStickPanel extends CommonPagedPanel<Recipe>
                         collect(Collectors.toMap(recipe -> recipe,
                             recipe -> this.generateRecipeDescription(recipe, null),
                             (a, b) -> b,
-                            () -> new LinkedHashMap<>(this.magicStick.getRecipeList().size())));
+                            () -> LinkedHashMap.newLinkedHashMap(this.magicStick.getRecipeList().size())));
 
                     // Open select gui
                     RecipeSelector.open(this.user,
                         Material.RED_STAINED_GLASS_PANE,
                         elementDescriptionMap,
                         (status, valueSet) -> {
-                            if (status)
+                            if (Boolean.TRUE.equals(status))
                             {
                                 this.magicStick.getRecipeList().removeAll(valueSet);
                             }

@@ -3,20 +3,15 @@ package world.bentobox.cauldronwitchery.panels.admin;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.panels.PanelItem;
-import world.bentobox.bentobox.api.panels.PanelListener;
 import world.bentobox.bentobox.api.panels.builders.PanelBuilder;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
 import world.bentobox.bentobox.api.user.User;
@@ -96,7 +91,7 @@ public class LibraryPanel extends CommonPagedPanel<LibraryEntry>
             map(file -> LibraryEntry.fromTemplate(
                 file.getName().substring(0, file.getName().length() - 5),
                 Material.PAPER)).
-            collect(Collectors.toList());
+            toList();
     }
 
 
@@ -123,7 +118,7 @@ public class LibraryPanel extends CommonPagedPanel<LibraryEntry>
             map(file -> LibraryEntry.fromTemplate(
                 file.getName().substring(0, file.getName().length() - 4),
                 Material.PAPER)).
-            collect(Collectors.toList());
+            toList();
     }
 
 
@@ -153,7 +148,7 @@ public class LibraryPanel extends CommonPagedPanel<LibraryEntry>
                         element.language().toLowerCase().contains(this.searchString.toLowerCase());
                 }).
                 distinct().
-                collect(Collectors.toList());
+                toList();
         }
     }
 
@@ -186,14 +181,7 @@ public class LibraryPanel extends CommonPagedPanel<LibraryEntry>
 
         this.populateElements(panelBuilder, this.filterElements);
 
-//        if (this.mode == Library.WEB)
-//        {
-//            panelBuilder.item(4, this.createDownloadNow());
-//        }
-
         panelBuilder.item(44, this.returnButton);
-
-        panelBuilder.listener(new DownloadCanceller());
 
         panelBuilder.build();
     }
@@ -234,25 +222,18 @@ public class LibraryPanel extends CommonPagedPanel<LibraryEntry>
     {
         Consumer<Boolean> consumer = value ->
         {
-            if (value)
+            if (Boolean.TRUE.equals(value) && this.mode != Library.WEB)
             {
-                switch (this.mode)
+                if (this.mode == Library.TEMPLATE)
                 {
-                    case TEMPLATE -> {
-                        this.addon.getImportManager().importFile(this.user,
-                            this.world,
-                            libraryEntry.name());
-
-                        CommonPanel.reopen(this.parentPanel != null ? this.parentPanel : this);
-                    }
-                    case DATABASE -> {
-                        this.addon.getImportManager().importDatabaseFile(this.user,
-                            this.world,
-                            libraryEntry.name());
-
-                        CommonPanel.reopen(this.parentPanel != null ? this.parentPanel : this);
-                    }
+                    this.addon.getImportManager().importFile(this.user, this.world, libraryEntry.name());
                 }
+                else
+                {
+                    this.addon.getImportManager().importDatabaseFile(this.user, this.world, libraryEntry.name());
+                }
+
+                CommonPanel.reopen(this.parentPanel != null ? this.parentPanel : this);
             }
 
             if (this.mode.equals(Library.WEB) || this.libraryEntries.size() > 1)
@@ -298,50 +279,6 @@ public class LibraryPanel extends CommonPagedPanel<LibraryEntry>
 
 
     /**
-     * This class allows changing icon for Generator Tier
-     */
-    private class DownloadCanceller implements PanelListener
-    {
-        /**
-         * On inventory click.
-         *
-         * @param user the user
-         * @param event the event
-         */
-        @Override
-        public void onInventoryClick(User user, InventoryClickEvent event)
-        {
-            // do nothing
-        }
-
-
-        /**
-         * On inventory close.
-         *
-         * @param event the event
-         */
-        @Override
-        public void onInventoryClose(InventoryCloseEvent event)
-        {
-            if (LibraryPanel.this.updateTask != null)
-            {
-                LibraryPanel.this.updateTask.cancel();
-            }
-        }
-
-
-        /**
-         * Setup current listener.
-         */
-        @Override
-        public void setup()
-        {
-            // Do nothing
-        }
-    }
-
-
-    /**
      * Enum that holds different view modes for current panel.
      */
     public enum Library
@@ -364,21 +301,6 @@ public class LibraryPanel extends CommonPagedPanel<LibraryEntry>
 // ---------------------------------------------------------------------
 // Section: Instance Variables
 // ---------------------------------------------------------------------
-
-    /**
-     * Indicates if download now button should trigger cache clearing.
-     */
-    private boolean clearCache;
-
-    /**
-     * Stores update task that is triggered.
-     */
-    private BukkitTask updateTask = null;
-
-    /**
-     * This variable will protect against spam-click.
-     */
-    private boolean blockedForDownland;
 
     /**
      * Stores active library that must be searched.

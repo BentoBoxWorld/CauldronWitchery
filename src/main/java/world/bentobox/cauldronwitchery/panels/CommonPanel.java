@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
@@ -264,7 +263,7 @@ public abstract class CommonPanel
             List<String> missingPermissions = magicStick.getPermissions().stream().
                 filter(permission -> target == null || !target.hasPermission(permission)).
                 sorted().
-                collect(Collectors.toList());
+                toList();
 
             StringBuilder permissionBuilder = new StringBuilder();
 

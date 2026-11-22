@@ -10,7 +10,6 @@ package world.bentobox.cauldronwitchery.panels.admin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.panels.PanelItem;
@@ -37,7 +36,7 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
     protected ManagePlayerPanel(CommonPanel parentPanel)
     {
         super(parentPanel);
-        this.elementList = Bukkit.getOnlinePlayers().stream().map(User::getInstance).collect(Collectors.toList());
+        this.elementList = Bukkit.getOnlinePlayers().stream().map(User::getInstance).toList();
         this.filterElements = this.elementList;
         this.searchString = "";
     }
@@ -80,7 +79,7 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
                     return element.getName().toLowerCase().contains(this.searchString.toLowerCase());
                 }).
                 distinct().
-                collect(Collectors.toList());
+                toList();
         }
     }
 
@@ -142,7 +141,7 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
                     map(Players::getPlayer).
                     filter(Objects::nonNull).
                     map(User::getInstance).
-                    collect(Collectors.toList());
+                    toList();
             }
 
             this.activeTab = button;

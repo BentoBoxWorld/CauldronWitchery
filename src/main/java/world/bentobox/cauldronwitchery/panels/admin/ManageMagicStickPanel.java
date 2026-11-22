@@ -6,7 +6,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.localization.TextVariables;
@@ -44,7 +43,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
         this.filterElements = this.magicStickList;
 
         // Init set with selected bundles.
-        this.selectedMagicSticks = new HashSet<>(this.magicStickList.size());
+        this.selectedMagicSticks = HashSet.newHashSet(this.magicStickList.size());
     }
 
 
@@ -104,7 +103,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
                                 contains(this.searchString.toLowerCase());
                 }).
                 distinct().
-                collect(Collectors.toList());
+                toList();
         }
     }
 
@@ -208,7 +207,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
                         // Create consumer that accepts value from conversation.
                         Consumer<Boolean> consumer = value ->
                         {
-                            if (value)
+                            if (Boolean.TRUE.equals(value))
                             {
                                 this.selectedMagicSticks.forEach(stickObject ->
                                 {

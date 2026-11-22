@@ -27,6 +27,9 @@ import world.bentobox.cauldronwitchery.utils.Utils;
  */
 public class AdminPanel extends CommonPanel
 {
+    private static final String CLICK_TO_OPEN = Constants.TIPS + "click-to-open";
+
+
     // ---------------------------------------------------------------------
     // Section: Constructor
     // ---------------------------------------------------------------------
@@ -83,15 +86,11 @@ public class AdminPanel extends CommonPanel
 
         PanelUtils.fillBorder(panelBuilder, Material.MAGENTA_STAINED_GLASS_PANE);
 
-        //panelBuilder.item(10, this.createButton(Action.MANAGE_USERS));
-        //panelBuilder.item(28, this.createButton(Action.WIPE_USER_DATABASE));
-
+        // User management, bundles and web library buttons are not shown yet.
         panelBuilder.item(12, this.createButton(Action.MANAGE_MAGIC_STICKS));
-        //panelBuilder.item(21, this.createButton(Action.MANAGE_BUNDLES));
 
         panelBuilder.item(14, this.createButton(Action.IMPORT_TEMPLATE));
 
-        //panelBuilder.item(15, this.createButton(Action.WEB_LIBRARY));
         panelBuilder.item(24, this.createButton(Action.EXPORT_DATABASE));
         panelBuilder.item(33, this.createButton(Action.IMPORT_DATABASE));
 
@@ -130,7 +129,7 @@ public class AdminPanel extends CommonPanel
                 glow = false;
 
                 description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-open"));
+                description.add(this.user.getTranslation(CLICK_TO_OPEN));
             }
             case MANAGE_MAGIC_STICKS -> {
                 icon = new ItemStack(Material.STICK);
@@ -141,18 +140,16 @@ public class AdminPanel extends CommonPanel
                 glow = false;
 
                 description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-open"));
+                description.add(this.user.getTranslation(CLICK_TO_OPEN));
             }
             case MANAGE_BUNDLES -> {
                 icon = new ItemStack(Material.CHEST);
-                clickHandler = (panel, user1, clickType, slot) -> {
-                    // BundleManagePanel.open(this);
-                    return true;
-                };
+                // Bundle management panel is not implemented yet.
+                clickHandler = (panel, user1, clickType, slot) -> true;
                 glow = false;
 
                 description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-open"));
+                description.add(this.user.getTranslation(CLICK_TO_OPEN));
             }
             case EDIT_SETTINGS -> {
                 icon = new ItemStack(Material.CRAFTING_TABLE);
@@ -163,7 +160,7 @@ public class AdminPanel extends CommonPanel
                 glow = false;
 
                 description.add("");
-                description.add(this.user.getTranslationOrNothing(Constants.TIPS + "click-to-open"));
+                description.add(this.user.getTranslationOrNothing(CLICK_TO_OPEN));
             }
             case WEB_LIBRARY -> {
                 icon = new ItemStack(Material.PAPER);
@@ -173,36 +170,7 @@ public class AdminPanel extends CommonPanel
             case EXPORT_DATABASE -> {
                 icon = new ItemStack(Material.HOPPER);
                 clickHandler = (panel, user, clickType, slot) -> {
-
-                    // This consumer process file exporting after user input is returned.
-                    Consumer<String> fileNameConsumer = value -> {
-                        if (value != null)
-                        {
-                            this.addon.getImportManager().generateDatabaseFile(this.user,
-                                this.world,
-                                Utils.sanitizeInput(value));
-                        }
-
-                        this.build();
-                    };
-
-                    // This function checks if file can be created.
-                    Predicate<String> validationFunction = fileName ->
-                    {
-                        String sanitizedName = Utils.sanitizeInput(fileName);
-                        return !new File(this.addon.getDataFolder(),
-                            sanitizedName.endsWith(".json") ? sanitizedName : sanitizedName + ".json").exists();
-                    };
-
-                    // Call a conversation API to get input string.
-                    ConversationUtils.createIDStringInput(fileNameConsumer,
-                        validationFunction,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "exported-file-name"),
-                        this.user.getTranslation(Constants.CONVERSATIONS + "database-export-completed",
-                            Constants.PARAMETER_WORLD, world.getName()),
-                        Constants.CONVERSATIONS + "file-name-exist");
-
+                    this.askExportFileName();
                     return true;
                 };
                 glow = false;
@@ -219,7 +187,7 @@ public class AdminPanel extends CommonPanel
                 glow = false;
 
                 description.add("");
-                description.add(this.user.getTranslationOrNothing(Constants.TIPS + "click-to-open"));
+                description.add(this.user.getTranslationOrNothing(CLICK_TO_OPEN));
             }
             case IMPORT_DATABASE -> {
                 icon = new ItemStack(Material.BOOKSHELF);
@@ -230,30 +198,12 @@ public class AdminPanel extends CommonPanel
                 glow = true;
 
                 description.add("");
-                description.add(this.user.getTranslationOrNothing(Constants.TIPS + "click-to-open"));
+                description.add(this.user.getTranslationOrNothing(CLICK_TO_OPEN));
             }
             case WIPE_DATABASE -> {
                 icon = new ItemStack(Material.TNT);
                 clickHandler = (panel, user, clickType, slot) -> {
-
-                    Consumer<Boolean> consumer = value -> {
-                        if (value)
-                        {
-                            this.addon.getAddonManager().wipeDatabase(Utils.getGameMode(this.world));
-                        }
-
-                        this.build();
-                    };
-
-                    // Create conversation that gets user acceptance to delete generator data.
-                    ConversationUtils.createConfirmation(
-                        consumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "confirm-all-data-deletion",
-                            Constants.PARAMETER_GAMEMODE, Utils.getGameMode(this.world)),
-                        this.user.getTranslation(Constants.CONVERSATIONS + "all-data-removed",
-                            Constants.PARAMETER_GAMEMODE, Utils.getGameMode(this.world)));
-
+                    this.askWipeConfirmation(this.addon.getAddonManager()::wipeDatabase, "confirm-all-data-deletion", "all-data-removed");
                     return true;
                 };
                 glow = true;
@@ -264,25 +214,7 @@ public class AdminPanel extends CommonPanel
             case WIPE_USER_DATABASE -> {
                 icon = new ItemStack(Material.TNT);
                 clickHandler = (panel, user, clickType, slot) -> {
-
-                    Consumer<Boolean> consumer = value -> {
-                        if (value)
-                        {
-                            this.addon.getAddonManager().wipePlayers(Utils.getGameMode(this.world));
-                        }
-
-                        this.build();
-                    };
-
-                    // Create conversation that gets user acceptance to delete generator data.
-                    ConversationUtils.createConfirmation(
-                        consumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "confirm-user-data-deletion",
-                            Constants.PARAMETER_GAMEMODE, Utils.getGameMode(this.world)),
-                        this.user.getTranslation(Constants.CONVERSATIONS + "user-data-removed",
-                            Constants.PARAMETER_GAMEMODE, Utils.getGameMode(this.world)));
-
+                    this.askWipeConfirmation(this.addon.getAddonManager()::wipePlayers, "confirm-user-data-deletion", "user-data-removed");
                     return true;
                 };
                 glow = false;
@@ -304,6 +236,73 @@ public class AdminPanel extends CommonPanel
             glow(glow).
             clickHandler(clickHandler).
             build();
+    }
+
+
+    /**
+     * Asks user for export file name in chat and exports database into that file.
+     */
+    private void askExportFileName()
+    {
+        // This consumer process file exporting after user input is returned.
+        Consumer<String> fileNameConsumer = value -> {
+            if (value != null)
+            {
+                this.addon.getImportManager().generateDatabaseFile(this.user,
+                    this.world,
+                    Utils.sanitizeInput(value));
+            }
+
+            this.build();
+        };
+
+        // This function checks if file can be created.
+        Predicate<String> validationFunction = fileName ->
+        {
+            String sanitizedName = Utils.sanitizeInput(fileName);
+            return !new File(this.addon.getDataFolder(),
+                sanitizedName.endsWith(".json") ? sanitizedName : sanitizedName + ".json").exists();
+        };
+
+        // Call a conversation API to get input string.
+        ConversationUtils.createIDStringInput(fileNameConsumer,
+            validationFunction,
+            this.user,
+            this.user.getTranslation(Constants.CONVERSATIONS + "exported-file-name"),
+            this.user.getTranslation(Constants.CONVERSATIONS + "database-export-completed",
+                Constants.PARAMETER_WORLD, this.world.getName()),
+            Constants.CONVERSATIONS + "file-name-exist");
+    }
+
+
+    /**
+     * Asks user to confirm data wipe in chat and runs it on confirmation.
+     *
+     * @param wipe Wipe action that accepts game mode name.
+     * @param confirmKey Conversation translation key for the question.
+     * @param removedKey Conversation translation key for the success message.
+     */
+    private void askWipeConfirmation(Consumer<String> wipe, String confirmKey, String removedKey)
+    {
+        String gameMode = Utils.getGameMode(this.world);
+
+        Consumer<Boolean> consumer = value -> {
+            if (Boolean.TRUE.equals(value) && gameMode != null)
+            {
+                wipe.accept(gameMode);
+            }
+
+            this.build();
+        };
+
+        // Create conversation that gets user acceptance to delete data.
+        ConversationUtils.createConfirmation(
+            consumer,
+            this.user,
+            this.user.getTranslation(Constants.CONVERSATIONS + confirmKey,
+                Constants.PARAMETER_GAMEMODE, gameMode),
+            this.user.getTranslation(Constants.CONVERSATIONS + removedKey,
+                Constants.PARAMETER_GAMEMODE, gameMode));
     }
 
 

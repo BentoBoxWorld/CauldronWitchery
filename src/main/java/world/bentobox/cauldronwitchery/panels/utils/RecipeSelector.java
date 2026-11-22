@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.panels.PanelItem;
@@ -36,7 +35,7 @@ public class RecipeSelector extends PagedSelector<Recipe>
 		this.border = border;
 
 		this.elements = objectDescriptionMap.keySet().stream().toList();
-		this.selectedElements = new HashSet<>(this.elements.size());
+		this.selectedElements = HashSet.newHashSet(this.elements.size());
 		this.filterElements = this.elements;
 	}
 
@@ -113,7 +112,7 @@ public class RecipeSelector extends PagedSelector<Recipe>
 							contains(this.searchString.toLowerCase());
 				}).
 				distinct().
-				collect(Collectors.toList());
+				toList();
 		}
 	}
 

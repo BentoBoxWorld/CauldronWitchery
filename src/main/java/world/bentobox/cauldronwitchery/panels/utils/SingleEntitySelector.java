@@ -6,7 +6,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.panels.PanelItem;
@@ -50,7 +49,7 @@ public class SingleEntitySelector extends PagedSelector<EntityType>
 			}).
 			// Sort by names
 			sorted(Comparator.comparing(EntityType::name)).
-			collect(Collectors.toList());
+			toList();
 		// Init without filters applied.
 		this.filterElements = this.elements;
 	}
@@ -134,7 +133,7 @@ public class SingleEntitySelector extends PagedSelector<EntityType>
 					return element.name().toLowerCase().contains(this.searchString.toLowerCase());
 				}).
 				distinct().
-				collect(Collectors.toList());
+				toList();
 		}
 	}
 
