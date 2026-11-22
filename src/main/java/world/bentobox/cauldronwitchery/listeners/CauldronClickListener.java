@@ -71,13 +71,6 @@ public class CauldronClickListener extends FlagListener implements Listener
         // Gets the user who clicks.
         User user = User.getInstance(event.getPlayer());
 
-        if (user == null)
-        {
-            // This cannot never happen. The only reason it is here, is because in 1.17.3 it is annotated
-            // with @Nullable.
-            return;
-        }
-
         if (!this.addon.getPlugin().getIWM().inWorld(user.getWorld()))
         {
             // Not a gamemode world. CauldronWitchery does not operate there.

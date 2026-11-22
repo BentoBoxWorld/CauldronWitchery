@@ -211,10 +211,19 @@ public class CauldronWitcheryManager
      */
     public boolean isMagicStick(ItemStack item, User user)
     {
+        String gameMode = Utils.getGameMode(user.getWorld());
+
+        if (gameMode == null)
+        {
+            return false;
+        }
+
+        String prefix = gameMode.toLowerCase(Locale.ENGLISH);
+
         // Search an item from magic stick item cache.
         return this.magicStickDataCache.values().
             stream().
-            filter(key -> key.getUniqueId().startsWith(Utils.getGameMode(user.getWorld()).toLowerCase())).
+            filter(key -> key.getUniqueId().startsWith(prefix)).
             anyMatch(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item));
     }
 
@@ -229,8 +238,17 @@ public class CauldronWitcheryManager
     @Nullable
     public MagicStickObject getMagicStick(ItemStack item, User user)
     {
+        String gameMode = Utils.getGameMode(user.getWorld());
+
+        if (gameMode == null)
+        {
+            return null;
+        }
+
+        String prefix = gameMode.toLowerCase(Locale.ENGLISH);
+
         return this.magicStickDataCache.values().stream().
-            filter(key -> key.getUniqueId().startsWith(Utils.getGameMode(user.getWorld()).toLowerCase())).
+            filter(key -> key.getUniqueId().startsWith(prefix)).
             filter(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item)).
             findFirst().
             orElse(null);
@@ -245,13 +263,21 @@ public class CauldronWitcheryManager
      */
     public List<MagicStickObject> getAllMagicSticks(World world)
     {
-        String name = Utils.getGameMode(world).toLowerCase();
+        String gameMode = Utils.getGameMode(world);
 
+        if (gameMode == null)
+        {
+            return new ArrayList<>();
+        }
+
+        String name = gameMode.toLowerCase(Locale.ENGLISH);
+
+        // Returned list must stay mutable: admin panels add and remove elements from it.
         return this.magicStickDataCache.values().stream().
             filter(stick -> stick.getUniqueId().startsWith(name)).
             sorted(Comparator.comparingInt(MagicStickObject::getOrder).
                 thenComparing(MagicStickObject::getFriendlyName)).
-            collect(Collectors.toList());
+            collect(Collectors.toCollection(ArrayList::new));
     }
 
 

@@ -40,6 +40,7 @@ class UtilsGiveItemTest
         this.location = mock(Location.class);
         this.item = mock(ItemStack.class);
 
+        when(this.user.isPlayer()).thenReturn(true);
         when(this.user.getPlayer()).thenReturn(player);
         when(player.getInventory()).thenReturn(this.inventory);
         when(player.getWorld()).thenReturn(this.world);
@@ -74,7 +75,7 @@ class UtilsGiveItemTest
     @Test
     void testNoPlayerDoesNothing()
     {
-        when(this.user.getPlayer()).thenReturn(null);
+        when(this.user.isPlayer()).thenReturn(false);
 
         Utils.giveItem(this.user, this.item);
 

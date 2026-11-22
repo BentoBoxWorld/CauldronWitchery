@@ -309,18 +309,26 @@ public class CauldronWitcheryImportManager
     public void importDatabaseFile(User user, World world, String fileName)
     {
         CauldronWitcheryManager manager = this.addon.getAddonManager();
+        String gameMode = Utils.getGameMode(world);
+
+        if (gameMode == null)
+        {
+            return;
+        }
+
+        gameMode = gameMode.toLowerCase(Locale.ENGLISH);
 
         // If exist any sticks that is bound to current world, then wipe existing data.
-        if (manager.hasMagicSticks(Utils.getGameMode(world).toLowerCase()))
+        if (manager.hasMagicSticks(gameMode))
         {
-            manager.wipeDatabase(Utils.getGameMode(world).toLowerCase());
+            manager.wipeDatabase(gameMode);
         }
 
         try
         {
             // This prefix will be used to all sticks. That is a unique way how to separate sticks for
             // each game mode.
-            String uniqueIDPrefix = Utils.getGameMode(world).toLowerCase() + "_";
+            String uniqueIDPrefix = gameMode + "_";
             DefaultDataHolder databaseFile = new DefaultJSONHandler(this.addon).loadObject(fileName);
 
             if (databaseFile == null)
@@ -355,9 +363,17 @@ public class CauldronWitcheryImportManager
     public void loadDownloadedFile(User user, World world, String downloadString)
     {
         CauldronWitcheryManager manager = this.addon.getAddonManager();
+        String gameMode = Utils.getGameMode(world);
+
+        if (gameMode == null)
+        {
+            return;
+        }
+
+        gameMode = gameMode.toLowerCase(Locale.ENGLISH);
 
         // If exist any data or level that is bound to current world, then do not load default data.
-        if (manager.hasMagicSticks(Utils.getGameMode(world).toLowerCase()))
+        if (manager.hasMagicSticks(gameMode))
         {
             if (user.isPlayer())
             {
@@ -375,8 +391,13 @@ public class CauldronWitcheryImportManager
         {
             // This prefix will be used to all sticks. That is a unique way how to separate sticks for
             // each game mode.
-            String uniqueIDPrefix = Utils.getGameMode(world).toLowerCase() + "_";
+            String uniqueIDPrefix = gameMode + "_";
             DefaultDataHolder downloadedData = new DefaultJSONHandler(this.addon).loadWebObject(downloadString);
+
+            if (downloadedData == null)
+            {
+                return;
+            }
 
             // All new sticks should get correct ID. So we need to map it to loaded sticks.
             downloadedData.getMagicStickList().forEach(magicStick -> {

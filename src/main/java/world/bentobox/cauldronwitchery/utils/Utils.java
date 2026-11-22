@@ -310,12 +310,12 @@ public class Utils
      */
     public static void giveItem(User user, ItemStack itemStack)
     {
-        Player player = user.getPlayer();
-
-        if (player == null)
+        if (!user.isPlayer())
         {
             return;
         }
+
+        Player player = user.getPlayer();
 
         player.getInventory().addItem(itemStack).values().forEach(leftover ->
             player.getWorld().dropItemNaturally(player.getLocation(), leftover));
