@@ -127,22 +127,20 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
         description.add(this.user.getTranslation(Constants.TIPS + "click-to-view"));
 
         PanelItem.ClickHandler clickHandler = (panel, user, clickType, i) -> {
-            if (button == activeTab)
+            if (button == this.activeTab)
             {
                 return true;
             }
-            else if (button == Tab.IS_ONLINE)
+
+            this.elementList = switch (button)
             {
-                this.elementList = Bukkit.getOnlinePlayers().stream().map(User::getInstance).toList();
-            }
-            else
-            {
-                this.elementList = this.addon.getPlayers().getPlayers().stream().
+                case IS_ONLINE -> Bukkit.getOnlinePlayers().stream().map(User::getInstance).toList();
+                case ALL_PLAYERS -> this.addon.getPlayers().getPlayers().stream().
                     map(Players::getPlayer).
                     filter(Objects::nonNull).
                     map(User::getInstance).
                     toList();
-            }
+            };
 
             this.activeTab = button;
 

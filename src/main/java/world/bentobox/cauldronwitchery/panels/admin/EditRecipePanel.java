@@ -33,6 +33,13 @@ import world.bentobox.cauldronwitchery.utils.Utils;
  */
 public class EditRecipePanel extends CommonPanel
 {
+    private static final String CLICK_TO_CHANGE = Constants.TIPS + "click-to-change";
+    private static final String INPUT_NUMBER = Constants.CONVERSATIONS + "input-number";
+    private static final String RECIPE_NAME = Constants.BUTTON + "recipe.name";
+    private static final String VALUE = "value";
+    private static final String VALUE_PLACEHOLDER = "[value]";
+
+
     // ---------------------------------------------------------------------
     // Section: Constructors
     // ---------------------------------------------------------------------
@@ -111,10 +118,7 @@ public class EditRecipePanel extends CommonPanel
 
         panelBuilder.item(32, this.createButton(Button.TEMPERATURE));
 
-        // Non implemented things
-        //panelBuilder.item(15, this.createButton(Button.COMPLEXITY));
-        //panelBuilder.item(24, this.createButton(Button.OUTCOME_POINTS));
-
+        // Complexity and outcome points buttons are hidden until the mastery feature is implemented.
 
         // Permissions.
         panelBuilder.item(34, this.createButton(Button.PERMISSIONS));
@@ -153,8 +157,8 @@ public class EditRecipePanel extends CommonPanel
         }
 
         return new PanelItemBuilder().
-            name(this.user.getTranslation(Constants.BUTTON + "recipe.name",
-                "[value]", recipe.getRecipeName(this.user))).
+            name(this.user.getTranslation(RECIPE_NAME,
+                VALUE_PLACEHOLDER, recipe.getRecipeName(this.user))).
             description(description).
             icon(recipe.getIcon()).
             clickHandler((panel, user, clickType, slot) -> {
@@ -201,13 +205,13 @@ public class EditRecipePanel extends CommonPanel
     private PanelItem createElementButton(ItemRecipe recipe)
     {
         return new PanelItemBuilder().
-            name(this.user.getTranslation(Constants.BUTTON + "recipe.name",
-                "[value]", recipe.getRecipeName(this.user))).
+            name(this.user.getTranslation(RECIPE_NAME,
+                VALUE_PLACEHOLDER, recipe.getRecipeName(this.user))).
             description(this.generateRecipeDescription(recipe, null)).
             description("").
-            description(this.selectedButton != Button.REWARD_ITEM ?
-                this.user.getTranslation(Constants.TIPS + "click-to-change") :
-                this.user.getTranslation(Constants.TIPS + "click-on-item")).
+            description(this.selectedButton == Button.REWARD_ITEM ?
+                this.user.getTranslation(Constants.TIPS + "click-on-item") :
+                this.user.getTranslation(CLICK_TO_CHANGE)).
             icon(recipe.getIcon()).
             clickHandler((panel, user, clickType, slot) -> {
                 // Selects and deselects item
@@ -229,8 +233,8 @@ public class EditRecipePanel extends CommonPanel
     private PanelItem createElementButton(EntityRecipe recipe)
     {
         return new PanelItemBuilder().
-            name(this.user.getTranslation(Constants.BUTTON + "recipe.name",
-                "[value]", recipe.getRecipeName(this.user))).
+            name(this.user.getTranslation(RECIPE_NAME,
+                VALUE_PLACEHOLDER, recipe.getRecipeName(this.user))).
             description(this.generateRecipeDescription(recipe, null)).
             description("").
             description(this.user.getTranslation(Constants.TIPS + "click-to-edit")).
@@ -268,425 +272,572 @@ public class EditRecipePanel extends CommonPanel
         final List<String> description = new ArrayList<>(3);
         description.add(this.user.getTranslation(reference + "description"));
 
+        ButtonData data = switch (button)
+        {
+            case REWARD_POINTS -> this.buildRewardPointsButton(button, reference, description);
+            case COMPLEXITY -> this.buildComplexityButton(button, reference, description);
+            case MAIN_INGREDIENT -> this.buildMainIngredientButton(button, reference, description);
+            case EXTRA_INGREDIENTS -> this.buildExtraIngredientsButton(button, reference, description);
+            case EXPERIENCE -> this.buildExperienceButton(button, reference, description);
+            case CAULDRON_TYPE -> this.buildCauldronTypeButton(button, reference, description);
+            case CAULDRON_LEVEL -> this.buildCauldronLevelButton(button, reference, description);
+            case TEMPERATURE -> this.buildTemperatureButton(button, reference, description);
+            case PERMISSIONS -> this.buildPermissionsButton(button, reference, description);
+            case ORDER -> this.buildOrderButton(button, reference, description);
+            case NAME -> this.buildNameButton(button, reference, description);
+            default -> new ButtonData(new ItemStack(Material.PAPER), false, null);
+        };
+
+        return new PanelItemBuilder().
+            icon(data.icon()).
+            name(name).
+            description(description).
+            glow(data.glow()).
+            clickHandler(data.clickHandler()).
+            build();
+    }
+
+
+    /**
+     * Visual state and behaviour of a button.
+     *
+     * @param icon Button icon.
+     * @param glow Whether the icon glows.
+     * @param clickHandler Click handler, may be null.
+     */
+    private record ButtonData(ItemStack icon, boolean glow, PanelItem.ClickHandler clickHandler)
+    {
+    }
+
+
+    /**
+     * Creates REWARD_POINTS button data and fills its description.
+     */
+    private ButtonData buildRewardPointsButton(Button button, String reference, List<String> description)
+    {
         ItemStack icon;
         boolean glow;
         PanelItem.ClickHandler clickHandler;
 
-        switch (button)
+        description.add(this.user.getTranslation(reference + VALUE,
+            Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getRewardPoints())));
+
+        icon = new ItemStack(Material.REPEATER);
+        clickHandler = (panel, user, clickType, i) -> {
+            // deselects item
+            this.selectedButton = null;
+
+            Consumer<Number> numberConsumer = number -> {
+                if (number != null)
+                {
+                    this.recipe.setRewardPoints(number.intValue());
+                }
+
+                // reopen panel
+                this.build();
+            };
+
+            ConversationUtils.createNumericInput(numberConsumer,
+                this.user,
+                this.user.getTranslation(INPUT_NUMBER),
+                0,
+                Integer.MAX_VALUE);
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates COMPLEXITY button data and fills its description.
+     */
+    private ButtonData buildComplexityButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        description.add(this.user.getTranslation(reference + VALUE,
+            Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getComplexity())));
+
+        icon = new ItemStack(Material.REPEATER);
+        clickHandler = (panel, user, clickType, i) -> {
+            // deselects item
+            this.selectedButton = null;
+
+            Consumer<Number> numberConsumer = number -> {
+                if (number != null)
+                {
+                    this.recipe.setComplexity(number.floatValue());
+                }
+
+                // reopen panel
+                this.build();
+            };
+
+            ConversationUtils.createNumericInput(numberConsumer,
+                this.user,
+                this.user.getTranslation(INPUT_NUMBER),
+                0,
+                1);
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates MAIN_INGREDIENT button data and fills its description.
+     */
+    private ButtonData buildMainIngredientButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        icon = this.recipe.getMainIngredient();
+
+        clickHandler = (panel, user, clickType, i) ->
         {
-            case REWARD_POINTS -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getRewardPoints())));
-
-                icon = new ItemStack(Material.REPEATER);
-                clickHandler = (panel, user, clickType, i) -> {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    Consumer<Number> numberConsumer = number -> {
-                        if (number != null)
-                        {
-                            this.recipe.setRewardPoints(number.intValue());
-                        }
-
-                        // reopen panel
-                        this.build();
-                    };
-
-                    ConversationUtils.createNumericInput(numberConsumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
-                        0,
-                        Integer.MAX_VALUE);
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case COMPLEXITY -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getComplexity())));
-
-                icon = new ItemStack(Material.REPEATER);
-                clickHandler = (panel, user, clickType, i) -> {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    Consumer<Number> numberConsumer = number -> {
-                        if (number != null)
-                        {
-                            this.recipe.setComplexity(number.floatValue());
-                        }
-
-                        // reopen panel
-                        this.build();
-                    };
-
-                    ConversationUtils.createNumericInput(numberConsumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
-                        0,
-                        1);
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case MAIN_INGREDIENT -> {
-                icon = this.recipe.getMainIngredient();
-
-                clickHandler = (panel, user, clickType, i) ->
-                {
-                    // selects / deselects the button.
-                    this.selectedButton = this.selectedButton == button ? null : button;
-                    this.build();
-                    return true;
-                };
-
-                if (this.selectedButton != button)
-                {
-                    description.add("");
-                    description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-                }
-                else
-                {
-                    description.add("");
-                    description.add(this.user.getTranslation(Constants.TIPS + "click-on-item"));
-                }
-
-                glow = this.selectedButton == button;
-            }
-            case EXTRA_INGREDIENTS -> {
-                if (this.recipe.getExtraIngredients().isEmpty())
-                {
-                    description.add(this.user.getTranslation(reference + "none"));
-                }
-                else
-                {
-                    description.add(this.user.getTranslation(reference + "title"));
-
-                    Utils.groupEqualItems(this.recipe.getExtraIngredients()).
-                        stream().
-                        sorted(Comparator.comparing(ItemStack::getType)).
-                        forEach(itemStack ->
-                            description.add(this.user.getTranslationOrNothing(reference + "value",
-                                "[item]", Utils.prettifyObject(itemStack, this.user))));
-                }
-
-                icon = new ItemStack(Material.CHEST);
-                clickHandler = (panel, user, clickType, slot) -> {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    ItemSelector.open(this.user,
-                        this.recipe.getExtraIngredients(),
-                        (status, value) -> {
-                            if (Boolean.TRUE.equals(status))
-                            {
-                                this.recipe.setExtraIngredients(value);
-                            }
-
-                            this.build();
-                        });
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case EXPERIENCE -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getExperience())));
-
-                icon = new ItemStack(Material.EXPERIENCE_BOTTLE);
-                clickHandler = (panel, user, clickType, i) -> {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    Consumer<Number> numberConsumer = number -> {
-                        if (number != null)
-                        {
-                            this.recipe.setExperience(number.intValue());
-                        }
-
-                        // reopen panel
-                        this.build();
-                    };
-
-                    ConversationUtils.createNumericInput(numberConsumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
-                        0,
-                        Integer.MAX_VALUE);
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case CAULDRON_TYPE -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    "[type]", Utils.prettifyObject(this.recipe.getCauldronType(), this.user)));
-                icon = new ItemStack(Material.CAULDRON);
-                clickHandler = (panel, user, clickType, slot) -> {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    Set<Material> validBlocks = new HashSet<>(Arrays.stream(Material.values()).toList());
-                    validBlocks.remove(Material.CAULDRON);
-                    validBlocks.remove(Material.WATER_CAULDRON);
-                    validBlocks.remove(Material.LAVA_CAULDRON);
-                    validBlocks.remove(Material.POWDER_SNOW_CAULDRON);
-                    validBlocks.add(this.recipe.getCauldronType());
-
-                    SingleBlockSelector.open(this.user,
-                        SingleBlockSelector.Mode.BLOCKS,
-                        validBlocks,
-                        (status, block) -> {
-                            if (Boolean.TRUE.equals(status))
-                            {
-                                this.recipe.setCauldronType(block);
-                            }
-
-                            this.build();
-                        });
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case CAULDRON_LEVEL -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getCauldronLevel())));
-
-                icon = new ItemStack(Material.LEAD);
-                clickHandler = (panel, user, clickType, i) -> {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    Consumer<Number> numberConsumer = number -> {
-                        if (number != null)
-                        {
-                            this.recipe.setCauldronLevel(number.intValue());
-                        }
-
-                        // reopen panel
-                        this.build();
-                    };
-
-                    ConversationUtils.createNumericInput(numberConsumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
-                        0,
-                        3);
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case TEMPERATURE -> {
-                description.add(this.user.getTranslation(reference +
-                    this.recipe.getTemperature().toString().toLowerCase()));
-
-                if (this.recipe.getTemperature() == Recipe.Temperature.COOL)
-                {
-                    icon = new ItemStack(Material.ICE);
-                }
-                else if (this.recipe.getTemperature() == Recipe.Temperature.HEAT)
-                {
-                    icon = new ItemStack(Material.CAMPFIRE);
-                }
-                else
-                {
-                    icon = new ItemStack(Material.DIRT);
-                }
-
-                clickHandler = (panel, user, clickType, slot) -> {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    if (clickType.isRightClick())
-                    {
-                        this.recipe.setTemperature((Utils.getPreviousValue(Recipe.Temperature.values(),
-                            this.recipe.getTemperature())));
-                    }
-                    else
-                    {
-                        this.recipe.setTemperature((Utils.getNextValue(Recipe.Temperature.values(),
-                            this.recipe.getTemperature())));
-                    }
-
-                    // Rebuild just this icon
-                    panel.getInventory().setItem(slot, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "left-click-to-cycle"));
-                description.add(this.user.getTranslation(Constants.TIPS + "right-click-to-cycle"));
-            }
-            case PERMISSIONS -> {
-                if (this.recipe.getPermissions().isEmpty())
-                {
-                    description.add(this.user.getTranslation(reference + "none"));
-                }
-                else
-                {
-                    description.add(this.user.getTranslation(reference + "title"));
-
-                    this.recipe.getPermissions().forEach(permission ->
-                        description.add(this.user.getTranslation(reference + "value",
-                            "[permission]", permission)));
-                }
-
-                icon = new ItemStack(Material.REDSTONE_LAMP);
-
-                clickHandler = (panel, user, clickType, i) ->
-                {
-                    // deselects item
-                    this.selectedButton = null;
-
-                    // Create consumer that process description change
-                    Consumer<List<String>> consumer = value ->
-                    {
-                        if (value != null)
-                        {
-                            this.recipe.setPermissions(new HashSet<>(value));
-                        }
-
-                        this.build();
-                    };
-
-                    if (!this.recipe.getPermissions().isEmpty() &&
-                        clickType.isShiftClick())
-                    {
-                        // Reset to the empty value
-                        consumer.accept(Collections.emptyList());
-                    }
-                    else
-                    {
-                        // start conversation
-                        ConversationUtils.createStringListInput(consumer,
-                            user,
-                            user.getTranslation(Constants.CONVERSATIONS + "write-permissions"),
-                            user.getTranslation(Constants.CONVERSATIONS + "permissions-changed"));
-                    }
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-
-                if (!this.recipe.getPermissions().isEmpty())
-                {
-                    description.add(this.user.getTranslation(Constants.TIPS + "shift-click-to-reset"));
-                }
-            }
-            case ORDER -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getOrder())));
-
-                icon = new ItemStack(Material.HOPPER);
-                clickHandler = (panel, user, clickType, i) -> {
-                    this.selectedButton = null;
-
-                    Consumer<Number> numberConsumer = number -> {
-                        if (number != null)
-                        {
-                            this.recipe.setOrder(number.intValue());
-                        }
-
-                        // reopen panel
-                        this.build();
-                    };
-
-                    ConversationUtils.createNumericInput(numberConsumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
-                        Integer.MIN_VALUE,
-                        Integer.MAX_VALUE);
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case NAME -> {
-                if (this.recipe.getRecipeDisplayName().isBlank())
-                {
-                    description.add(this.user.getTranslation(reference + "no-value"));
-                }
-                else
-                {
-                    description.add(this.user.getTranslation(reference + "value",
-                        Constants.PARAMETER_NAME, this.recipe.getRecipeDisplayName()));
-                }
-
-                icon = new ItemStack(Material.NAME_TAG);
-
-                clickHandler = (panel, user, clickType, i) ->
-                {
-                    this.selectedButton = null;
-
-                    // Create consumer that process description change
-                    Consumer<String> consumer = value ->
-                    {
-                        if (value != null)
-                        {
-                            this.recipe.setRecipeDisplayName(value);
-                        }
-
-                        this.build();
-                    };
-
-                    // start conversation
-                    ConversationUtils.createStringInput(consumer,
-                        user,
-                        user.getTranslation(Constants.CONVERSATIONS + "write-name"),
-                        user.getTranslation(Constants.CONVERSATIONS + "name-changed"));
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            default -> {
-                icon = new ItemStack(Material.PAPER);
-                clickHandler = null;
-                glow = false;
-            }
+            // selects / deselects the button.
+            this.selectedButton = this.selectedButton == button ? null : button;
+            this.build();
+            return true;
+        };
+
+        if (this.selectedButton != button)
+        {
+            description.add("");
+            description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+        }
+        else
+        {
+            description.add("");
+            description.add(this.user.getTranslation(Constants.TIPS + "click-on-item"));
         }
 
-        return new PanelItemBuilder().
-            icon(icon).
-            name(name).
-            description(description).
-            glow(glow).
-            clickHandler(clickHandler).
-            build();
+        glow = this.selectedButton == button;
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates EXTRA_INGREDIENTS button data and fills its description.
+     */
+    private ButtonData buildExtraIngredientsButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        if (this.recipe.getExtraIngredients().isEmpty())
+        {
+            description.add(this.user.getTranslation(reference + "none"));
+        }
+        else
+        {
+            description.add(this.user.getTranslation(reference + "title"));
+
+            Utils.groupEqualItems(this.recipe.getExtraIngredients()).
+                stream().
+                sorted(Comparator.comparing(ItemStack::getType)).
+                forEach(itemStack ->
+                    description.add(this.user.getTranslationOrNothing(reference + VALUE,
+                        "[item]", Utils.prettifyObject(itemStack, this.user))));
+        }
+
+        icon = new ItemStack(Material.CHEST);
+        clickHandler = (panel, user, clickType, slot) -> {
+            // deselects item
+            this.selectedButton = null;
+
+            ItemSelector.open(this.user,
+                this.recipe.getExtraIngredients(),
+                (status, value) -> {
+                    if (Boolean.TRUE.equals(status))
+                    {
+                        this.recipe.setExtraIngredients(value);
+                    }
+
+                    this.build();
+                });
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates EXPERIENCE button data and fills its description.
+     */
+    private ButtonData buildExperienceButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        description.add(this.user.getTranslation(reference + VALUE,
+            Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getExperience())));
+
+        icon = new ItemStack(Material.EXPERIENCE_BOTTLE);
+        clickHandler = (panel, user, clickType, i) -> {
+            // deselects item
+            this.selectedButton = null;
+
+            Consumer<Number> numberConsumer = number -> {
+                if (number != null)
+                {
+                    this.recipe.setExperience(number.intValue());
+                }
+
+                // reopen panel
+                this.build();
+            };
+
+            ConversationUtils.createNumericInput(numberConsumer,
+                this.user,
+                this.user.getTranslation(INPUT_NUMBER),
+                0,
+                Integer.MAX_VALUE);
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates CAULDRON_TYPE button data and fills its description.
+     */
+    private ButtonData buildCauldronTypeButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        description.add(this.user.getTranslation(reference + VALUE,
+            "[type]", Utils.prettifyObject(this.recipe.getCauldronType(), this.user)));
+        icon = new ItemStack(Material.CAULDRON);
+        clickHandler = (panel, user, clickType, slot) -> {
+            // deselects item
+            this.selectedButton = null;
+
+            Set<Material> validBlocks = new HashSet<>(Arrays.stream(Material.values()).toList());
+            validBlocks.remove(Material.CAULDRON);
+            validBlocks.remove(Material.WATER_CAULDRON);
+            validBlocks.remove(Material.LAVA_CAULDRON);
+            validBlocks.remove(Material.POWDER_SNOW_CAULDRON);
+            validBlocks.add(this.recipe.getCauldronType());
+
+            SingleBlockSelector.open(this.user,
+                SingleBlockSelector.Mode.BLOCKS,
+                validBlocks,
+                (status, block) -> {
+                    if (Boolean.TRUE.equals(status))
+                    {
+                        this.recipe.setCauldronType(block);
+                    }
+
+                    this.build();
+                });
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates CAULDRON_LEVEL button data and fills its description.
+     */
+    private ButtonData buildCauldronLevelButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        description.add(this.user.getTranslation(reference + VALUE,
+            Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getCauldronLevel())));
+
+        icon = new ItemStack(Material.LEAD);
+        clickHandler = (panel, user, clickType, i) -> {
+            // deselects item
+            this.selectedButton = null;
+
+            Consumer<Number> numberConsumer = number -> {
+                if (number != null)
+                {
+                    this.recipe.setCauldronLevel(number.intValue());
+                }
+
+                // reopen panel
+                this.build();
+            };
+
+            ConversationUtils.createNumericInput(numberConsumer,
+                this.user,
+                this.user.getTranslation(INPUT_NUMBER),
+                0,
+                3);
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates TEMPERATURE button data and fills its description.
+     */
+    private ButtonData buildTemperatureButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        description.add(this.user.getTranslation(reference +
+            this.recipe.getTemperature().toString().toLowerCase()));
+
+        if (this.recipe.getTemperature() == Recipe.Temperature.COOL)
+        {
+            icon = new ItemStack(Material.ICE);
+        }
+        else if (this.recipe.getTemperature() == Recipe.Temperature.HEAT)
+        {
+            icon = new ItemStack(Material.CAMPFIRE);
+        }
+        else
+        {
+            icon = new ItemStack(Material.DIRT);
+        }
+
+        clickHandler = (panel, user, clickType, slot) -> {
+            // deselects item
+            this.selectedButton = null;
+
+            if (clickType.isRightClick())
+            {
+                this.recipe.setTemperature((Utils.getPreviousValue(Recipe.Temperature.values(),
+                    this.recipe.getTemperature())));
+            }
+            else
+            {
+                this.recipe.setTemperature((Utils.getNextValue(Recipe.Temperature.values(),
+                    this.recipe.getTemperature())));
+            }
+
+            // Rebuild just this icon
+            panel.getInventory().setItem(slot, this.createButton(button).getItem());
+            this.addon.saveSettings();
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(Constants.TIPS + "left-click-to-cycle"));
+        description.add(this.user.getTranslation(Constants.TIPS + "right-click-to-cycle"));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates PERMISSIONS button data and fills its description.
+     */
+    private ButtonData buildPermissionsButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        if (this.recipe.getPermissions().isEmpty())
+        {
+            description.add(this.user.getTranslation(reference + "none"));
+        }
+        else
+        {
+            description.add(this.user.getTranslation(reference + "title"));
+
+            this.recipe.getPermissions().forEach(permission ->
+                description.add(this.user.getTranslation(reference + VALUE,
+                    "[permission]", permission)));
+        }
+
+        icon = new ItemStack(Material.REDSTONE_LAMP);
+
+        clickHandler = (panel, user, clickType, i) ->
+        {
+            // deselects item
+            this.selectedButton = null;
+
+            // Create consumer that process description change
+            Consumer<List<String>> consumer = value ->
+            {
+                if (value != null)
+                {
+                    this.recipe.setPermissions(new HashSet<>(value));
+                }
+
+                this.build();
+            };
+
+            if (!this.recipe.getPermissions().isEmpty() &&
+                clickType.isShiftClick())
+            {
+                // Reset to the empty value
+                consumer.accept(Collections.emptyList());
+            }
+            else
+            {
+                // start conversation
+                ConversationUtils.createStringListInput(consumer,
+                    user,
+                    user.getTranslation(Constants.CONVERSATIONS + "write-permissions"),
+                    user.getTranslation(Constants.CONVERSATIONS + "permissions-changed"));
+            }
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        if (!this.recipe.getPermissions().isEmpty())
+        {
+            description.add(this.user.getTranslation(Constants.TIPS + "shift-click-to-reset"));
+        }
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates ORDER button data and fills its description.
+     */
+    private ButtonData buildOrderButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        description.add(this.user.getTranslation(reference + VALUE,
+            Constants.PARAMETER_NUMBER, String.valueOf(this.recipe.getOrder())));
+
+        icon = new ItemStack(Material.HOPPER);
+        clickHandler = (panel, user, clickType, i) -> {
+            this.selectedButton = null;
+
+            Consumer<Number> numberConsumer = number -> {
+                if (number != null)
+                {
+                    this.recipe.setOrder(number.intValue());
+                }
+
+                // reopen panel
+                this.build();
+            };
+
+            ConversationUtils.createNumericInput(numberConsumer,
+                this.user,
+                this.user.getTranslation(INPUT_NUMBER),
+                Integer.MIN_VALUE,
+                Integer.MAX_VALUE);
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
+    }
+
+
+    /**
+     * Creates NAME button data and fills its description.
+     */
+    private ButtonData buildNameButton(Button button, String reference, List<String> description)
+    {
+        ItemStack icon;
+        boolean glow;
+        PanelItem.ClickHandler clickHandler;
+
+        if (this.recipe.getRecipeDisplayName().isBlank())
+        {
+            description.add(this.user.getTranslation(reference + "no-value"));
+        }
+        else
+        {
+            description.add(this.user.getTranslation(reference + VALUE,
+                Constants.PARAMETER_NAME, this.recipe.getRecipeDisplayName()));
+        }
+
+        icon = new ItemStack(Material.NAME_TAG);
+
+        clickHandler = (panel, user, clickType, i) ->
+        {
+            this.selectedButton = null;
+
+            // Create consumer that process description change
+            Consumer<String> consumer = value ->
+            {
+                if (value != null)
+                {
+                    this.recipe.setRecipeDisplayName(value);
+                }
+
+                this.build();
+            };
+
+            // start conversation
+            ConversationUtils.createStringInput(consumer,
+                user,
+                user.getTranslation(Constants.CONVERSATIONS + "write-name"),
+                user.getTranslation(Constants.CONVERSATIONS + "name-changed"));
+
+            return true;
+        };
+        glow = false;
+
+        description.add("");
+        description.add(this.user.getTranslation(CLICK_TO_CHANGE));
+
+        return new ButtonData(icon, glow, clickHandler);
     }
 
 
