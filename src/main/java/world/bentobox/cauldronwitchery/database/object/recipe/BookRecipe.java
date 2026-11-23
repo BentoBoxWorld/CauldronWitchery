@@ -97,11 +97,11 @@ public class BookRecipe extends Recipe
 
 
     @Override
-    public Recipe clone()
+    public Recipe copy()
     {
         BookRecipe recipe = new BookRecipe();
         recipe.setBookName(this.bookName);
-        this.populateClone(recipe);
+        this.populateCopy(recipe);
         return recipe;
     }
 

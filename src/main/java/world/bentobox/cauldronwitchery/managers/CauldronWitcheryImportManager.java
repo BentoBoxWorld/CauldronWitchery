@@ -16,7 +16,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
@@ -42,6 +41,9 @@ import world.bentobox.cauldronwitchery.utils.Utils;
  */
 public class CauldronWitcheryImportManager
 {
+    private static final String DESCRIPTION = "description";
+    private static final String JSON_EXTENSION = ".json";
+
     /**
      * Import recipes from file or link.
      * @param addon CauldronWitchery addon.
@@ -190,17 +192,17 @@ public class CauldronWitcheryImportManager
                 magicStick.setFriendlyName(section.getString("name"));
             }
 
-            if (section.contains("description"))
+            if (section.contains(DESCRIPTION))
             {
-                if (section.isString("description"))
+                if (section.isString(DESCRIPTION))
                 {
-                    magicStick.setDescription(section.getString("description"));
+                    magicStick.setDescription(section.getString(DESCRIPTION));
                 }
-                else if (section.isList("description"))
+                else if (section.isList(DESCRIPTION))
                 {
                     StringBuilder builder = new StringBuilder();
 
-                    section.getStringList("description").forEach(line -> {
+                    section.getStringList(DESCRIPTION).forEach(line -> {
                         builder.append(line);
                         builder.append("\n");
                     });
@@ -220,7 +222,7 @@ public class CauldronWitcheryImportManager
             this.addon.getAddonManager().saveMagicStick(magicStick);
             this.addon.getAddonManager().loadMagicStick(magicStick, true, null);
         }
-        catch (Exception ignored)
+        catch (Exception _)
         {
             return 0;
         }
@@ -309,18 +311,26 @@ public class CauldronWitcheryImportManager
     public void importDatabaseFile(User user, World world, String fileName)
     {
         CauldronWitcheryManager manager = this.addon.getAddonManager();
+        String gameMode = Utils.getGameMode(world);
+
+        if (gameMode == null)
+        {
+            return;
+        }
+
+        gameMode = gameMode.toLowerCase(Locale.ENGLISH);
 
         // If exist any sticks that is bound to current world, then wipe existing data.
-        if (manager.hasMagicSticks(Utils.getGameMode(world).toLowerCase()))
+        if (manager.hasMagicSticks(gameMode))
         {
-            manager.wipeDatabase(Utils.getGameMode(world).toLowerCase());
+            manager.wipeDatabase(gameMode);
         }
 
         try
         {
             // This prefix will be used to all sticks. That is a unique way how to separate sticks for
             // each game mode.
-            String uniqueIDPrefix = Utils.getGameMode(world).toLowerCase() + "_";
+            String uniqueIDPrefix = gameMode + "_";
             DefaultDataHolder databaseFile = new DefaultJSONHandler(this.addon).loadObject(fileName);
 
             if (databaseFile == null)
@@ -355,9 +365,17 @@ public class CauldronWitcheryImportManager
     public void loadDownloadedFile(User user, World world, String downloadString)
     {
         CauldronWitcheryManager manager = this.addon.getAddonManager();
+        String gameMode = Utils.getGameMode(world);
+
+        if (gameMode == null)
+        {
+            return;
+        }
+
+        gameMode = gameMode.toLowerCase(Locale.ENGLISH);
 
         // If exist any data or level that is bound to current world, then do not load default data.
-        if (manager.hasMagicSticks(Utils.getGameMode(world).toLowerCase()))
+        if (manager.hasMagicSticks(gameMode))
         {
             if (user.isPlayer())
             {
@@ -375,8 +393,13 @@ public class CauldronWitcheryImportManager
         {
             // This prefix will be used to all sticks. That is a unique way how to separate sticks for
             // each game mode.
-            String uniqueIDPrefix = Utils.getGameMode(world).toLowerCase() + "_";
+            String uniqueIDPrefix = gameMode + "_";
             DefaultDataHolder downloadedData = new DefaultJSONHandler(this.addon).loadWebObject(downloadString);
+
+            if (downloadedData == null)
+            {
+                return;
+            }
 
             // All new sticks should get correct ID. So we need to map it to loaded sticks.
             downloadedData.getMagicStickList().forEach(magicStick -> {
@@ -404,7 +427,7 @@ public class CauldronWitcheryImportManager
     public void generateDatabaseFile(User user, World world, String fileName)
     {
         File defaultFile = new File(this.addon.getDataFolder(),
-            fileName.endsWith(".json") ? fileName : fileName + ".json");
+            fileName.endsWith(JSON_EXTENSION) ? fileName : fileName + JSON_EXTENSION);
 
         if (defaultFile.exists())
         {
@@ -439,7 +462,7 @@ public class CauldronWitcheryImportManager
 
                         return clone;
                     }).
-                    collect(Collectors.toList());
+                    toList();
 
                 DefaultDataHolder defaultDataHolder = new DefaultDataHolder();
                 defaultDataHolder.setMagicStickList(challengeList);
@@ -576,7 +599,7 @@ public class CauldronWitcheryImportManager
             {
                 return EntityType.valueOf(text.toUpperCase());
             }
-            catch (Exception e)
+            catch (Exception _)
             {
                 return null;
             }
@@ -617,7 +640,7 @@ public class CauldronWitcheryImportManager
         {
             return Recipe.Temperature.valueOf(text.toUpperCase());
         }
-        catch (Exception e)
+        catch (Exception _)
         {
             return defaultValue;
         }
@@ -677,9 +700,9 @@ public class CauldronWitcheryImportManager
          */
         DefaultDataHolder loadObject(String fileName)
         {
-            if (!fileName.endsWith(".json"))
+            if (!fileName.endsWith(JSON_EXTENSION))
             {
-                fileName = fileName + ".json";
+                fileName = fileName + JSON_EXTENSION;
             }
 
             File defaultFile = new File(this.addon.getDataFolder(), fileName);
@@ -692,7 +715,7 @@ public class CauldronWitcheryImportManager
 
                 return object;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException _)
             {
                 this.addon.logError("Could not load file '" + defaultFile.getName() + "': File not found.");
             }

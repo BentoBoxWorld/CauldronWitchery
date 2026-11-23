@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
@@ -44,7 +44,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
         this.filterElements = this.magicStickList;
 
         // Init set with selected bundles.
-        this.selectedMagicSticks = new HashSet<>(this.magicStickList.size());
+        this.selectedMagicSticks = HashSet.newHashSet(this.magicStickList.size());
     }
 
 
@@ -104,7 +104,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
                                 contains(this.searchString.toLowerCase());
                 }).
                 distinct().
-                collect(Collectors.toList());
+                toList();
         }
     }
 
@@ -142,47 +142,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
                 icon = Material.WRITABLE_BOOK;
                 clickHandler = (panel, user1, clickType, slot) ->
                 {
-                    String gameModePrefix = Utils.getGameMode(this.world).toLowerCase() + "_";
-
-                    // This consumer process new bundle creating with a name and id from given
-                    // consumer value.
-                    Consumer<String> bundleIdConsumer = value ->
-                    {
-                        if (value != null)
-                        {
-                            MagicStickObject newObject = new MagicStickObject();
-                            newObject.setFriendlyName(value);
-                            newObject.setUniqueId(gameModePrefix + Utils.sanitizeInput(value));
-                            // Add PAPER as new icon.
-                            newObject.setMagicStick(new ItemStack(Material.STICK));
-                            this.manager.saveMagicStick(newObject);
-                            this.manager.loadMagicStick(newObject, false, this.user);
-
-                            // Add new generator to generatorList.
-                            this.magicStickList.add(newObject);
-                            // Open bundle edit panel.
-                            EditMagicStickPanel.open(this, newObject);
-                        }
-                        else
-                        {
-                            // Operation is canceled. Open this panel again.
-                            this.build();
-                        }
-                    };
-
-                    // This function checks if generator with a given ID already exist.
-                    Function<String, Boolean> validationFunction = magicStick ->
-                        this.manager.getMagicStickById(gameModePrefix + Utils.sanitizeInput(magicStick)) == null;
-
-                    // Call a conversation API to get input string.
-                    ConversationUtils.createIDStringInput(bundleIdConsumer,
-                        validationFunction,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "write-name"),
-                        this.user.getTranslation(Constants.CONVERSATIONS + "new-object-created",
-                            Constants.PARAMETER_WORLD, world.getName()),
-                        Constants.ERRORS + "object-already-exists");
-
+                    this.askNewMagicStickId();
                     return true;
                 };
             }
@@ -204,56 +164,7 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
 
                     clickHandler = (panel, user1, clickType, slot) ->
                     {
-
-                        // Create consumer that accepts value from conversation.
-                        Consumer<Boolean> consumer = value ->
-                        {
-                            if (value)
-                            {
-                                this.selectedMagicSticks.forEach(stickObject ->
-                                {
-                                    this.manager.delete(stickObject);
-                                    this.magicStickList.remove(stickObject);
-                                });
-
-                                this.selectedMagicSticks.clear();
-                            }
-
-                            this.build();
-                        };
-
-                        String stickString;
-
-                        if (!this.selectedMagicSticks.isEmpty())
-                        {
-                            Iterator<MagicStickObject> iterator = this.selectedMagicSticks.iterator();
-
-                            StringBuilder builder = new StringBuilder();
-                            builder.append(iterator.next().getFriendlyName());
-
-                            while (iterator.hasNext())
-                            {
-                                builder.append(", ").append(iterator.next().getFriendlyName());
-                            }
-
-                            stickString = builder.toString();
-                        }
-                        else
-                        {
-                            stickString = "";
-                        }
-
-                        // Create conversation that gets user acceptance to delete selected generator data.
-                        ConversationUtils.createConfirmation(
-                            consumer,
-                            this.user,
-                            this.user.getTranslation(Constants.CONVERSATIONS + "confirm-deletion",
-                                TextVariables.NUMBER, String.valueOf(this.selectedMagicSticks.size()),
-                                "[value]", stickString),
-                            this.user.getTranslation(Constants.CONVERSATIONS + "data-removed",
-                                "[gamemode]", Utils.getGameMode(this.world)));
-
-
+                        this.askRemoveSelectedSticks();
                         return true;
                     };
                 }
@@ -277,6 +188,99 @@ public class ManageMagicStickPanel extends CommonPagedPanel<MagicStickObject>
             clickHandler(clickHandler).
             glow(glow).
             build();
+    }
+
+
+    /**
+     * Asks user for a new magic stick name in chat, creates the stick and opens its edit panel.
+     */
+    private void askNewMagicStickId()
+    {
+        String gameMode = Utils.getGameMode(this.world);
+
+        if (gameMode == null)
+        {
+            return;
+        }
+
+        String gameModePrefix = gameMode.toLowerCase() + "_";
+
+        // This consumer process new magic stick creating with a name and id from given
+        // consumer value.
+        Consumer<String> stickIdConsumer = value ->
+        {
+            if (value != null)
+            {
+                MagicStickObject newObject = new MagicStickObject();
+                newObject.setFriendlyName(value);
+                newObject.setUniqueId(gameModePrefix + Utils.sanitizeInput(value));
+                // Add STICK as new icon.
+                newObject.setMagicStick(new ItemStack(Material.STICK));
+                this.manager.saveMagicStick(newObject);
+                this.manager.loadMagicStick(newObject, false, this.user);
+
+                // Add new stick to stick list.
+                this.magicStickList.add(newObject);
+                // Open stick edit panel.
+                EditMagicStickPanel.open(this, newObject);
+            }
+            else
+            {
+                // Operation is canceled. Open this panel again.
+                this.build();
+            }
+        };
+
+        // This function checks if magic stick with a given ID already exist.
+        Predicate<String> validationFunction = magicStick ->
+            this.manager.getMagicStickById(gameModePrefix + Utils.sanitizeInput(magicStick)) == null;
+
+        // Call a conversation API to get input string.
+        ConversationUtils.createIDStringInput(stickIdConsumer,
+            validationFunction,
+            this.user,
+            this.user.getTranslation(Constants.CONVERSATIONS + "write-name"),
+            this.user.getTranslation(Constants.CONVERSATIONS + "new-object-created",
+                Constants.PARAMETER_WORLD, this.world.getName()),
+            Constants.ERRORS + "object-already-exists");
+    }
+
+
+    /**
+     * Asks user to confirm removal of selected magic sticks in chat and removes them on confirmation.
+     */
+    private void askRemoveSelectedSticks()
+    {
+        // Create consumer that accepts value from conversation.
+        Consumer<Boolean> consumer = value ->
+        {
+            if (Boolean.TRUE.equals(value))
+            {
+                this.selectedMagicSticks.forEach(stickObject ->
+                {
+                    this.manager.delete(stickObject);
+                    this.magicStickList.remove(stickObject);
+                });
+
+                this.selectedMagicSticks.clear();
+            }
+
+            this.build();
+        };
+
+        String stickString = this.selectedMagicSticks.stream().
+            map(MagicStickObject::getFriendlyName).
+            collect(Collectors.joining(", "));
+
+        // Create conversation that gets user acceptance to delete selected magic sticks.
+        ConversationUtils.createConfirmation(
+            consumer,
+            this.user,
+            this.user.getTranslation(Constants.CONVERSATIONS + "confirm-deletion",
+                TextVariables.NUMBER, String.valueOf(this.selectedMagicSticks.size()),
+                "[value]", stickString),
+            this.user.getTranslation(Constants.CONVERSATIONS + "data-removed",
+                "[gamemode]", Utils.getGameMode(this.world)));
     }
 
 

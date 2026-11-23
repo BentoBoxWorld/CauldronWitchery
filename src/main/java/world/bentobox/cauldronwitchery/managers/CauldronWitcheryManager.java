@@ -43,6 +43,16 @@ import world.bentobox.cauldronwitchery.utils.Utils;
 public class CauldronWitcheryManager
 {
     /**
+     * Minecraft written books can hold at most this many pages.
+     */
+    private static final int MAX_BOOK_PAGES = 100;
+
+    /**
+     * Suffix of default (English) book translation files.
+     */
+    private static final String DEFAULT_BOOK_SUFFIX = "-en-US";
+
+    /**
      * Instantiates a new Cauldron witchery manager.
      *
      * @param addon the addon
@@ -116,7 +126,8 @@ public class CauldronWitcheryManager
      */
     public void reload()
     {
-        // TODO: Implement
+        this.reloadSticks();
+        this.reloadBooks();
     }
 
 
@@ -211,10 +222,19 @@ public class CauldronWitcheryManager
      */
     public boolean isMagicStick(ItemStack item, User user)
     {
+        String gameMode = Utils.getGameMode(user.getWorld());
+
+        if (gameMode == null)
+        {
+            return false;
+        }
+
+        String prefix = gameMode.toLowerCase(Locale.ENGLISH);
+
         // Search an item from magic stick item cache.
         return this.magicStickDataCache.values().
             stream().
-            filter(key -> key.getUniqueId().startsWith(Utils.getGameMode(user.getWorld()).toLowerCase())).
+            filter(key -> key.getUniqueId().startsWith(prefix)).
             anyMatch(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item));
     }
 
@@ -229,8 +249,17 @@ public class CauldronWitcheryManager
     @Nullable
     public MagicStickObject getMagicStick(ItemStack item, User user)
     {
+        String gameMode = Utils.getGameMode(user.getWorld());
+
+        if (gameMode == null)
+        {
+            return null;
+        }
+
+        String prefix = gameMode.toLowerCase(Locale.ENGLISH);
+
         return this.magicStickDataCache.values().stream().
-            filter(key -> key.getUniqueId().startsWith(Utils.getGameMode(user.getWorld()).toLowerCase())).
+            filter(key -> key.getUniqueId().startsWith(prefix)).
             filter(key -> Utils.isSimilarNoDurability(key.getMagicStick(), item)).
             findFirst().
             orElse(null);
@@ -245,13 +274,21 @@ public class CauldronWitcheryManager
      */
     public List<MagicStickObject> getAllMagicSticks(World world)
     {
-        String name = Utils.getGameMode(world).toLowerCase();
+        String gameMode = Utils.getGameMode(world);
 
+        if (gameMode == null)
+        {
+            return new ArrayList<>();
+        }
+
+        String name = gameMode.toLowerCase(Locale.ENGLISH);
+
+        // Returned list must stay mutable: admin panels add and remove elements from it.
         return this.magicStickDataCache.values().stream().
             filter(stick -> stick.getUniqueId().startsWith(name)).
             sorted(Comparator.comparingInt(MagicStickObject::getOrder).
                 thenComparing(MagicStickObject::getFriendlyName)).
-            collect(Collectors.toList());
+            collect(Collectors.toCollection(ArrayList::new));
     }
 
 
@@ -577,11 +614,8 @@ public class CauldronWitcheryManager
             {
                 YamlConfiguration languageYaml = YamlConfiguration.loadConfiguration(bookTranslation);
 
-                if (!this.translatedBooks.containsKey(bookName))
-                {
-                    // Merge into current bookTranslation
-                    this.translatedBooks.put(bookName, languageYaml);
-                }
+                // Merge into current bookTranslation
+                this.translatedBooks.putIfAbsent(bookName, languageYaml);
             }
             catch (Exception e)
             {
@@ -650,35 +684,11 @@ public class CauldronWitcheryManager
             PersistentDataType.STRING,
             user.getName());
 
-        List<String> pages = new ArrayList<>(100);
-
         ConfigurationSection pagesSection = dataSection.getConfigurationSection("pages");
 
-        int lastFilledPage = 0;
-
-        // Fill predefined pages in book.
-        if (pagesSection != null)
-        {
-            // There are max 100 pages per book.
-            for (int i = 0; i < 100; i++)
-            {
-                String pageContent = pagesSection.getString(String.valueOf(i));
-
-                if (pageContent != null)
-                {
-                    pages.add(i, Util.translateColorCodes(pageContent));
-                    lastFilledPage = i;
-                }
-                else
-                {
-                    // Add empty page.
-                    pages.add(i, "");
-                }
-            }
-        }
-
-        // Add one page?
-        lastFilledPage += 1;
+        List<String> pages = new ArrayList<>(MAX_BOOK_PAGES);
+        // Recipes start right after the last predefined page.
+        int lastFilledPage = this.fillPredefinedPages(pages, pagesSection) + 1;
 
         // Add All recipes
         List<Recipe> recipeList = this.magicStickDataCache.values().stream().
@@ -696,99 +706,12 @@ public class CauldronWitcheryManager
         {
             for (Recipe recipe : recipeList)
             {
-                StringBuilder recipePage;
+                String recipePage = this.buildRecipePage(recipe, recipeSection, user);
 
-                int level = switch (recipe.getCauldronType()) {
-                    case LAVA_CAULDRON -> 3;
-                    case CAULDRON -> 0;
-                    default -> recipe.getCauldronLevel();
-                };
-
-                String cauldronLevel;
-
-                ConfigurationSection cauldronSection = recipeSection.getConfigurationSection("cauldron_level");
-
-                if (cauldronSection != null)
+                if (recipePage != null)
                 {
-                    cauldronLevel = cauldronSection.getString(String.valueOf(level), "");
+                    pages.set(lastFilledPage++, Util.translateColorCodes(recipePage));
                 }
-                else
-                {
-                    cauldronLevel = "";
-                }
-
-                if (recipe instanceof EntityRecipe entityRecipe)
-                {
-                    recipePage = new StringBuilder(recipeSection.getString("mob-header", "").
-                        replace("[mob]", Utils.prettifyObject(entityRecipe.getEntityType(), user)).
-                        replace("[level]", String.valueOf(recipe.getExperience())).
-                        replace("[cauldron_level]", cauldronLevel).
-                        replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
-                        replace("[offhand]", Utils.prettifyObject(recipe.getMainIngredient(), user)));
-                }
-                else if (recipe instanceof ItemRecipe itemRecipe)
-                {
-                    recipePage = new StringBuilder(recipeSection.getString("item-header", "").
-                        replace("[item]", Utils.prettifyObject(itemRecipe.getItemStack(), user)).
-                        replace("[level]", String.valueOf(recipe.getExperience())).
-                        replace("[cauldron_level]", cauldronLevel).
-                        replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
-                        replace("[offhand]", Utils.prettifyObject(recipe.getMainIngredient(), user)));
-                }
-                else if (recipe instanceof BookRecipe bookRecipe)
-                {
-                    String recipeBookName = bookRecipe.getBookName();
-
-                    YamlConfiguration bookConfiguration =
-                        this.getBookConfiguration(recipeBookName, user.getLocale().toLanguageTag());
-
-                    String name;
-
-                    if (bookConfiguration != null)
-                    {
-                        name = bookConfiguration.getString(recipeBookName + ".title", "");
-                    }
-                    else
-                    {
-                        // Cannot add this book.
-                        continue;
-                    }
-
-                    recipePage = new StringBuilder(recipeSection.getString("book-header", "").
-                        replace("[book]", name).
-                        replace("[level]", String.valueOf(recipe.getExperience())).
-                        replace("[cauldron_level]", cauldronLevel).
-                        replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
-                        replace("[offhand]", Utils.prettifyObject(recipe.getMainIngredient(), user)));
-                }
-                else
-                {
-                    continue;
-                }
-
-                recipePage.append("\n");
-                recipePage.append(recipeSection.getString("extra-title", ""));
-
-                for (ItemStack extraIngredient : recipe.getExtraIngredients())
-                {
-                    recipePage.append("\n");
-                    recipePage.append(recipeSection.getString("extra-element", "").
-                        replace("[item]", Utils.prettifyObject(extraIngredient, user)));
-                }
-
-                if (recipe.getTemperature() == Recipe.Temperature.COOL)
-                {
-                    recipePage.append("\n");
-                    recipePage.append(recipeSection.getString("cooling", ""));
-                }
-
-                if (recipe.getTemperature() == Recipe.Temperature.HEAT)
-                {
-                    recipePage.append("\n");
-                    recipePage.append(recipeSection.getString("heating", ""));
-                }
-
-                pages.set(lastFilledPage++, Util.translateColorCodes(recipePage.toString()));
             }
         }
 
@@ -817,6 +740,133 @@ public class CauldronWitcheryManager
 
 
     /**
+     * Fills given page list with predefined pages from the book configuration. Missing pages are left empty,
+     * so the list always has room for recipe pages.
+     *
+     * @param pages List of pages that will be filled.
+     * @param pagesSection Configuration section with predefined pages, may be null.
+     * @return Index of the last predefined page that has content.
+     */
+    private int fillPredefinedPages(List<String> pages, @Nullable ConfigurationSection pagesSection)
+    {
+        int lastFilledPage = 0;
+
+        for (int i = 0; i < MAX_BOOK_PAGES; i++)
+        {
+            String pageContent = pagesSection == null ? null : pagesSection.getString(String.valueOf(i));
+
+            if (pageContent != null)
+            {
+                pages.add(i, Util.translateColorCodes(pageContent));
+                lastFilledPage = i;
+            }
+            else
+            {
+                // Add empty page.
+                pages.add(i, "");
+            }
+        }
+
+        return lastFilledPage;
+    }
+
+
+    /**
+     * Builds the book page text that describes given recipe.
+     *
+     * @param recipe Recipe that must be described.
+     * @param recipeSection Book configuration section with recipe templates.
+     * @param user User who will read the book.
+     * @return Page text (before color translation), or null if recipe cannot be added to the book.
+     */
+    @Nullable
+    private String buildRecipePage(Recipe recipe, ConfigurationSection recipeSection, User user)
+    {
+        String header = this.buildRecipeHeader(recipe, recipeSection, user);
+
+        if (header == null)
+        {
+            return null;
+        }
+
+        StringBuilder recipePage = new StringBuilder(header);
+
+        recipePage.append("\n");
+        recipePage.append(recipeSection.getString("extra-title", ""));
+
+        for (ItemStack extraIngredient : recipe.getExtraIngredients())
+        {
+            recipePage.append("\n");
+            recipePage.append(recipeSection.getString("extra-element", "").
+                replace("[item]", Utils.prettifyObject(extraIngredient, user)));
+        }
+
+        if (recipe.getTemperature() == Recipe.Temperature.COOL)
+        {
+            recipePage.append("\n");
+            recipePage.append(recipeSection.getString("cooling", ""));
+        }
+        else if (recipe.getTemperature() == Recipe.Temperature.HEAT)
+        {
+            recipePage.append("\n");
+            recipePage.append(recipeSection.getString("heating", ""));
+        }
+
+        return recipePage.toString();
+    }
+
+
+    /**
+     * Builds the header line of a recipe page, based on recipe type.
+     *
+     * @param recipe Recipe that must be described.
+     * @param recipeSection Book configuration section with recipe templates.
+     * @param user User who will read the book.
+     * @return Header text, or null if recipe cannot be added to the book.
+     */
+    @Nullable
+    private String buildRecipeHeader(Recipe recipe, ConfigurationSection recipeSection, User user)
+    {
+        String header = switch (recipe)
+        {
+            case EntityRecipe entityRecipe -> recipeSection.getString("mob-header", "").
+                replace("[mob]", Utils.prettifyObject(entityRecipe.getEntityType(), user));
+            case ItemRecipe itemRecipe -> recipeSection.getString("item-header", "").
+                replace("[item]", Utils.prettifyObject(itemRecipe.getItemStack(), user));
+            case BookRecipe bookRecipe -> {
+                YamlConfiguration bookConfiguration =
+                    this.getBookConfiguration(bookRecipe.getBookName(), user.getLocale().toLanguageTag());
+
+                // Cannot add a book that has no translation.
+                yield bookConfiguration == null ? null : recipeSection.getString("book-header", "").
+                    replace("[book]", bookConfiguration.getString(bookRecipe.getBookName() + ".title", ""));
+            }
+            default -> null;
+        };
+
+        if (header == null)
+        {
+            return null;
+        }
+
+        int level = switch (recipe.getCauldronType()) {
+            case LAVA_CAULDRON -> 3;
+            case CAULDRON -> 0;
+            default -> recipe.getCauldronLevel();
+        };
+
+        ConfigurationSection cauldronSection = recipeSection.getConfigurationSection("cauldron_level");
+        String cauldronLevel = cauldronSection == null ? "" : cauldronSection.getString(String.valueOf(level), "");
+
+        return header.
+            replace("[level]", String.valueOf(recipe.getExperience())).
+            replace("[cauldron_level]", cauldronLevel).
+            replace("[cauldron]", Utils.prettifyObject(recipe.getCauldronType(), user)).
+            replace("[offhand]", Utils.prettifyObject(recipe.getMainIngredient(), user));
+    }
+
+
+    /**
      * This method returns book config section with the requested locale tag.
      * @param bookName Book name.
      * @param localeTag Locale tag.
@@ -825,14 +875,8 @@ public class CauldronWitcheryManager
     @Nullable
     private YamlConfiguration getBookConfiguration(String bookName, String localeTag)
     {
-        if (this.translatedBooks.containsKey(bookName + "-" + localeTag))
-        {
-            return this.translatedBooks.get(bookName + "-" + localeTag);
-        }
-        else
-        {
-            return this.translatedBooks.get(bookName + "-en-US");
-        }
+        YamlConfiguration translated = this.translatedBooks.get(bookName + "-" + localeTag);
+        return translated != null ? translated : this.translatedBooks.get(bookName + DEFAULT_BOOK_SUFFIX);
     }
 
 
@@ -845,9 +889,9 @@ public class CauldronWitcheryManager
     public List<String> getAllBookNames()
     {
         return this.translatedBooks.keySet().stream().
-            filter(name -> name.endsWith("-en-US")).
-            map(name -> name.replace("-en-US", "")).
-            collect(Collectors.toList());
+            filter(name -> name.endsWith(DEFAULT_BOOK_SUFFIX)).
+            map(name -> name.replace(DEFAULT_BOOK_SUFFIX, "")).
+            toList();
     }
 
 
@@ -873,55 +917,42 @@ public class CauldronWitcheryManager
      */
     public void purchaseStick(User user, MagicStickObject magicStick)
     {
-        if (this.addon.isEconomyProvided() && magicStick.getPurchaseCost() > 0.0)
+        String name = magicStick.getFriendlyName().isBlank() ?
+            Utils.prettifyObject(magicStick.getMagicStick(), user) :
+            magicStick.getFriendlyName();
+
+        if (!this.addon.isEconomyProvided() || magicStick.getPurchaseCost() <= 0.0)
         {
-            if (this.addon.getEconomyProvider().has(user, magicStick.getPurchaseCost()) && user.getLocation() != null)
-            {
-                EconomyResponse withdraw = this.addon.getEconomyProvider().withdraw(user, magicStick.getPurchaseCost());
+            Utils.giveItem(user, magicStick.getMagicStick());
+            this.recordStickPurchase(user);
 
-                if (withdraw.transactionSuccess())
-                {
-                    Utils.giveItem(user, magicStick.getMagicStick());
-                    this.recordStickPurchase(user);
+            Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "free-stick",
+                Constants.PARAMETER_NAME, name));
+            return;
+        }
 
-                    String name = magicStick.getFriendlyName().isBlank() ?
-                        Utils.prettifyObject(magicStick.getMagicStick(), user) :
-                        magicStick.getFriendlyName();
+        if (!this.addon.getEconomyProvider().has(user, magicStick.getPurchaseCost()))
+        {
+            Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "not-enough-money",
+                Constants.PARAMETER_NAME, name));
+            return;
+        }
 
-                    Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "purchased-stick",
-                        Constants.PARAMETER_NAME, name,
-                        Constants.PARAMETER_VALUE, String.valueOf(magicStick.getPurchaseCost())));
-                }
-                else
-                {
-                    Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "could-not-withdraw",
-                        Constants.PARAMETER_VALUE, withdraw.errorMessage));
-                }
-            }
-            else
-            {
-                String name = magicStick.getFriendlyName().isBlank() ?
-                    Utils.prettifyObject(magicStick.getMagicStick(), user) :
-                    magicStick.getFriendlyName();
+        EconomyResponse withdraw = this.addon.getEconomyProvider().withdraw(user, magicStick.getPurchaseCost());
 
-                Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "not-enough-money",
-                    Constants.PARAMETER_NAME, name));
-            }
+        if (withdraw.transactionSuccess())
+        {
+            Utils.giveItem(user, magicStick.getMagicStick());
+            this.recordStickPurchase(user);
+
+            Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "purchased-stick",
+                Constants.PARAMETER_NAME, name,
+                Constants.PARAMETER_VALUE, String.valueOf(magicStick.getPurchaseCost())));
         }
         else
         {
-            if (user.getLocation() != null)
-            {
-                Utils.giveItem(user, magicStick.getMagicStick());
-                this.recordStickPurchase(user);
-
-                String name = magicStick.getFriendlyName().isBlank() ?
-                    Utils.prettifyObject(magicStick.getMagicStick(), user) :
-                    magicStick.getFriendlyName();
-
-                Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "free-stick",
-                    Constants.PARAMETER_NAME, name));
-            }
+            Utils.sendMessage(user, user.getTranslation(Constants.MESSAGES + "could-not-withdraw",
+                Constants.PARAMETER_VALUE, withdraw.errorMessage));
         }
     }
 

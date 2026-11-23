@@ -148,8 +148,8 @@ public class MagicStickObject implements DataObject
         object.setMagicStick(this.magicStick.clone());
         object.setBookName(this.bookName);
         object.setRecipeList(this.recipeList.stream().
-            map(Recipe::clone).
-            collect(Collectors.toList()));
+            map(Recipe::copy).
+            collect(Collectors.toCollection(ArrayList::new)));
 
         object.setFriendlyName(this.friendlyName);
         object.setDescription(this.description);
@@ -349,7 +349,7 @@ public class MagicStickObject implements DataObject
     /**
      * Allows to set complexity of the stick usage.
      * Larger complexity, bigger chance for it to fail.
-     * TODO: Requires for MASTERY_SKILL feature
+     * Reserved for the planned MASTERY_SKILL feature.
      */
     @Expose
     private float complexity;

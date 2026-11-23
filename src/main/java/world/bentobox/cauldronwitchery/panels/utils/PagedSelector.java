@@ -8,11 +8,13 @@ package world.bentobox.cauldronwitchery.panels.utils;
 
 
 import org.bukkit.Material;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import world.bentobox.bentobox.api.panels.Panel;
 import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelBuilder;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
@@ -98,7 +100,7 @@ public abstract class PagedSelector<T>
 
         // Add next page button if there are more than MAX_ELEMENTS objects and pageIndex + 1 is
         // larger or equal to the max page count.
-        if (size > MAX_ELEMENTS && !(1.0 * size / MAX_ELEMENTS <= this.pageIndex + 1))
+        if (size > MAX_ELEMENTS && 1.0 * size / MAX_ELEMENTS > this.pageIndex + 1)
         {
             panelBuilder.item(26, this.getButton(CommonButtons.NEXT));
 
@@ -131,99 +133,29 @@ public abstract class PagedSelector<T>
         final String name = this.user.getTranslation(reference + "name");
         final List<String> description = new ArrayList<>(3);
 
-        ItemStack icon;
-        PanelItem.ClickHandler clickHandler;
-
-        if (button == CommonButtons.NEXT)
+        ItemStack icon = switch (button)
         {
-            description.add(this.user.getTranslation(reference + "description",
-                Constants.PARAMETER_NUMBER, String.valueOf(this.pageIndex + 2)));
+            case NEXT -> this.describeNextButton(reference, description);
+            case PREVIOUS -> this.describePreviousButton(reference, description);
+            case SEARCH -> this.describeSearchButton(reference, description);
+        };
 
-            description.add("");
-            description.add(this.user.getTranslation(Constants.TIPS + "click-to-next"));
-
-            icon = new ItemStack(Material.OAK_SIGN, this.pageIndex + 2);
-            clickHandler = (panel, user, clickType, slot) ->
+        PanelItem.ClickHandler clickHandler = switch (button)
+        {
+            case NEXT -> (panel, user, clickType, slot) ->
             {
                 this.pageIndex++;
                 this.build();
                 return true;
             };
-        }
-        else if (button == CommonButtons.PREVIOUS)
-        {
-            description.add(this.user.getTranslation(reference + "description",
-                Constants.PARAMETER_NUMBER, String.valueOf(this.pageIndex)));
-
-            description.add("");
-            description.add(this.user.getTranslation(Constants.TIPS + "click-to-previous"));
-
-            icon = new ItemStack(Material.OAK_SIGN, Math.max(1, this.pageIndex));
-            clickHandler = (panel, user, clickType, slot) ->
+            case PREVIOUS -> (panel, user, clickType, slot) ->
             {
                 this.pageIndex--;
                 this.build();
                 return true;
             };
-        }
-        else if (button == CommonButtons.SEARCH)
-        {
-            description.add(this.user.getTranslation(reference + "description"));
-
-            if (this.searchString != null && !this.searchString.isEmpty())
-            {
-                description.add(this.user.getTranslation(reference + "search",
-                    Constants.PARAMETER_VALUE, this.searchString));
-            }
-
-            description.add("");
-            description.add(this.user.getTranslation(Constants.TIPS + "left-click-to-edit"));
-
-            if (!this.searchString.isEmpty())
-            {
-                description.add(this.user.getTranslation(Constants.TIPS + "right-click-to-clear"));
-            }
-
-            icon = new ItemStack(Material.ANVIL);
-
-            clickHandler = (panel, user, clickType, slot) -> {
-                if (clickType.isRightClick())
-                {
-                    // Clear string.
-                    this.searchString = "";
-                    this.updateFilters();
-                    // Rebuild gui.
-                    this.build();
-                }
-                else
-                {
-                    // Create consumer that process description change
-                    Consumer<String> consumer = value ->
-                    {
-                        if (value != null)
-                        {
-                            this.searchString = value;
-                            this.updateFilters();
-                        }
-
-                        this.build();
-                    };
-
-                    // start conversation
-                    ConversationUtils.createStringInput(consumer,
-                        user,
-                        user.getTranslation(Constants.CONVERSATIONS + "write-search"),
-                        user.getTranslation(Constants.CONVERSATIONS + "search-updated"));
-                }
-
-                return true;
-            };
-        }
-        else
-        {
-            icon = new ItemStack(Material.PAPER);
-            clickHandler = null;
-        }
+            case SEARCH -> this::onSearchClick;
+        };
 
         return new PanelItemBuilder().
             icon(icon).
@@ -231,6 +163,101 @@ public abstract class PagedSelector<T>
             description(description).
             clickHandler(clickHandler).
             build();
+    }
+
+
+    /**
+     * Populates the next page button description and returns its icon.
+     */
+    private ItemStack describeNextButton(String reference, List<String> description)
+    {
+        description.add(this.user.getTranslation(reference + "description",
+            Constants.PARAMETER_NUMBER, String.valueOf(this.pageIndex + 2)));
+
+        description.add("");
+        description.add(this.user.getTranslation(Constants.TIPS + "click-to-next"));
+
+        return new ItemStack(Material.OAK_SIGN, this.pageIndex + 2);
+    }
+
+
+    /**
+     * Populates the previous page button description and returns its icon.
+     */
+    private ItemStack describePreviousButton(String reference, List<String> description)
+    {
+        description.add(this.user.getTranslation(reference + "description",
+            Constants.PARAMETER_NUMBER, String.valueOf(this.pageIndex)));
+
+        description.add("");
+        description.add(this.user.getTranslation(Constants.TIPS + "click-to-previous"));
+
+        return new ItemStack(Material.OAK_SIGN, Math.max(1, this.pageIndex));
+    }
+
+
+    /**
+     * Populates the search button description and returns its icon.
+     */
+    private ItemStack describeSearchButton(String reference, List<String> description)
+    {
+        description.add(this.user.getTranslation(reference + "description"));
+
+        boolean hasSearch = this.searchString != null && !this.searchString.isEmpty();
+
+        if (hasSearch)
+        {
+            description.add(this.user.getTranslation(reference + "search",
+                Constants.PARAMETER_VALUE, this.searchString));
+        }
+
+        description.add("");
+        description.add(this.user.getTranslation(Constants.TIPS + "left-click-to-edit"));
+
+        if (hasSearch)
+        {
+            description.add(this.user.getTranslation(Constants.TIPS + "right-click-to-clear"));
+        }
+
+        return new ItemStack(Material.ANVIL);
+    }
+
+
+    /**
+     * Handles a click on the search button: right click clears the search, any other click asks for a new value.
+     */
+    private boolean onSearchClick(Panel panel, User user, ClickType clickType, int slot)
+    {
+        if (clickType.isRightClick())
+        {
+            // Clear string.
+            this.searchString = "";
+            this.updateFilters();
+            // Rebuild gui.
+            this.build();
+        }
+        else
+        {
+            // Create consumer that process description change
+            Consumer<String> consumer = value ->
+            {
+                if (value != null)
+                {
+                    this.searchString = value;
+                    this.updateFilters();
+                }
+
+                this.build();
+            };
+
+            // start conversation
+            ConversationUtils.createStringInput(consumer,
+                user,
+                user.getTranslation(Constants.CONVERSATIONS + "write-search"),
+                user.getTranslation(Constants.CONVERSATIONS + "search-updated"));
+        }
+
+        return true;
     }
 
 

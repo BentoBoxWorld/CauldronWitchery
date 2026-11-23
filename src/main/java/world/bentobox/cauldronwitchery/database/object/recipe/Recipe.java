@@ -31,7 +31,7 @@ public abstract class Recipe
     /**
      * Instantiates a new Recipe.
      */
-    public Recipe()
+    protected Recipe()
     {
         // Empty constructor.
     }
@@ -71,7 +71,7 @@ public abstract class Recipe
      */
     public List<ItemStack> getExtraIngredients()
     {
-        return extraIngredients.stream().map(ItemStack::clone).collect(Collectors.toList());
+        return extraIngredients.stream().map(ItemStack::clone).collect(Collectors.toCollection(ArrayList::new));
     }
 
 
@@ -290,11 +290,10 @@ public abstract class Recipe
 
 
     /**
-     * This method clones given object.
-     * @return Clone of recipe.
+     * This method copies given object.
+     * @return Copy of recipe.
      */
-    @Override
-    public abstract Recipe clone();
+    public abstract Recipe copy();
 
 
     /**
@@ -347,7 +346,7 @@ public abstract class Recipe
      * This method populates clone with items from current object.
      * @param clone Clone object that must be populated.
      */
-    protected void populateClone(Recipe clone)
+    protected void populateCopy(Recipe clone)
     {
         clone.setRecipeId(this.getRecipeId());
         clone.setRecipeDisplayName(this.getRecipeDisplayName());
@@ -472,14 +471,14 @@ public abstract class Recipe
 
     /**
      * Stores the reward points for using this recipe.
-     * TODO: Requires for MASTERY_SKILL feature
+     * Reserved for the planned MASTERY_SKILL feature.
      */
     @Expose
     private int rewardPoints;
 
     /**
      * Complexity level for recipe.
-     * TODO: Requires for MASTERY_SKILL feature
+     * Reserved for the planned MASTERY_SKILL feature.
      */
     @Expose
     private float complexity;

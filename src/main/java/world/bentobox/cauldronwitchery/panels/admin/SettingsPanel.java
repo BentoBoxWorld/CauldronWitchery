@@ -11,9 +11,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import lv.id.bonne.panelutils.PanelUtils;
-import world.bentobox.bentobox.api.configuration.Config;
 import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelBuilder;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
@@ -28,6 +28,10 @@ import world.bentobox.cauldronwitchery.utils.Constants;
  */
 public class SettingsPanel extends CommonPanel
 {
+    private static final String ENABLED = "enabled";
+    private static final String DISABLED = "disabled";
+
+
     /**
      * This is default constructor for all classes that extends CommonPanel.
      *
@@ -86,199 +90,127 @@ public class SettingsPanel extends CommonPanel
      */
     private PanelItem createButton(Action button)
     {
+        return switch (button)
+        {
+            case SUCCESS_DAMAGE -> this.createNumberButton(button, Material.STICK,
+                this.settings.getSuccessDamageAmount(), this.settings::setSuccessDamageAmount);
+            case FAIL_DAMAGE -> this.createNumberButton(button, Material.BLAZE_ROD,
+                this.settings.getErrorDamageAmount(), this.settings::setErrorDamageAmount);
+            // These toggles affect other buttons, so the whole panel is rebuilt.
+            case MIX_IN_CAULDRON -> this.createToggleButton(button, Material.CAULDRON,
+                this.settings.isMixInCauldron(), this.settings::setMixInCauldron, true);
+            case EXACT_COUNT -> this.createToggleButton(button, Material.COMPARATOR,
+                this.settings.isExactExtraCount(), this.settings::setExactExtraCount, true);
+            case REMOVE_LEFT_OVERS -> this.createToggleButton(button, Material.LAVA_BUCKET,
+                this.settings.isRemoveLeftOvers(), this.settings::setRemoveLeftOvers, false);
+            case REMOVE_ON_FAIL -> this.createToggleButton(button, Material.CAMPFIRE,
+                this.settings.isRemoveOnFail(), this.settings::setRemoveOnFail, false);
+            case FAIL_DESTROY_CAULDRON -> this.createToggleButton(button, Material.TNT,
+                this.settings.isErrorDestroyCauldron(), this.settings::setErrorDestroyCauldron, false);
+            case CORRECT_FAIL_MESSAGE -> this.createToggleButton(button, Material.MAP,
+                this.settings.isCorrectErrorMessage(), this.settings::setCorrectErrorMessage, false);
+        };
+    }
+
+
+    /**
+     * Creates a button that asks for a number in chat and stores it in settings.
+     *
+     * @param button Button type, used for translations.
+     * @param material Icon material.
+     * @param value Current value.
+     * @param setter Settings setter for the new value.
+     * @return the panel item
+     */
+    private PanelItem createNumberButton(Action button, Material material, int value, IntConsumer setter)
+    {
         final String reference = Constants.BUTTON + button.name().toLowerCase() + ".";
 
-        final String name = this.user.getTranslation(reference + "name");
-        final List<String> description = new ArrayList<>(3);
+        final List<String> description = new ArrayList<>(4);
         description.add(this.user.getTranslation(reference + "description"));
+        description.add(this.user.getTranslation(reference + "value",
+            Constants.PARAMETER_NUMBER, String.valueOf(value)));
+        description.add("");
+        description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
 
-        ItemStack icon;
-        boolean glow;
-        PanelItem.ClickHandler clickHandler;
-
-        switch (button)
-        {
-            case SUCCESS_DAMAGE -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NUMBER, String.valueOf(this.settings.getSuccessDamageAmount())));
-
-                icon = new ItemStack(Material.STICK, Math.max(1, this.settings.getSuccessDamageAmount()));
-                clickHandler = (panel, user, clickType, i) -> {
-                    Consumer<Number> numberConsumer = number -> {
-                        if (number != null)
-                        {
-                            this.settings.setSuccessDamageAmount(number.intValue());
-                            this.addon.saveSettings();
-                        }
-
-                        // reopen panel
-                        this.build();
-                    };
-
-                    ConversationUtils.createNumericInput(numberConsumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
-                        0,
-                        2000);
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case FAIL_DAMAGE -> {
-                description.add(this.user.getTranslation(reference + "value",
-                    Constants.PARAMETER_NUMBER, String.valueOf(this.settings.getErrorDamageAmount())));
-
-                icon = new ItemStack(Material.BLAZE_ROD, Math.max(1, this.settings.getErrorDamageAmount()));
-                clickHandler = (panel, user, clickType, i) -> {
-                    Consumer<Number> numberConsumer = number -> {
-                        if (number != null)
-                        {
-                            this.settings.setErrorDamageAmount(number.intValue());
-                            this.addon.saveSettings();
-                        }
-
-                        // reopen panel
-                        this.build();
-                    };
-
-                    ConversationUtils.createNumericInput(numberConsumer,
-                        this.user,
-                        this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
-                        0,
-                        2000);
-
-                    return true;
-                };
-                glow = false;
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-change"));
-            }
-            case MIX_IN_CAULDRON -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isMixInCauldron() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.CAULDRON);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setMixInCauldron(!this.settings.isMixInCauldron());
-                    // More buttons are affected by this button.
-                    this.build();
+        PanelItem.ClickHandler clickHandler = (panel, user, clickType, i) -> {
+            Consumer<Number> numberConsumer = number -> {
+                if (number != null)
+                {
+                    setter.accept(number.intValue());
                     this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isMixInCauldron();
+                }
 
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case EXACT_COUNT -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isExactExtraCount() ? "enabled" : "disabled")));
+                // reopen panel
+                this.build();
+            };
 
-                icon = new ItemStack(Material.COMPARATOR);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setExactExtraCount(!this.settings.isExactExtraCount());
-                    // More buttons are affected by this button.
-                    this.build();
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isExactExtraCount();
+            ConversationUtils.createNumericInput(numberConsumer,
+                this.user,
+                this.user.getTranslation(Constants.CONVERSATIONS + "input-number"),
+                0,
+                2000);
 
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case REMOVE_LEFT_OVERS -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isRemoveLeftOvers() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.LAVA_BUCKET);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setRemoveLeftOvers(!this.settings.isRemoveLeftOvers());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isRemoveLeftOvers();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case REMOVE_ON_FAIL -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isRemoveOnFail() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.CAMPFIRE);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setRemoveOnFail(!this.settings.isRemoveOnFail());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isRemoveOnFail();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case FAIL_DESTROY_CAULDRON -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isErrorDestroyCauldron() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.TNT);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setErrorDestroyCauldron(!this.settings.isErrorDestroyCauldron());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isErrorDestroyCauldron();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            case CORRECT_FAIL_MESSAGE -> {
-                description.add(this.user.getTranslation(reference +
-                    (this.settings.isCorrectErrorMessage() ? "enabled" : "disabled")));
-
-                icon = new ItemStack(Material.MAP);
-                clickHandler = (panel, user1, clickType, i) -> {
-                    this.settings.setCorrectErrorMessage(!this.settings.isCorrectErrorMessage());
-                    panel.getInventory().setItem(i, this.createButton(button).getItem());
-                    this.addon.saveSettings();
-                    return true;
-                };
-                glow = this.settings.isCorrectErrorMessage();
-
-                description.add("");
-                description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
-            }
-            default -> {
-                icon = new ItemStack(Material.PAPER);
-                clickHandler = null;
-                glow = false;
-            }
-        }
+            return true;
+        };
 
         return new PanelItemBuilder().
-            name(name).
+            name(this.user.getTranslation(reference + "name")).
             description(description).
-            icon(icon).
+            icon(new ItemStack(material, Math.max(1, value))).
             clickHandler(clickHandler).
-            glow(glow).
+            glow(false).
             build();
     }
 
 
     /**
-     * This method saves current settings.
+     * Creates a button that toggles a boolean setting.
+     *
+     * @param button Button type, used for translations.
+     * @param material Icon material.
+     * @param enabled Current value.
+     * @param setter Settings setter for the new value.
+     * @param rebuildPanel {@code true} if whole panel must be rebuilt, {@code false} to update only this button.
+     * @return the panel item
      */
-    private void saveSettings()
+    private PanelItem createToggleButton(Action button,
+        Material material,
+        boolean enabled,
+        Consumer<Boolean> setter,
+        boolean rebuildPanel)
     {
-        new Config<>(this.addon, Settings.class).saveConfigObject(this.settings);
+        final String reference = Constants.BUTTON + button.name().toLowerCase() + ".";
+
+        final List<String> description = new ArrayList<>(4);
+        description.add(this.user.getTranslation(reference + "description"));
+        description.add(this.user.getTranslation(reference + (enabled ? ENABLED : DISABLED)));
+        description.add("");
+        description.add(this.user.getTranslation(Constants.TIPS + "click-to-toggle"));
+
+        PanelItem.ClickHandler clickHandler = (panel, user, clickType, i) -> {
+            setter.accept(!enabled);
+
+            if (rebuildPanel)
+            {
+                this.build();
+            }
+            else
+            {
+                panel.getInventory().setItem(i, this.createButton(button).getItem());
+            }
+
+            this.addon.saveSettings();
+            return true;
+        };
+
+        return new PanelItemBuilder().
+            name(this.user.getTranslation(reference + "name")).
+            description(description).
+            icon(new ItemStack(material)).
+            clickHandler(clickHandler).
+            glow(enabled).
+            build();
     }
 
 

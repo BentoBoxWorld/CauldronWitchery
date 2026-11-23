@@ -10,7 +10,6 @@ package world.bentobox.cauldronwitchery.panels.admin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import lv.id.bonne.panelutils.PanelUtils;
 import world.bentobox.bentobox.api.panels.PanelItem;
@@ -37,7 +36,7 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
     protected ManagePlayerPanel(CommonPanel parentPanel)
     {
         super(parentPanel);
-        this.elementList = Bukkit.getOnlinePlayers().stream().map(User::getInstance).collect(Collectors.toList());
+        this.elementList = Bukkit.getOnlinePlayers().stream().map(User::getInstance).toList();
         this.filterElements = this.elementList;
         this.searchString = "";
     }
@@ -80,7 +79,7 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
                     return element.getName().toLowerCase().contains(this.searchString.toLowerCase());
                 }).
                 distinct().
-                collect(Collectors.toList());
+                toList();
         }
     }
 
@@ -128,22 +127,20 @@ public class ManagePlayerPanel extends CommonPagedPanel<User>
         description.add(this.user.getTranslation(Constants.TIPS + "click-to-view"));
 
         PanelItem.ClickHandler clickHandler = (panel, user, clickType, i) -> {
-            if (button == activeTab)
+            if (button == this.activeTab)
             {
                 return true;
             }
-            else if (button == Tab.IS_ONLINE)
+
+            this.elementList = switch (button)
             {
-                this.elementList = Bukkit.getOnlinePlayers().stream().map(User::getInstance).toList();
-            }
-            else
-            {
-                this.elementList = this.addon.getPlayers().getPlayers().stream().
+                case IS_ONLINE -> Bukkit.getOnlinePlayers().stream().map(User::getInstance).toList();
+                case ALL_PLAYERS -> this.addon.getPlayers().getPlayers().stream().
                     map(Players::getPlayer).
                     filter(Objects::nonNull).
                     map(User::getInstance).
-                    collect(Collectors.toList());
-            }
+                    toList();
+            };
 
             this.activeTab = button;
 

@@ -35,6 +35,9 @@ import world.bentobox.cauldronwitchery.utils.Utils;
  */
 public class RecipesPanel extends CommonPanel
 {
+    private static final String RECIPE_TYPE = "RECIPE";
+
+
     private RecipesPanel(CommonPanel parentPanel, MagicStickObject magicStick)
     {
         super(parentPanel);
@@ -82,7 +85,7 @@ public class RecipesPanel extends CommonPanel
         panelBuilder.world(this.user.getWorld());
 
         // Register button builders
-        panelBuilder.registerTypeBuilder("RECIPE", this::createRecipeButton);
+        panelBuilder.registerTypeBuilder(RECIPE_TYPE, this::createRecipeButton);
 
         // Register next and previous builders
         panelBuilder.registerTypeBuilder("NEXT", this::createNextButton);
@@ -103,7 +106,7 @@ public class RecipesPanel extends CommonPanel
             return null;
         }
 
-        int index = this.recipeIndex * slot.amountMap().getOrDefault("RECIPE", 1) + slot.slot();
+        int index = this.recipeIndex * slot.amountMap().getOrDefault(RECIPE_TYPE, 1) + slot.slot();
 
         if (index >= this.recipes.size())
         {
@@ -149,8 +152,8 @@ public class RecipesPanel extends CommonPanel
 
         if (template.description() != null && !template.description().isBlank())
         {
-            // TODO: adding parameters could be useful.
-            builder.description(this.user.getTranslation(this.world, template.description()));
+            builder.description(this.user.getTranslation(this.world, template.description(),
+                Constants.PARAMETER_NAME, recipeName));
         }
         else
         {
@@ -167,8 +170,8 @@ public class RecipesPanel extends CommonPanel
     {
         int size = this.recipes.size();
 
-        if (size <= slot.amountMap().getOrDefault("RECIPE", 1) ||
-            1.0 * size / slot.amountMap().getOrDefault("RECIPE", 1) <= this.recipeIndex + 1)
+        if (size <= slot.amountMap().getOrDefault(RECIPE_TYPE, 1) ||
+            1.0 * size / slot.amountMap().getOrDefault(RECIPE_TYPE, 1) <= this.recipeIndex + 1)
         {
             // There are no next elements
             return null;
@@ -182,7 +185,7 @@ public class RecipesPanel extends CommonPanel
         {
             ItemStack clone = template.icon().clone();
 
-            if ((Boolean) template.dataMap().getOrDefault("indexing", false))
+            if (Boolean.TRUE.equals(template.dataMap().get("indexing")))
             {
                 clone.setAmount(nextPageIndex);
             }
@@ -247,7 +250,7 @@ public class RecipesPanel extends CommonPanel
         {
             ItemStack clone = template.icon().clone();
 
-            if ((Boolean) template.dataMap().getOrDefault("indexing", false))
+            if (Boolean.TRUE.equals(template.dataMap().get("indexing")))
             {
                 clone.setAmount(previousPageIndex);
             }

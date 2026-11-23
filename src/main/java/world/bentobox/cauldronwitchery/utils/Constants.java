@@ -11,6 +11,12 @@ package world.bentobox.cauldronwitchery.utils;
  */
 public class Constants
 {
+    private Constants()
+    {
+        // Constants class.
+    }
+
+
     /**
      * Reference string to ADDON_NAME in translations.
      */
